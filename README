@@ -1,0 +1,3 @@
+opengl application wrapper for use with Malkia's UFO project at https://github.com/malkia/ufo
+uses OpenGL and SDL
+honestly there is something like this already in the UFO project.  you would probably be safer using that. 
