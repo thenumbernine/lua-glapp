@@ -1,7 +1,7 @@
 local ffi = require 'ffi'
 local sdl = require 'ffi.sdl'
 local bit = require 'bit'
-require 'ext'
+local class = require 'ext.class'
 
 -- too bad for so long Windows would only ship with GL 1.1
 --  has that changed?
@@ -214,7 +214,7 @@ function GLApp:run()
 		sdl.SDL_WM_SetCaption(self.title, nil)
 		--sdl.SDL_EnableKeyRepeat(0,0)
 		
-		--sdl.SDL_GL_SetSwapInterval(1)
+		sdl.SDL_GL_SetSwapInterval(1)
 
 		gl.glViewport(0, 0, self.width, self.height)
 		--gl.glUseProgramObjectARB(nil)
@@ -226,7 +226,7 @@ function GLApp:run()
 			end
 		end
 
-		if self.initGL then self.initGL(gl, 'gl') end
+		if self.initGL then self:initGL(gl, 'gl') end
 		
 		repeat
 			while sdl.SDL_PollEvent(eventPtr) > 0 do
