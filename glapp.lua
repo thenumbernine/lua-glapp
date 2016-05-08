@@ -202,21 +202,30 @@ function GLApp:run()
 		sdl.SDL_GL_SetAttribute(sdl.SDL_GL_GREEN_SIZE, 8)
 		sdl.SDL_GL_SetAttribute(sdl.SDL_GL_BLUE_SIZE, 8)
 		sdl.SDL_GL_SetAttribute(sdl.SDL_GL_ALPHA_SIZE, 8)
-		sdl.SDL_GL_SetAttribute(sdl.SDL_GL_DEPTH_SIZE, 16)
+		sdl.SDL_GL_SetAttribute(sdl.SDL_GL_DEPTH_SIZE, 24)
 		sdl.SDL_GL_SetAttribute(sdl.SDL_GL_DOUBLEBUFFER, 1)
 		--]]
 
-		local screenFlags = bit.bor(sdl.SDL_OPENGL, sdl.SDL_DOUBLEBUF)
-		-- bad on osx ...
-		screenFlags = bit.bor(screenFlags, sdl.SDL_RESIZABLE)
-		
+--[[ screen
+		local screenFlags = bit.bor(sdl.SDL_OPENGL, sdl.SDL_DOUBLEBUF, sdl.SDL_RESIZABLE)
 		local screen = sdl.SDL_SetVideoMode(self.width, self.height, 0, screenFlags)
 		sdl.SDL_WM_SetCaption(self.title, nil)
+--]]
+-- [[ window
+		self.window = sdl.SDL_CreateWindow(
+			self.title,
+			sdl.SDL_WINDOWPOS_CENTERED,
+			sdl.SDL_WINDOWPOS_CENTERED,
+			self.width, self.height,
+			bit.bor(
+				sdl.SDL_WINDOW_OPENGL,
+				sdl.SDL_WINDOW_RESIZABLE,
+				sdl.SDL_WINDOW_SHOWN))
+		self.context = sdl.SDL_GL_CreateContext(self.window)
+--]]	
 		--sdl.SDL_EnableKeyRepeat(0,0)
-		
-		sdl.SDL_GL_SetSwapInterval(1)
+		sdl.SDL_GL_SetSwapInterval(0)
 
-		gl.glViewport(0, 0, self.width, self.height)
 		--gl.glUseProgramObjectARB(nil)
 
 		-- now that gl is loaded, if we're windows then we need to load extensions
@@ -228,16 +237,26 @@ function GLApp:run()
 
 		if self.initGL then self:initGL(gl, 'gl') end
 		
+		sdl.SDL_SetWindowSize(self.window, self.width, self.height)
+		gl.glViewport(0, 0, self.width, self.height)
+	
 		repeat
 			while sdl.SDL_PollEvent(eventPtr) > 0 do
 				if eventPtr[0].type == sdl.SDL_QUIT then
 					done = true
+--[[ screen
 				elseif eventPtr[0].type == sdl.SDL_VIDEORESIZE then
 					self.width, self.height = eventPtr[0].resize.w, eventPtr[0].resize.h
---[[ opengl resize is buggy on osx
-					screen = sdl.SDL_SetVideoMode(eventPtr[0].resize.w, eventPtr[0].resize.h, 32, bit.bor(sdl.SDL_HWSURFACE, sdl.SDL_RESIZABLE))
---]]
 					gl.glViewport(0, 0, self.width, self.height)
+--]]
+-- [[ window
+				elseif eventPtr[0].type == sdl.SDL_WINDOWEVENT then
+					if eventPtr[0].window.event == sdl.SDL_WINDOWEVENT_RESIZED then
+						self.width, self.height = eventPtr[0].window.data1, eventPtr[0].window.data2
+						sdl.SDL_SetWindowSize(self.window, self.width, self.height)
+						gl.glViewport(0, 0, self.width, self.height)
+					end
+--]]
 				elseif eventPtr[0].type == sdl.SDL_KEYDOWN then
 					if ffi.os == 'Windows' and eventPtr[0].key.keysym.sym == sdl.SDLK_F4 and bit.band(eventPtr[0].key.keysym.mod, sdl.KMOD_ALT) ~= 0 then
 						done = true
@@ -248,12 +267,17 @@ function GLApp:run()
 						break
 					end
 				end
-				if self.event then self:event(eventPtr[0]) end
+				if self.event then self:event(eventPtr[0], eventPtr) end
 			end
 			
 			if self.update then self:update() end
-			
+		
+--[[ screen
 			sdl.SDL_GL_SwapBuffers()
+--]]
+-- [[ window
+			sdl.SDL_GL_SwapWindow(self.window)
+--]]
 		until done
 		
 	end, function(err)
@@ -262,6 +286,9 @@ function GLApp:run()
 	end)
 
 	if self.exit then self:exit() end
+	
+	sdl.SDL_GL_DeleteContext(self.context)
+	sdl.SDL_DestroyWindow(self.window);
 	sdl.SDL_Quit()
 end
 
