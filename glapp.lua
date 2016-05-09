@@ -267,7 +267,12 @@ function GLApp:run()
 						break
 					end
 				end
-				if self.event then self:event(eventPtr[0], eventPtr) end
+				if self.event then
+					-- TODO at first i passed eventPtr[0] luajit ref for convenience
+					-- but now that ImGui uses the ptr itself, I need to pass the ptr
+					-- so ... eventually phase eventPtr[0] out?
+					self:event(eventPtr[0], eventPtr)
+				end
 			end
 			
 			if self.update then self:update() end
