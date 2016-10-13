@@ -14,13 +14,14 @@ local addWGL = ffi.os == 'Windows'
 -- this code preys explicitly upon ffi.gl
 local wglFuncs
 if addWGL then
-	require 'ext'
+	local table = require 'ext.table'
+	local string = require 'ext.string'
 -- allow overwritings
 	local oldgl = require 'ffi.OpenGL'
 	local gl = setmetatable({}, {__index=oldgl})
 	package.loaded['ffi.OpenGL'] = gl
 
-	wglFuncs = {}
+	wglFuncs = table()
 -- TODO separate this from ffi.gl?
 	local wglDefs = [[
 void glActiveTexture (GLenum);
@@ -141,11 +142,11 @@ void glFramebufferTextureLayer (GLenum, GLenum, GLuint, GLint, GLint);
 
 ]]
 	ffi.cdef('void* wglGetProcAddress(const char*);')
-	for _,line in ipairs(wglDefs:trim():split('[\r\n]')) do
-		line = line:trim()
+	for _,line in ipairs(string.split(string.trim(wglDefs),'[\r\n]')) do
+		line = string.trim(line)
 		if line ~= '' then
 			local returnType, func, params = line:match('(%w+)%s+(%w+)%s*%((.*)%);%s*')
-			wglFuncs[func] = {returnType, params}
+			wglFuncs:insert{returnType=returnType, func=func, params=params}
 			local cdef = 'typedef '..returnType..' (*p'..func..')('..params..');'
 			ffi.cdef(cdef)
 		end
@@ -230,8 +231,13 @@ function GLApp:run()
 
 		-- now that gl is loaded, if we're windows then we need to load extensions
 		if addWGL then
-			for func,_ in pairs(wglFuncs) do
+			print('stupid windows...')
+			for _,info in ipairs(wglFuncs) do
+				local func = info.func
+				io.write('loading '..func)
+				io.stdout:flush()
 				gl[func] = ffi.new('p'..func, gl.wglGetProcAddress(func))
+				print(' to be '..tostring(gl[func]))
 			end
 		end
 
