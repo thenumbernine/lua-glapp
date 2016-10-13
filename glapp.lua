@@ -16,10 +16,6 @@ local wglFuncs
 if addWGL then
 	local table = require 'ext.table'
 	local string = require 'ext.string'
--- allow overwritings
-	local oldgl = require 'ffi.OpenGL'
-	local gl = setmetatable({}, {__index=oldgl})
-	package.loaded['ffi.OpenGL'] = gl
 
 	wglFuncs = table()
 -- TODO separate this from ffi.gl?
