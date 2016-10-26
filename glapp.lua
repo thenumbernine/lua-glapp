@@ -17,6 +17,7 @@ if addWGL then
 	local table = require 'ext.table'
 	local string = require 'ext.string'
 
+	require 'ffi.OpenGL'	-- for GLenum's def
 	wglFuncs = table()
 -- TODO separate this from ffi.gl?
 	local wglDefs = [[
