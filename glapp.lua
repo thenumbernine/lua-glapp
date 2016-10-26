@@ -228,13 +228,9 @@ function GLApp:run()
 
 		-- now that gl is loaded, if we're windows then we need to load extensions
 		if addWGL then
-			print('stupid windows...')
 			for _,info in ipairs(wglFuncs) do
 				local func = info.func
-				io.write('loading '..func)
-				io.stdout:flush()
 				gl[func] = ffi.new('p'..func, gl.wglGetProcAddress(func))
-				print(' to be '..tostring(gl[func]))
 			end
 		end
 
