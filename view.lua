@@ -1,0 +1,70 @@
+local class = require 'ext.class'
+local vec3 = require 'vec.vec3'
+local quat = require 'vec.quat'
+local gl = require 'ffi.OpenGL'
+
+local View = class()
+
+View.znear = .1
+View.zfar = 100
+View.ortho = false
+View.orthoSize = 10
+View.fovY = 90
+
+-- static method applied to GLApp classes
+function View.apply(cl)
+	local cl = class(cl)
+	function cl:init(...)
+		cl.super.init(self, ...)
+		self.view = View()
+		self.view.pos[3] = self.viewDist or self.view.pos[3]
+	end
+	function cl:update(...)
+		self.view:setup(self.width / self.height)
+		cl.super.update(self, ...)
+	end
+	return cl
+end
+
+function View:init()
+	self.pos = vec3(0,0,10)
+	self.angle = quat(0,0,0,1)
+end
+
+function View:setup(aspectRatio)
+	self:setupProjection(aspectRatio)
+	self:setupModelView()
+end
+
+function View:setupProjection(aspectRatio)
+	gl.glMatrixMode(gl.GL_PROJECTION)
+	gl.glLoadIdentity()
+	if not self.ortho then
+		local tanFovY = math.tan(self.fovY / 2)
+		gl.glFrustum(
+			-self.znear * aspectRatio * tanFovY,
+			self.znear * aspectRatio * tanFovY,
+			-self.znear * tanFovY,
+			self.znear * tanFovY,
+			self.znear,
+			self.zfar)
+	else
+		gl.glOrtho(
+			-aspectRatio * self.orthoSize,
+			aspectRatio * self.orthoSize,
+			-self.orthoSize,
+			self.orthoSize,
+			self.znear,
+			self.zfar)
+	end
+end
+
+function View:setupModelView()
+	gl.glMatrixMode(gl.GL_MODELVIEW)
+	gl.glLoadIdentity()
+	local aa = self.angle:conjugate():toAngleAxis()
+	gl.glRotated(aa[4],aa[1],aa[2],aa[3])
+	gl.glTranslated((-self.pos):unpack())
+end
+
+return View

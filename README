@@ -18,3 +18,8 @@ local sdl  = ffi.load( ffi_SDL_lib or ffi_sdl_lib or
 5) add the following line to sdl.lua
 
 ffi.cdef[[ enum {SDL_INIT_VIDEO = 0x20 }; ]]
+
+
+I also added view.lua and orbit.lua to add behaviors to GLApp classes
+view.lua = View object, applied to the class via View.apply
+orbit.lua = function to apply orbit behavior 
