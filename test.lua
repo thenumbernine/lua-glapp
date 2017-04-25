@@ -1,7 +1,7 @@
 #!/usr/bin/env luajit
 local ffi = require 'ffi'
 local GLApp = require 'glapp'
-local gl = require 'ffi.OpenGL'
+local gl = require 'gl'
 local glu = require 'ffi.glu'
 local sdl = require 'ffi.sdl'
 local class = require 'ext.class'

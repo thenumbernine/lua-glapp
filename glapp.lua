@@ -7,7 +7,7 @@ local class = require 'ext.class'
 --  has that changed?
 local addWGL = ffi.os == 'Windows'
 
--- this has to be done for all windows opengl programs, so I figure as much to do it here ...
+-- this has to be requestExit for all windows opengl programs, so I figure as much to do it here ...
 -- that makes this piece of code not-cross-platform
 -- the danger is, the whole purpose of passing gl through init args is to provide non-ffi.gl gl's (like EGL)
 -- of course that was experimental to begin with
@@ -17,7 +17,7 @@ if addWGL then
 	local table = require 'ext.table'
 	local string = require 'ext.string'
 
-	require 'ffi.OpenGL'	-- for GLenum's def
+	require 'gl'	-- for GLenum's def
 	wglFuncs = table()
 -- TODO separate this from ffi.gl?
 	local wglDefs = [[
@@ -172,7 +172,7 @@ function GLApp:init()
 	self.done = false
 end
 
-function GLApp:done()
+function GLApp:requestExit()
 	self.done = true
 end
 
@@ -189,7 +189,7 @@ function GLApp:run()
 	assert(sdl.SDL_Init(self.sdlInitFlags) == 0)
 	xpcall(function()		
 		if not self.gl then
-			self.gl = require 'ffi.OpenGL'
+			self.gl = require 'gl'
 		end
 		local gl = self.gl
 
@@ -242,7 +242,7 @@ function GLApp:run()
 		repeat
 			while sdl.SDL_PollEvent(eventPtr) > 0 do
 				if eventPtr[0].type == sdl.SDL_QUIT then
-					done = true
+					self:requestExit()
 --[[ screen
 				elseif eventPtr[0].type == sdl.SDL_VIDEORESIZE then
 					self.width, self.height = eventPtr[0].resize.w, eventPtr[0].resize.h
@@ -258,11 +258,11 @@ function GLApp:run()
 --]]
 				elseif eventPtr[0].type == sdl.SDL_KEYDOWN then
 					if ffi.os == 'Windows' and eventPtr[0].key.keysym.sym == sdl.SDLK_F4 and bit.band(eventPtr[0].key.keysym.mod, sdl.KMOD_ALT) ~= 0 then
-						done = true
+						self:requestExit()
 						break
 					end
 					if ffi.os == 'OSX' and eventPtr[0].key.keysym.sym == sdl.SDLK_q and bit.band(eventPtr[0].key.keysym.mod, sdl.KMOD_GUI) ~= 0 then
-						done = true
+						self:requestExit()
 						break
 					end
 				end
@@ -282,7 +282,7 @@ function GLApp:run()
 -- [[ window
 			sdl.SDL_GL_SwapWindow(self.window)
 --]]
-		until done
+		until self.done
 		
 	end, function(err)
 		print(err)
