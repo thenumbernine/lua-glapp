@@ -40,16 +40,27 @@ return function(cl)
 				if leftButtonDown and not guiDown then
 					if shiftDown then
 						if dx ~= 0 or dy ~= 0 then
-							self.view.pos = self.view.pos * math.exp(dy * -.03)
+							if self.view.ortho then
+								self.view.orthoSize = self.view.orthoSize * math.exp(dy * -.03)
+							else
+								self.view.pos = self.view.pos * math.exp(dy * -.03)
+							end
 						end
 					else
 						if dx ~= 0 or dy ~= 0 then
-							local magn = math.sqrt(dx * dx + dy * dy)
-							local fdx = dx / magn
-							local fdy = dy / magn
-							local rotation = quat():fromAngleAxis(-fdy, -fdx, 0, magn)
-							self.view.angle = (self.view.angle * rotation):normalize()
-							self.view.pos = self.view.angle:zAxis() * self.view.pos:length()
+							if self.view.ortho then
+								local aspectRatio = self.width / self.height
+								local fdx = -2 * dx / self.width * self.view.orthoSize * aspectRatio
+								local fdy = 2 * dy / self.height * self.view.orthoSize
+								self.view.pos = self.view.pos + vec3(fdx, fdy, 0)
+							else
+								local magn = math.sqrt(dx * dx + dy * dy)
+								local fdx = dx / magn
+								local fdy = dy / magn
+								local rotation = quat():fromAngleAxis(-fdy, -fdx, 0, magn)
+								self.view.angle = (self.view.angle * rotation):normalize()
+								self.view.pos = self.view.angle:zAxis() * self.view.pos:length()
+							end
 						end
 					end
 				end

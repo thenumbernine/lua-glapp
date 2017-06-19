@@ -36,26 +36,35 @@ function View:setup(aspectRatio)
 	self:setupModelView()
 end
 
-function View:setupProjection(aspectRatio)
-	gl.glMatrixMode(gl.GL_PROJECTION)
-	gl.glLoadIdentity()
+-- get the arguments for glFrustum / glOrtho
+function View:getBounds(aspectRatio)
 	if not self.ortho then
 		local tanFovY = math.tan(self.fovY / 2)
-		gl.glFrustum(
+		return	
 			-self.znear * aspectRatio * tanFovY,
 			self.znear * aspectRatio * tanFovY,
 			-self.znear * tanFovY,
 			self.znear * tanFovY,
 			self.znear,
-			self.zfar)
+			self.zfar
 	else
-		gl.glOrtho(
+		return
 			-aspectRatio * self.orthoSize,
 			aspectRatio * self.orthoSize,
 			-self.orthoSize,
 			self.orthoSize,
 			self.znear,
-			self.zfar)
+			self.zfar
+	end
+end
+
+function View:setupProjection(aspectRatio)
+	gl.glMatrixMode(gl.GL_PROJECTION)
+	gl.glLoadIdentity()
+	if not self.ortho then
+		gl.glFrustum(self:getBounds(aspectRatio))
+	else
+		gl.glOrtho(self:getBounds(aspectRatio))
 	end
 end
 
