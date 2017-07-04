@@ -33,11 +33,21 @@ return function(cl)
 
 		local shiftDown = leftShiftDown or rightShiftDown
 		local guiDown = leftGuiDown or rightGuiDown
-		if event.type == sdl.SDL_MOUSEMOTION then
+		if event.type == sdl.SDL_MOUSEMOTION 
+		or event.type == sdl.SDL_MOUSEWHEEL
+		then
 			if canHandleMouse then
-				local dx = event.motion.xrel
-				local dy = event.motion.yrel
-				if leftButtonDown and not guiDown then
+				local dx, dy
+				if event.type == sdl.SDL_MOUSEMOTION then
+					dx = event.motion.xrel
+					dy = event.motion.yrel
+				else
+					dx = 10 * event.wheel.x
+					dy = 10 * event.wheel.y
+				end
+				if (leftButtonDown and not guiDown)
+				or event.type == sdl.SDL_MOUSEWHEEL
+				then
 					if shiftDown then
 						if dx ~= 0 or dy ~= 0 then
 							if self.view.ortho then
