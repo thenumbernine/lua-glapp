@@ -11,6 +11,18 @@ local Test = class(GLApp)
 
 Test.title = "Spinning Triangle"
 
+function Test:initGL()
+	--[[ present in 1.3.0, which is what Malkia's UFO uses
+	local version = sdl.SDL_Linked_Version()
+	print'SDL_Linked_Version:'
+	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
+	--]]
+	local version = ffi.new'SDL_version[1]'
+	sdl.SDL_GetVersion(version)
+	print'SDL_GetVersion:'
+	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
+end
+
 local x, y = ffi.new('int[1]'), ffi.new('int[1]')
 function Test:update()
 	local t = sdl.SDL_GetTicks() / 1000	-- gettime?
