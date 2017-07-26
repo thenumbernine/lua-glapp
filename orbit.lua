@@ -21,8 +21,11 @@ return function(cl)
 	end
 
 	function cl:event(event, eventPtr)
-		cl.super.event(self, event, eventPtr)
-		
+		local superEvent = cl.super.event
+		if superEvent then
+			superEvent(self, event, eventPtr)
+		end
+
 		local canHandleMouse = true
 		local canHandleKeyboard = true
 		if ImGuiApp and ImGuiApp.is(self) then

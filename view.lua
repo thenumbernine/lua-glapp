@@ -21,7 +21,10 @@ function View.apply(cl)
 	end
 	function cl:update(...)
 		self.view:setup(self.width / self.height)
-		cl.super.update(self, ...)
+		local superUpdate = cl.super.update
+		if superUpdate then
+			superUpdate(self, ...)
+		end
 	end
 	return cl
 end
