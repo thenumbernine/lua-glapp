@@ -28,6 +28,7 @@ end
 
 function View:init()
 	self.pos = vec3(0,0,10)
+	self.orbit = vec3(0,0,0)	-- orbit center
 	self.angle = quat(0,0,0,1)
 end
 

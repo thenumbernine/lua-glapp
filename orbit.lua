@@ -53,7 +53,7 @@ return function(cl)
 							if self.view.ortho then
 								self.view.orthoSize = self.view.orthoSize * math.exp(dy * -.03)
 							else
-								self.view.pos = self.view.pos * math.exp(dy * -.03)
+								self.view.pos = (self.view.pos - self.view.orbit) * math.exp(dy * -.03) + self.view.orbit
 							end
 						end
 					else
@@ -69,7 +69,7 @@ return function(cl)
 								local fdy = dy / magn
 								local rotation = quat():fromAngleAxis(-fdy, -fdx, 0, magn)
 								self.view.angle = (self.view.angle * rotation):normalize()
-								self.view.pos = self.view.angle:zAxis() * self.view.pos:length()
+								self.view.pos = self.view.angle:zAxis() * (self.view.pos - self.view.orbit):length() + self.view.orbit
 							end
 						end
 					end
