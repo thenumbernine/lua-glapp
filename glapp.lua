@@ -224,7 +224,7 @@ function GLApp:run()
 		--sdl.SDL_EnableKeyRepeat(0,0)
 		sdl.SDL_GL_SetSwapInterval(0)
 
-		--gl.glUseProgramObjectARB(nil)
+		--gl.glUseProgram(0)
 
 		-- now that gl is loaded, if we're windows then we need to load extensions
 		if addWGL then
@@ -233,11 +233,11 @@ function GLApp:run()
 				gl[func] = ffi.new('p'..func, gl.wglGetProcAddress(func))
 			end
 		end
-
-		if self.initGL then self:initGL(gl, 'gl') end
 		
 		sdl.SDL_SetWindowSize(self.window, self.width, self.height)
 		gl.glViewport(0, 0, self.width, self.height)
+
+		if self.initGL then self:initGL(gl, 'gl') end
 	
 		repeat
 			while sdl.SDL_PollEvent(eventPtr) > 0 do
