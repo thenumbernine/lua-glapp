@@ -251,10 +251,13 @@ function GLApp:run()
 --]]
 -- [[ window
 				elseif eventPtr[0].type == sdl.SDL_WINDOWEVENT then
-					if eventPtr[0].window.event == sdl.SDL_WINDOWEVENT_RESIZED then
-						self.width, self.height = eventPtr[0].window.data1, eventPtr[0].window.data2
-						sdl.SDL_SetWindowSize(self.window, self.width, self.height)
-						gl.glViewport(0, 0, self.width, self.height)
+					if eventPtr[0].window.event == sdl.SDL_WINDOWEVENT_SIZE_CHANGED then
+						local newWidth, newHeight = eventPtr[0].window.data1, eventPtr[0].window.data2
+						if self.width ~= newWidth or self.height ~= newHeight then
+							self.width, self.height = newWidth, newHeight
+							sdl.SDL_SetWindowSize(self.window, self.width, self.height)
+							gl.glViewport(0, 0, self.width, self.height)
+						end
 					end
 --]]
 				elseif eventPtr[0].type == sdl.SDL_KEYDOWN then
