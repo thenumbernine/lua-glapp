@@ -18,6 +18,8 @@ return function(cl)
 		self.rightShiftDown = false
 		self.leftGuiDown = false
 		self.rightGuiDown = false
+		self.leftAltDown = false
+		self.rightAltDown = false
 	end
 
 	function cl:event(event, eventPtr)
@@ -36,6 +38,7 @@ return function(cl)
 
 		local shiftDown = leftShiftDown or rightShiftDown
 		local guiDown = leftGuiDown or rightGuiDown
+		local altDown = leftAltDown or rightAltDown
 		if event.type == sdl.SDL_MOUSEMOTION 
 		or event.type == sdl.SDL_MOUSEWHEEL
 		then
@@ -59,6 +62,10 @@ return function(cl)
 								self.view.pos = (self.view.pos - self.view.orbit) * math.exp(dy * -.03) + self.view.orbit
 							end
 						end
+					elseif altDown then
+						local dist = (self.view.pos - self.view.orbit):length()
+						self.view.orbit = self.view.orbit + self.view.angle:rotate(vec3(-dx,dy,0) * .1)
+						self.view.pos = self.view.angle:zAxis() * dist + self.view.orbit
 					else
 						if dx ~= 0 or dy ~= 0 then
 							if self.view.ortho then
@@ -99,6 +106,10 @@ return function(cl)
 				leftGuiDown = true
 			elseif event.key.keysym.sym == sdl.SDLK_RGUI then
 				rightGuiDown = true
+			elseif event.key.keysym.sym == sdl.SDLK_LALT then
+				leftAltDown = true
+			elseif event.key.keysym.sym == sdl.SDLK_RALT then
+				rightAltDown = true
 			end
 		elseif event.type == sdl.SDL_KEYUP then
 			if event.key.keysym.sym == sdl.SDLK_LSHIFT then
@@ -109,6 +120,10 @@ return function(cl)
 				leftGuiDown = false
 			elseif event.key.keysym.sym == sdl.SDLK_RGUI then
 				rightGuiDown = false
+			elseif event.key.keysym.sym == sdl.SDLK_LALT then
+				leftAltDown = false
+			elseif event.key.keysym.sym == sdl.SDLK_RALT then
+				rightAltDown = false
 			end
 		end
 	end
