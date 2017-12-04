@@ -29,10 +29,16 @@ function View.apply(cl)
 	return cl
 end
 
-function View:init()
-	self.pos = vec3(0,0,10)
-	self.orbit = vec3(0,0,0)	-- orbit center
-	self.angle = quat(0,0,0,1)
+function View:init(args)
+	if args then
+		self.pos = vec3(table.unpack(args.pos))
+		self.orbit = vec3(table.unpack(args.orbit))
+		self.angle = quat(table.unpack(args.angle))
+	else
+		self.pos = vec3(0,0,10)
+		self.orbit = vec3(0,0,0)	-- orbit center
+		self.angle = quat(0,0,0,1)
+	end
 end
 
 function View:setup(aspectRatio)
