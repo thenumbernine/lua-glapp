@@ -49,7 +49,7 @@ end
 -- get the arguments for glFrustum / glOrtho
 function View:getBounds(aspectRatio)
 	if not self.ortho then
-		local tanFovY = math.tan(self.fovY / 2)
+		local tanFovY = math.tan(math.rad(self.fovY / 2))
 		return	
 			-self.znear * aspectRatio * tanFovY,
 			self.znear * aspectRatio * tanFovY,

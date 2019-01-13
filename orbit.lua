@@ -64,7 +64,7 @@ return function(cl)
 						end
 					elseif altDown then
 						local dist = (self.view.pos - self.view.orbit):length()
-						self.view.orbit = self.view.orbit + self.view.angle:rotate(vec3(-dx,dy,0) * .1)
+						self.view.orbit = self.view.orbit + self.view.angle:rotate(vec3(-dx,dy,0) * (dist * .1))
 						self.view.pos = self.view.angle:zAxis() * dist + self.view.orbit
 					else
 						if dx ~= 0 or dy ~= 0 then
