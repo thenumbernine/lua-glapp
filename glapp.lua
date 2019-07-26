@@ -138,6 +138,49 @@ void glBlitFramebuffer (GLint, GLint, GLint, GLint, GLint, GLint, GLint, GLint, 
 void glRenderbufferStorageMultisample (GLenum, GLsizei, GLenum, GLsizei, GLsizei);
 void glFramebufferTextureLayer (GLenum, GLenum, GLuint, GLint, GLint);
 
+void glVertexAttrib1d (GLuint index, GLdouble x);
+void glVertexAttrib1dv (GLuint index, const GLdouble *v);
+void glVertexAttrib1f (GLuint index, GLfloat x);
+void glVertexAttrib1fv (GLuint index, const GLfloat *v);
+void glVertexAttrib1s (GLuint index, GLshort x);
+void glVertexAttrib1sv (GLuint index, const GLshort *v);
+void glVertexAttrib2d (GLuint index, GLdouble x, GLdouble y);
+void glVertexAttrib2dv (GLuint index, const GLdouble *v);
+void glVertexAttrib2f (GLuint index, GLfloat x, GLfloat y);
+void glVertexAttrib2fv (GLuint index, const GLfloat *v);
+void glVertexAttrib2s (GLuint index, GLshort x, GLshort y);
+void glVertexAttrib2sv (GLuint index, const GLshort *v);
+void glVertexAttrib3d (GLuint index, GLdouble x, GLdouble y, GLdouble z);
+void glVertexAttrib3dv (GLuint index, const GLdouble *v);
+void glVertexAttrib3f (GLuint index, GLfloat x, GLfloat y, GLfloat z);
+void glVertexAttrib3fv (GLuint index, const GLfloat *v);
+void glVertexAttrib3s (GLuint index, GLshort x, GLshort y, GLshort z);
+void glVertexAttrib3sv (GLuint index, const GLshort *v);
+void glVertexAttrib4Nbv (GLuint index, const GLbyte *v);
+void glVertexAttrib4Niv (GLuint index, const GLint *v);
+void glVertexAttrib4Nsv (GLuint index, const GLshort *v);
+void glVertexAttrib4Nub (GLuint index, GLubyte x, GLubyte y, GLubyte z, GLubyte w);
+void glVertexAttrib4Nubv (GLuint index, const GLubyte *v);
+void glVertexAttrib4Nuiv (GLuint index, const GLuint *v);
+void glVertexAttrib4Nusv (GLuint index, const GLushort *v);
+void glVertexAttrib4bv (GLuint index, const GLbyte *v);
+void glVertexAttrib4d (GLuint index, GLdouble x, GLdouble y, GLdouble z, GLdouble w);
+void glVertexAttrib4dv (GLuint index, const GLdouble *v);
+void glVertexAttrib4f (GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
+void glVertexAttrib4fv (GLuint index, const GLfloat *v);
+void glVertexAttrib4iv (GLuint index, const GLint *v);
+void glVertexAttrib4s (GLuint index, GLshort x, GLshort y, GLshort z, GLshort w);
+void glVertexAttrib4sv (GLuint index, const GLshort *v);
+void glVertexAttrib4ubv (GLuint index, const GLubyte *v);
+void glVertexAttrib4uiv (GLuint index, const GLuint *v);
+void glVertexAttrib4usv (GLuint index, const GLushort *v);
+void glVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer);
+void glEnableVertexAttribArray (GLuint index);
+void glDisableVertexAttribArray (GLuint index);
+void glGetVertexAttribdv (GLuint index, GLenum pname, GLdouble *params);
+void glGetVertexAttribfv (GLuint index, GLenum pname, GLfloat *params);
+void glGetVertexAttribiv (GLuint index, GLenum pname, GLint *params);
+void glGetVertexAttribPointerv (GLuint index, GLenum pname, GLvoid* *pointer);
 ]]
 	ffi.cdef('void* wglGetProcAddress(const char*);')
 	for _,line in ipairs(string.split(string.trim(wglDefs),'[\r\n]')) do
