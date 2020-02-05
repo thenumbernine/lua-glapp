@@ -1,5 +1,7 @@
 -- adds orbit trackball behavior to a GLApp
 -- depends on View.apply
+-- TODO combine this with glapp.mouse
+-- TODO move dependency over to vec-ffi
 local class = require 'ext.class'
 local sdl = require 'ffi.sdl'
 local quat = require 'vec.quat'

@@ -16,6 +16,7 @@ build = {
 	type = "builtin",
 	modules = {
 		["glapp"] = "glapp.lua",
+		["glapp.mouse"] = "mouse.lua",
 		["glapp.orbit"] = "orbit.lua",
 		["glapp.tests.test"] = "tests/test.lua",
 		["glapp.tests.version"] = "tests/version.lua",
