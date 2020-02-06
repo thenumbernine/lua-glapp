@@ -6,6 +6,7 @@ local class = require 'ext.class'
 local sdl = require 'ffi.sdl'
 local vec3d = require 'vec-ffi.vec3d'
 local quatd = require 'vec-ffi.quatd'
+local Mouse = require 'glapp.mouse'
 
 local result, ImGuiApp = pcall(require, 'imguiapp')
 ImGuiApp = result and ImGuiApp
@@ -13,10 +14,16 @@ ImGuiApp = result and ImGuiApp
 return function(cl)
 	cl = class(cl)
 
+	-- TODO how to detect View.apply and apply if we haven't applied yet
+	-- that would get rid of the need for orbit-view
+	
+	-- and TODO same thing for Mouse.apply?
+
 	function cl:init(...)
 		cl.super.init(self, ...)
-		self.leftButtonDown = false
-		self.rightButtonDown = false
+		
+		self.mouse = self.mouse or Mouse()
+		
 		self.leftShiftDown = false
 		self.rightShiftDown = false
 		self.leftGuiDown = false
@@ -39,9 +46,11 @@ return function(cl)
 			canHandleKeyboard = not ig.igGetIO()[0].WantCaptureKeyboard
 		end
 
-		local shiftDown = leftShiftDown or rightShiftDown
-		local guiDown = leftGuiDown or rightGuiDown
-		local altDown = leftAltDown or rightAltDown
+		self.mouse:update()
+
+		local shiftDown = self.leftShiftDown or self.rightShiftDown
+		local guiDown = self.leftGuiDown or self.rightGuiDown
+		local altDown = self.leftAltDown or self.rightAltDown
 		if event.type == sdl.SDL_MOUSEMOTION 
 		or event.type == sdl.SDL_MOUSEWHEEL
 		then
@@ -54,7 +63,7 @@ return function(cl)
 					dx = 10 * event.wheel.x
 					dy = 10 * event.wheel.y
 				end
-				if (leftButtonDown and not guiDown)
+				if (self.mouse.leftDown and not guiDown)
 				or event.type == sdl.SDL_MOUSEWHEEL
 				then
 					if shiftDown then
@@ -88,45 +97,33 @@ return function(cl)
 					end
 				end
 			end
-		elseif event.type == sdl.SDL_MOUSEBUTTONDOWN then
-			if event.button.button == sdl.SDL_BUTTON_LEFT then
-				leftButtonDown = true
-			elseif event.button.button == sdl.SDL_BUTTON_RIGHT then
-				rightButtonDown = true
-			end
-		elseif event.type == sdl.SDL_MOUSEBUTTONUP then
-			if event.button.button == sdl.SDL_BUTTON_LEFT then
-				leftButtonDown = false
-			elseif event.button.button == sdl.SDL_BUTTON_RIGHT then
-				rightButtonDown = false
-			end
 		elseif event.type == sdl.SDL_KEYDOWN then
 			if event.key.keysym.sym == sdl.SDLK_LSHIFT then
-				leftShiftDown = true
+				self.leftShiftDown = true
 			elseif event.key.keysym.sym == sdl.SDLK_RSHIFT then
-				rightShiftDown = true
+				self.rightShiftDown = true
 			elseif event.key.keysym.sym == sdl.SDLK_LGUI then
-				leftGuiDown = true
+				self.leftGuiDown = true
 			elseif event.key.keysym.sym == sdl.SDLK_RGUI then
-				rightGuiDown = true
+				self.rightGuiDown = true
 			elseif event.key.keysym.sym == sdl.SDLK_LALT then
-				leftAltDown = true
+				self.leftAltDown = true
 			elseif event.key.keysym.sym == sdl.SDLK_RALT then
-				rightAltDown = true
+				self.rightAltDown = true
 			end
 		elseif event.type == sdl.SDL_KEYUP then
 			if event.key.keysym.sym == sdl.SDLK_LSHIFT then
-				leftShiftDown = false
+				self.leftShiftDown = false
 			elseif event.key.keysym.sym == sdl.SDLK_RSHIFT then
-				rightShiftDown = false
+				self.rightShiftDown = false
 			elseif event.key.keysym.sym == sdl.SDLK_LGUI then
-				leftGuiDown = false
+				self.leftGuiDown = false
 			elseif event.key.keysym.sym == sdl.SDLK_RGUI then
-				rightGuiDown = false
+				self.rightGuiDown = false
 			elseif event.key.keysym.sym == sdl.SDLK_LALT then
-				leftAltDown = false
+				self.leftAltDown = false
 			elseif event.key.keysym.sym == sdl.SDLK_RALT then
-				rightAltDown = false
+				self.rightAltDown = false
 			end
 		end
 	end

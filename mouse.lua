@@ -26,6 +26,7 @@ end
 
 local viewportInt = ffi.new('GLint[4]')
 
+-- TODO :event() instead of :update()
 function Mouse:update()
 	-- store last state
 	self.lastPos.x = self.pos.x
