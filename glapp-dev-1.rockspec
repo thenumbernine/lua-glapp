@@ -19,6 +19,7 @@ build = {
 		["glapp.mouse"] = "mouse.lua",
 		["glapp.orbit"] = "orbit.lua",
 		["glapp.orbit-view"] = "orbit-view.lua",
+		["glapp.orbit-view-app"] = "orbit-view-app.lua",
 		["glapp.view"] = "view.lua",
 		["glapp.tests.test"] = "tests/test.lua",
 		["glapp.tests.version"] = "tests/version.lua",
