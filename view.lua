@@ -26,6 +26,10 @@ function View.apply(cl)
 			superUpdate(self, ...)
 		end
 	end
+	
+	-- let orbit know this class has a view, so if orbit doesn't find this flag it can call View.apply itself
+	cl.viewApplied = true
+
 	return cl
 end
 

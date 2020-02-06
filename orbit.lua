@@ -1,7 +1,5 @@
--- adds orbit trackball behavior to a GLApp
--- depends on View.apply
--- TODO combine this with glapp.mouse
--- TODO move dependency over to vec-ffi
+-- This class adds orbit trackball behavior to a GLApp (or GLApp subclass).
+-- It also calls View.apply on the class if it has not yet already been applied to the class
 local class = require 'ext.class'
 local sdl = require 'ffi.sdl'
 local vec3d = require 'vec-ffi.vec3d'
@@ -12,11 +10,16 @@ local result, ImGuiApp = pcall(require, 'imguiapp')
 ImGuiApp = result and ImGuiApp
 
 return function(cl)
+	-- if no class is specified then assume the class is GLApp by default
+	cl = cl or require 'glapp'
+	
 	cl = class(cl)
 
-	-- TODO how to detect View.apply and apply if we haven't applied yet
-	-- that would get rid of the need for orbit-view
-	
+	-- make sure we have self.view == a View object
+	if not cl.viewApplied then
+		cl = class(require 'glapp.view'.apply(cl))
+	end
+
 	-- and TODO same thing for Mouse.apply?
 
 	function cl:init(...)

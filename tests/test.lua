@@ -1,10 +1,9 @@
 #!/usr/bin/env luajit
 local ffi = require 'ffi'
-local GLApp = require 'glapp'
 local gl = require 'gl'
 local sdl = require 'ffi.sdl'
 
-local Test = require 'glapp.orbit-view'(GLApp)
+local Test = require 'glapp.orbit'()
 
 Test.title = "Spinning Triangle"
 
