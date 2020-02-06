@@ -1,6 +1,6 @@
 local class = require 'ext.class'
-local vec3 = require 'vec.vec3'
-local quat = require 'vec.quat'
+local vec3d = require 'vec-ffi.vec3d'
+local quatd = require 'vec-ffi.quatd'
 local gl = require 'gl'
 
 local View = class()
@@ -17,7 +17,7 @@ function View.apply(cl)
 	function cl:init(...)
 		cl.super.init(self, ...)
 		self.view = View()
-		self.view.pos[3] = self.viewDist or self.view.pos[3]
+		self.view.pos.z = self.viewDist or self.view.pos.z
 	end
 	function cl:update(...)
 		self.view:setup(self.width / self.height)
@@ -29,15 +29,19 @@ function View.apply(cl)
 	return cl
 end
 
+local function unpack(t)
+	return (t.unpack or table.unpack)(t)
+end
+
 function View:init(args)
 	if args then
-		self.pos = vec3(table.unpack(args.pos))
-		self.orbit = vec3(table.unpack(args.orbit))
-		self.angle = quat(table.unpack(args.angle))
+		self.pos = vec3d(unpack(args.pos))
+		self.orbit = vec3d(unpack(args.orbit))
+		self.angle = quatd(unpack(args.angle))
 	else
-		self.pos = vec3(0,0,10)
-		self.orbit = vec3(0,0,0)	-- orbit center
-		self.angle = quat(0,0,0,1)
+		self.pos = vec3d(0,0,10)
+		self.orbit = vec3d(0,0,0)	-- orbit center
+		self.angle = quatd(0,0,0,1)
 	end
 end
 
@@ -82,8 +86,8 @@ function View:setupModelView()
 	gl.glMatrixMode(gl.GL_MODELVIEW)
 	gl.glLoadIdentity()
 	local aa = self.angle:conjugate():toAngleAxis()
-	gl.glRotated(aa[4],aa[1],aa[2],aa[3])
-	gl.glTranslated((-self.pos):unpack())
+	gl.glRotated(aa.w, aa.x, aa.y, aa.z)
+	gl.glTranslated(-self.pos.x, -self.pos.y, -self.pos.z)
 end
 
 return View

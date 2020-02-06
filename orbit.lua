@@ -4,7 +4,8 @@
 -- TODO move dependency over to vec-ffi
 local class = require 'ext.class'
 local sdl = require 'ffi.sdl'
-local quat = require 'vec.quat'
+local vec3d = require 'vec-ffi.vec3d'
+local quatd = require 'vec-ffi.quatd'
 
 local result, ImGuiApp = pcall(require, 'imguiapp')
 ImGuiApp = result and ImGuiApp
@@ -66,7 +67,7 @@ return function(cl)
 						end
 					elseif altDown then
 						local dist = (self.view.pos - self.view.orbit):length()
-						self.view.orbit = self.view.orbit + self.view.angle:rotate(vec3(-dx,dy,0) * (dist * .1))
+						self.view.orbit = self.view.orbit + self.view.angle:rotate(vec3d(-dx,dy,0) * (dist * .1))
 						self.view.pos = self.view.angle:zAxis() * dist + self.view.orbit
 					else
 						if dx ~= 0 or dy ~= 0 then
@@ -74,12 +75,12 @@ return function(cl)
 								local aspectRatio = self.width / self.height
 								local fdx = -2 * dx / self.width * self.view.orthoSize * aspectRatio
 								local fdy = 2 * dy / self.height * self.view.orthoSize
-								self.view.pos = self.view.pos + vec3(fdx, fdy, 0)
+								self.view.pos = self.view.pos + vec3d(fdx, fdy, 0)
 							else
 								local magn = math.sqrt(dx * dx + dy * dy)
 								local fdx = dx / magn
 								local fdy = dy / magn
-								local rotation = quat():fromAngleAxis(-fdy, -fdx, 0, magn)
+								local rotation = quatd():fromAngleAxis(-fdy, -fdx, 0, magn)
 								self.view.angle = (self.view.angle * rotation):normalize()
 								self.view.pos = self.view.angle:zAxis() * (self.view.pos - self.view.orbit):length() + self.view.orbit
 							end

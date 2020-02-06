@@ -3,7 +3,6 @@ OpenGL application wrapper for LuaJIT.
 ### Dependencies:
 
 - https://github.com/thenumbernine/lua-ext
-- https://github.com/thenumbernine/vec-lua
 - https://github.com/thenumbernine/vec-ffi-lua
 - https://github.com/thenumbernine/lua-ffi-bindings for the OpenGL, GLU, SDL bindings
 - `glapp.orbit` can detect if the glapp object is a subclass of https://github.com/thenumbernine/lua-imguiapp if available.
