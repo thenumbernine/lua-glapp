@@ -49,7 +49,9 @@ return function(cl)
 			canHandleKeyboard = not ig.igGetIO()[0].WantCaptureKeyboard
 		end
 
-		self.mouse:update()
+		if self.mouse then	-- event() is called before init()
+			self.mouse:update()
+		end
 
 		local shiftDown = self.leftShiftDown or self.rightShiftDown
 		local guiDown = self.leftGuiDown or self.rightGuiDown
@@ -66,7 +68,7 @@ return function(cl)
 					dx = 10 * event.wheel.x
 					dy = 10 * event.wheel.y
 				end
-				if (self.mouse.leftDown and not guiDown)
+				if (self.mouse and self.mouse.leftDown and not guiDown)
 				or event.type == sdl.SDL_MOUSEWHEEL
 				then
 					if shiftDown then
