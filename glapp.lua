@@ -3,6 +3,24 @@ local sdl = require 'ffi.sdl'
 local bit = require 'bit'
 local class = require 'ext.class'
 
+-- [[ TODO put these in a SDL dedicated library, make them accessible to the outside world
+local function sdlAssert(result)
+	if result then return end
+	local msg = ffi.string(sdl.SDL_GetError())
+	error('SDL_GetError(): '..msg)
+end
+
+local function sdlAssertZero(intResult)
+	sdlAssert(intResult == 0)
+	return intResult
+end
+
+local function sdlAssertNonNull(ptrResult)
+	sdlAssert(ptrResult ~= nil)
+	return ptrResult
+end
+--]]
+
 -- too bad for so long Windows would only ship with GL 1.1
 --  has that changed?
 local addWGL = ffi.os == 'Windows'
@@ -230,7 +248,7 @@ GLApp.width = 640
 GLApp.height = 480
 
 function GLApp:run()
-	assert(sdl.SDL_Init(self.sdlInitFlags) == 0)
+	sdlAssertZero(sdl.SDL_Init(self.sdlInitFlags))
 	xpcall(function()		
 		if not self.gl then
 			self.gl = require 'gl'
@@ -239,13 +257,13 @@ function GLApp:run()
 
 		local eventPtr = ffi.new('SDL_Event[1]')
 
-		-- [[	needed for windows, not for ... android? I forget ...
-		sdl.SDL_GL_SetAttribute(sdl.SDL_GL_RED_SIZE, 8)
-		sdl.SDL_GL_SetAttribute(sdl.SDL_GL_GREEN_SIZE, 8)
-		sdl.SDL_GL_SetAttribute(sdl.SDL_GL_BLUE_SIZE, 8)
-		sdl.SDL_GL_SetAttribute(sdl.SDL_GL_ALPHA_SIZE, 8)
-		sdl.SDL_GL_SetAttribute(sdl.SDL_GL_DEPTH_SIZE, 24)
-		sdl.SDL_GL_SetAttribute(sdl.SDL_GL_DOUBLEBUFFER, 1)
+		-- [[ needed for windows, not for ... android? I forget ...
+		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_RED_SIZE, 8))
+		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_GREEN_SIZE, 8))
+		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_BLUE_SIZE, 8))
+		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_ALPHA_SIZE, 8))
+		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_DEPTH_SIZE, 24))
+		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_DOUBLEBUFFER, 1))
 		--]]
 
 --[[ screen
@@ -254,7 +272,7 @@ function GLApp:run()
 		sdl.SDL_WM_SetCaption(self.title, nil)
 --]]
 -- [[ window
-		self.window = sdl.SDL_CreateWindow(
+		self.window = sdlAssertNonNull(sdl.SDL_CreateWindow(
 			self.title,
 			sdl.SDL_WINDOWPOS_CENTERED,
 			sdl.SDL_WINDOWPOS_CENTERED,
@@ -262,11 +280,11 @@ function GLApp:run()
 			bit.bor(
 				sdl.SDL_WINDOW_OPENGL,
 				sdl.SDL_WINDOW_RESIZABLE,
-				sdl.SDL_WINDOW_SHOWN))
-		self.context = sdl.SDL_GL_CreateContext(self.window)
+				sdl.SDL_WINDOW_SHOWN)))
+		self.context = sdlAssertNonNull(sdl.SDL_GL_CreateContext(self.window))
 --]]	
 		--sdl.SDL_EnableKeyRepeat(0,0)
-		sdl.SDL_GL_SetSwapInterval(0)
+		sdlAssertZero(sdl.SDL_GL_SetSwapInterval(0))
 
 		--gl.glUseProgram(0)
 
