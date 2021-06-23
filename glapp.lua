@@ -50,29 +50,23 @@ if addWGL then
 	for _,line in ipairs(string.split(string.trim(wglDefs),'[\r\n]')) do
 		local line = line
 		local returnType, func, params, cdef
--- [[ TODO show where the error occurred?
-xpcall(function()
---]]
-		line = line:match'^(.*)//' or line
-		line = string.trim(line)
-		if line ~= '' then
-			-- lazy tokenizer:
-			line = line:gsub('%*', ' * '):gsub('%s+', ' ')
-			returnType, func, params = line:match('^(.+)%s+(%S+)%s*%((.*)%);%s*$')
-			wglFuncs:insert{returnType=returnType, func=func, params=params}
-			cdef = 'typedef '..returnType..' (*p'..func..')('..params..');'
-			ffi.cdef(cdef)
-		end
--- [[
-end, function(err)
-	print('line = ', line)			
-	print('returnType = ', returnType)
-	print('func = ', func)
-	print('params = ', params)
-	print('cdef = ', cdef)
-	io.stderr:write(err..'\n'..debug.traceback())
-end)
---]]
+		xpcall(function()
+			if line ~= '' then
+				-- lazy tokenizer:
+				line = line:gsub('%*', ' * '):gsub('%s+', ' ')
+				returnType, func, params = line:match('^(.+)%s+(%S+)%s*%((.*)%);%s*$')
+				wglFuncs:insert{returnType=returnType, func=func, params=params}
+				cdef = 'typedef '..returnType..' (*p'..func..')('..params..');'
+				ffi.cdef(cdef)
+			end
+		end, function(err)
+			print('line = ', line)			
+			print('returnType = ', returnType)
+			print('func = ', func)
+			print('params = ', params)
+			print('cdef = ', cdef)
+			io.stderr:write(err..'\n'..debug.traceback())
+		end)
 	end
 
 --[[

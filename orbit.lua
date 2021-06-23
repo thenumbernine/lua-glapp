@@ -92,6 +92,7 @@ return function(cl)
 								self.view.pos = self.view.pos + vec3d(fdx, fdy, 0)
 							else
 								local magn = math.sqrt(dx * dx + dy * dy)
+								magn = magn * math.tan(math.rad(.5 * self.view.fovY))
 								local fdx = dx / magn
 								local fdy = dy / magn
 								local rotation = quatd():fromAngleAxis(-fdy, -fdx, 0, magn)
