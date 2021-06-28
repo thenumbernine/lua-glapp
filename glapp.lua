@@ -38,26 +38,22 @@ if addWGL then
 	local gl = require 'gl'	-- for GLenum's def
 	wglFuncs = table()
 
-	local wglDefs = table()
-	for k,v in pairs(gl) do
-		if k:match'^opengl_symbols_' then
-			wglDefs:insert(v)
-		end
-	end
-	wglDefs = wglDefs:concat'\n'
-
 	ffi.cdef('void* wglGetProcAddress(const char*);')
-	for _,line in ipairs(string.split(string.trim(wglDefs),'[\r\n]')) do
+	for _,line in ipairs(string.split(string.trim(gl.code),'[\r\n]')) do
 		local line = line
 		local returnType, func, params, cdef
 		xpcall(function()
 			if line ~= '' then
-				-- lazy tokenizer:
-				line = line:gsub('%*', ' * '):gsub('%s+', ' ')
-				returnType, func, params = line:match('^(.+)%s+(%S+)%s*%((.*)%);%s*$')
-				wglFuncs:insert{returnType=returnType, func=func, params=params}
-				cdef = 'typedef '..returnType..' (*p'..func..')('..params..');'
-				ffi.cdef(cdef)
+				local rest = line:match'^extern%s+(.*)$' 
+				if rest then
+					-- looks like the windows gl.h for v1.1 doesn't use 'extern' while the glext.h does
+					-- and since we're fixing windows glext.h, how about we just skip the non-externs
+					-- all else should be function defs
+					-- lazy tokenizer:
+					line = line:gsub('%*', ' * '):gsub('%s+', ' ')	-- help the lazy tokenzier parse return types
+					returnType, func, params = line:match('^(.+)%s+(%S+)%s*%((.*)%);%s*$')
+					wglFuncs:insert{returnType=returnType, func=func, params=params}
+				end
 			end
 		end, function(err)
 			print('line = ', line)			
@@ -68,11 +64,6 @@ if addWGL then
 			io.stderr:write(err..'\n'..debug.traceback())
 		end)
 	end
-
---[[
-	glShaderSource = {'GLvoid', 'GLuint shader, GLsizei count, const GLchar* *string, const GLint *length'},
-	glCreateShader = {'GLuint', 'GLenum'},
---]]
 end
 
 
@@ -151,7 +142,7 @@ function GLApp:run()
 		if addWGL then
 			for _,info in ipairs(wglFuncs) do
 				local func = info.func
-				gl[func] = ffi.new('p'..func, gl.wglGetProcAddress(func))
+				gl[func] = ffi.new('PFN'..func:upper()..'PROC', gl.wglGetProcAddress(func))
 			end
 		end
 		
