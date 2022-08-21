@@ -44,7 +44,7 @@ return function(cl)
 		local canHandleMouse = true
 		local canHandleKeyboard = true
 		if ImGuiApp and ImGuiApp:isa(self) then
-			local ig = require 'ffi.imgui'
+			local ig = require 'imgui'
 			canHandleMouse = not ig.igGetIO()[0].WantCaptureMouse
 			canHandleKeyboard = not ig.igGetIO()[0].WantCaptureKeyboard
 		end
