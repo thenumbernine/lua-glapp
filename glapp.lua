@@ -131,7 +131,7 @@ function GLApp:run()
 				sdl.SDL_WINDOW_OPENGL,
 				sdl.SDL_WINDOW_RESIZABLE,
 				sdl.SDL_WINDOW_SHOWN)))
-		self.context = sdlAssertNonNull(sdl.SDL_GL_CreateContext(self.window))
+		self.sdlCtx = sdlAssertNonNull(sdl.SDL_GL_CreateContext(self.window))
 --]]	
 		--sdl.SDL_EnableKeyRepeat(0,0)
 		sdlAssertZero(sdl.SDL_GL_SetSwapInterval(0))
@@ -205,7 +205,7 @@ function GLApp:run()
 
 	if self.exit then self:exit() end
 	
-	sdl.SDL_GL_DeleteContext(self.context)
+	sdl.SDL_GL_DeleteContext(self.sdlCtx)
 	sdl.SDL_DestroyWindow(self.window);
 	sdl.SDL_Quit()
 end
