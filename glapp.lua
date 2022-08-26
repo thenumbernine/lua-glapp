@@ -44,7 +44,7 @@ if addWGL then
 		local returnType, func, params, cdef
 		xpcall(function()
 			if line ~= '' then
-				local rest = line:match'^extern%s+(.*)$' 
+				local rest = line:match'^extern%s+(.*)$'
 				if rest then
 					-- looks like the windows gl.h for v1.1 doesn't use 'extern' while the glext.h does
 					-- and since we're fixing windows glext.h, how about we just skip the non-externs
@@ -56,7 +56,7 @@ if addWGL then
 				end
 			end
 		end, function(err)
-			print('line = ', line)			
+			print('line = ', line)
 			print('returnType = ', returnType)
 			print('func = ', func)
 			print('params = ', params)
@@ -99,7 +99,7 @@ GLApp.height = 480
 
 function GLApp:run()
 	sdlAssertZero(sdl.SDL_Init(self.sdlInitFlags))
-	xpcall(function()		
+	xpcall(function()
 		if not self.gl then
 			self.gl = require 'gl'
 		end
@@ -132,7 +132,7 @@ function GLApp:run()
 				sdl.SDL_WINDOW_RESIZABLE,
 				sdl.SDL_WINDOW_SHOWN)))
 		self.sdlCtx = sdlAssertNonNull(sdl.SDL_GL_CreateContext(self.window))
---]]	
+--]]
 		--sdl.SDL_EnableKeyRepeat(0,0)
 		sdlAssertZero(sdl.SDL_GL_SetSwapInterval(0))
 
@@ -208,6 +208,36 @@ function GLApp:run()
 	sdl.SDL_GL_DeleteContext(self.sdlCtx)
 	sdl.SDL_DestroyWindow(self.window);
 	sdl.SDL_Quit()
+end
+
+--[[
+This is a common feature so I'll put it here.
+It is based on Image, but I'll only require() Image within the function so GLApp itself doesn't depend on Image.
+I put it here vs lua-opengl because it also depends on GLApp.width and .height, so ultimately it is dependent on GLApp.
+It uses a .screenshotContext field for caching the Image buffer of the read pixels, and the buffer for flipping them before saving the screenshot.
+--]]
+function GLApp:screenshotToFile(filename)
+	local Image = require 'image'
+	local gl = self.gl
+	local w, h = self.width, self.height
+
+	self.screenshotContext = self.screenshotContext or {}
+	local ssimg = self.screenshotContext.ssimg
+	local ssflipped = self.screenshotContext.ssflipped
+	if ssimg then
+		if w ~= ssimg.width or h ~= ssimg.height then
+			ssimg = nil
+			ssflipped = nil
+		end
+	end
+	if not ssimg then
+		ssimg = Image(w, h, 4, 'unsigned char')
+		ssflipped = Image(w, h, 4, 'unsigned char')
+		self.screenshotContext.ssimg = ssimg
+		self.screenshotContext.ssflipped = ssflipped
+	end
+	gl.glReadPixels(0, 0, w, h, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, ssimg.buffer)
+	ssimg:flip(ssflipped):save(filename)
 end
 
 return GLApp
