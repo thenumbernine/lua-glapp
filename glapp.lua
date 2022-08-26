@@ -242,7 +242,7 @@ function GLApp:screenshotToFile(filename)
 	ssimg:flip(ssflipped)
 	-- but I don't want dest alpha, so I'll make it full here
 	for i=3,4*w*h-1,4 do
-		ssflippped.buffer[i] = 255
+		ssflipped.buffer[i] = 255
 	end
 	ssflipped:save(filename)
 end
