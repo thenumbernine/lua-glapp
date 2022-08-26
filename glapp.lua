@@ -230,14 +230,21 @@ function GLApp:screenshotToFile(filename)
 			ssflipped = nil
 		end
 	end
+	-- hmm, I'm having trouble with anything but RGBA ...
 	if not ssimg then
 		ssimg = Image(w, h, 4, 'unsigned char')
 		ssflipped = Image(w, h, 4, 'unsigned char')
 		self.screenshotContext.ssimg = ssimg
 		self.screenshotContext.ssflipped = ssflipped
 	end
+	--gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT, 1)
 	gl.glReadPixels(0, 0, w, h, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, ssimg.buffer)
-	ssimg:flip(ssflipped):save(filename)
+	ssimg:flip(ssflipped)
+	-- but I don't want dest alpha, so I'll make it full here
+	for i=3,4*w*h-1,4 do
+		ssflippped.buffer[i] = 255
+	end
+	ssflipped:save(filename)
 end
 
 return GLApp
