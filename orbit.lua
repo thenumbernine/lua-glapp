@@ -103,33 +103,22 @@ return function(cl)
 					end
 				end
 			end
-		elseif event.type == sdl.SDL_KEYDOWN then
+		elseif event.type == sdl.SDL_KEYUP
+		or event.type == sdl.SDL_KEYDOWN
+		then
+			local down = event.type == sdl.SDL_KEYDOWN
 			if event.key.keysym.sym == sdl.SDLK_LSHIFT then
-				self.leftShiftDown = true
+				self.leftShiftDown = down
 			elseif event.key.keysym.sym == sdl.SDLK_RSHIFT then
-				self.rightShiftDown = true
+				self.rightShiftDown = down
 			elseif event.key.keysym.sym == sdl.SDLK_LGUI then
-				self.leftGuiDown = true
+				self.leftGuiDown = down
 			elseif event.key.keysym.sym == sdl.SDLK_RGUI then
-				self.rightGuiDown = true
+				self.rightGuiDown = down
 			elseif event.key.keysym.sym == sdl.SDLK_LALT then
-				self.leftAltDown = true
+				self.leftAltDown = down
 			elseif event.key.keysym.sym == sdl.SDLK_RALT then
-				self.rightAltDown = true
-			end
-		elseif event.type == sdl.SDL_KEYUP then
-			if event.key.keysym.sym == sdl.SDLK_LSHIFT then
-				self.leftShiftDown = false
-			elseif event.key.keysym.sym == sdl.SDLK_RSHIFT then
-				self.rightShiftDown = false
-			elseif event.key.keysym.sym == sdl.SDLK_LGUI then
-				self.leftGuiDown = false
-			elseif event.key.keysym.sym == sdl.SDLK_RGUI then
-				self.rightGuiDown = false
-			elseif event.key.keysym.sym == sdl.SDLK_LALT then
-				self.leftAltDown = false
-			elseif event.key.keysym.sym == sdl.SDLK_RALT then
-				self.rightAltDown = false
+				self.rightAltDown = down
 			end
 		end
 	end

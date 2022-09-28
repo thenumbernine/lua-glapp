@@ -120,7 +120,6 @@ function Mouse:update()
 			end
 		end	
 	end
-	
 end
 
 return Mouse

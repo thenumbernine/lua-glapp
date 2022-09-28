@@ -60,19 +60,19 @@ function View:getBounds(aspectRatio)
 		local tanFovY = math.tan(math.rad(self.fovY / 2))
 		return	
 			-self.znear * aspectRatio * tanFovY,
-			self.znear * aspectRatio * tanFovY,
+			 self.znear * aspectRatio * tanFovY,
 			-self.znear * tanFovY,
-			self.znear * tanFovY,
-			self.znear,
-			self.zfar
+			 self.znear * tanFovY,
+			 self.znear,
+			 self.zfar
 	else
 		return
-			-aspectRatio * self.orthoSize,
-			aspectRatio * self.orthoSize,
+			-self.orthoSize * aspectRatio,
+			 self.orthoSize * aspectRatio,
 			-self.orthoSize,
-			self.orthoSize,
-			self.znear,
-			self.zfar
+			 self.orthoSize,
+			 self.znear,
+			 self.zfar
 	end
 end
 
