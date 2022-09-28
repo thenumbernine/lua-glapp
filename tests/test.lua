@@ -30,11 +30,6 @@ local Test = require 'glapp.orbit'()
 Test.title = "Spinning Triangle"
 
 function Test:initGL()
-	--[[ present in 1.3.0, which is what Malkia's UFO uses
-	local version = sdl.SDL_Linked_Version()
-	print'SDL_Linked_Version:'
-	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
-	--]]
 	local version = ffi.new'SDL_version[1]'
 	sdl.SDL_GetVersion(version)
 	print'SDL_GetVersion:'
@@ -47,8 +42,8 @@ function Test:update()
 	gl.glClearColor(0, 0, 0, 0)
 	gl.glClear(gl.GL_COLOR_BUFFER_BIT)
 
-	local t = sdl.SDL_GetTicks() / 1000	-- gettime?
-	gl.glRotatef(.3 * t * 100, 0, 1, 0)
+	local t = sdl.SDL_GetTicks() * 1e-3
+	gl.glRotatef(t * 30, 0, 1, 0)
 	
 	gl.glBegin(gl.GL_TRIANGLES)
 	gl.glColor3f(1, 0, 0)
