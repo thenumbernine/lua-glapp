@@ -1,6 +1,7 @@
 #!/usr/bin/env luajit
 
 local ffi = require 'ffi'
+local template = require 'template'
 local class = require 'ext.class'
 local GLApp = require 'glapp'
 local gl = require 'gl'
@@ -17,6 +18,7 @@ function App:initGL(...)
 		App.super.initGL(self, ...)
 	end
 
+	-- TODO gl.get() function for global gets
 	-- each global size dim must be <= this
 	local maxComputeWorkGroupCount = GLProgram:get3'GL_MAX_COMPUTE_WORK_GROUP_COUNT'
 	print('GL_MAX_COMPUTE_WORK_GROUP_COUNT = '..maxComputeWorkGroupCount)
@@ -63,11 +65,15 @@ function App:initGL(...)
 	}
 	glreport'here'
 
+	local localSize = vec3i(32,32,1)
 	self.computeShader = GLProgram{
-		computeCode = [[
+		computeCode = template([[
 #version 460
 
-layout(local_size_x=32, local_size_y=32, local_size_z=1) in;
+layout(local_size_x=<?=localSize.x
+	?>, local_size_y=<?=localSize.y
+	?>, local_size_z=<?=localSize.z
+	?>) in;
 
 layout(rgba32f, binding=0) uniform writeonly image2D dstTex;
 layout(rgba32f, binding=1) uniform readonly image2D srcTex;
@@ -79,43 +85,25 @@ void main() {
 	pixel.z = 1.;
 	imageStore(dstTex, itc, pixel);
 }
-]]
+]], 	{
+			localSize = localSize,
+		})
 	}
 	glreport'here'
 
 	self.computeShader:use()
-	
-	--dstTex:bindImage(0)
-	gl.glBindImageTexture(
-		0,					-- unit
-		dstTex.id,			-- texture
-		0,					-- level
-		gl.GL_FALSE,		-- layered
-		0,					-- layer
-		gl.GL_WRITE_ONLY,	-- access.  can be derived from shader program (right?).
-		gl.GL_RGBA32F		-- format.  can be derived from shader program.
-	)
+
+	self.computeShader:bindImage(0, dstTex, gl.GL_RGBA32F, gl.GL_WRITE_ONLY)
 	-- ... hmm, format deserves a connectio with the detected uniform-type-from-program
 	-- so maybe glBindImageTexture should be a function of the program and not of the texture?
 	-- or maybe both: self.computeShader:bindImageTexture(0, dstTex)
 
-	--srcTex:bindImage(1)
-	gl.glBindImageTexture(
-		1,					-- unit
-		srcTex.id,			-- texture
-		0,					-- level
-		gl.GL_FALSE,		-- layered
-		0,					-- layer
-		gl.GL_READ_ONLY,	-- access
-		gl.GL_RGBA32F		-- format
-	)
+	self.computeShader:bindImage(1, srcTex, gl.GL_RGBA32F, gl.GL_READ_ONLY)
 
-	gl.glDispatchCompute(w,h,1)
-	--gl.glDispatchCompute(1,1,1)
-	--gl.glDispatchCompute(8,8,1)
+	gl.glDispatchCompute(math.ceil(w / localSize.x), math.ceil(h / localSize.y), 1)
 	
-	--gl.glMemoryBarrier(gl.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT)
-	gl.glMemoryBarrier(gl.GL_ALL_BARRIER_BITS)
+	gl.glMemoryBarrier(gl.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT)
+	--gl.glMemoryBarrier(gl.GL_ALL_BARRIER_BITS)
 	
 	--srcTex:unbindImage(1)
 	--dstTex:unbindImage(0)
