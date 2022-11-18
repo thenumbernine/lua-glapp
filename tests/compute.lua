@@ -3,6 +3,7 @@
 local ffi = require 'ffi'
 local template = require 'template'
 local class = require 'ext.class'
+local table = require 'ext.table'
 local GLApp = require 'glapp'
 local gl = require 'gl'
 local glreport = require 'gl.report'
@@ -93,14 +94,16 @@ void main() {
 
 	self.computeShader:use()
 
-	self.computeShader:bindImage(0, dstTex, gl.GL_RGBA32F, gl.GL_WRITE_ONLY)
-	-- ... hmm, format deserves a connectio with the detected uniform-type-from-program
-	-- so maybe glBindImageTexture should be a function of the program and not of the texture?
-	-- or maybe both: self.computeShader:bindImageTexture(0, dstTex)
+	-- TODO how do I get the uniform's read/write access, or its format?
+	-- or do I have to input that twice, both in the shader code as its glsl-format and in the glBindImageTexture call as a gl enum?
 
+	self.computeShader:bindImage(0, dstTex, gl.GL_RGBA32F, gl.GL_WRITE_ONLY)
 	self.computeShader:bindImage(1, srcTex, gl.GL_RGBA32F, gl.GL_READ_ONLY)
 
-	gl.glDispatchCompute(math.ceil(w / localSize.x), math.ceil(h / localSize.y), 1)
+	gl.glDispatchCompute(
+		math.ceil(w / tonumber(localSize.x)),
+		math.ceil(h / tonumber(localSize.y)),
+		1)
 	
 	gl.glMemoryBarrier(gl.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT)
 	--gl.glMemoryBarrier(gl.GL_ALL_BARRIER_BITS)
@@ -109,6 +112,16 @@ void main() {
 	--dstTex:unbindImage(0)
 	self.computeShader:useNone()
 	glreport'here'
+
+--[[
+	for _,uniform in ipairs(self.computeShader.uniforms) do
+		print(require 'ext.tolua'(uniform))
+	end
+--]]
+--[[
+	{arraySize=1, loc=0, name="dstTex", setters={glsltype="image2D"}, type=gl.GL_IMAGE_2D}
+	{arraySize=1, loc=1, name="srcTex", setters={glsltype="image2D"}, type=gl.GL_IMAGE_2D}
+--]]
 
 	srcTex:toCPU(img.buffer, 0)
 	srcTex:unbind()
