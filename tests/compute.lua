@@ -17,20 +17,12 @@ function App:initGL(...)
 		App.super.initGL(self, ...)
 	end
 
-	local function geti3(pname)
-		local v = vec3i()
-		gl.glGetIntegeri_v(pname, 0, v.s+0)
-		gl.glGetIntegeri_v(pname, 1, v.s+1)
-		gl.glGetIntegeri_v(pname, 2, v.s+2)
-		return v
-	end
-
 	-- each global size dim must be <= this
-	local maxComputeWorkGroupCount = geti3(gl.GL_MAX_COMPUTE_WORK_GROUP_COUNT)
+	local maxComputeWorkGroupCount = GLProgram:get3'GL_MAX_COMPUTE_WORK_GROUP_COUNT'
 	print('GL_MAX_COMPUTE_WORK_GROUP_COUNT = '..maxComputeWorkGroupCount)
 
 	-- each local size dim must be <= this
-	local maxComputeWorkGroupSize = geti3(gl.GL_MAX_COMPUTE_WORK_GROUP_SIZE)
+	local maxComputeWorkGroupSize = GLProgram:get3'GL_MAX_COMPUTE_WORK_GROUP_SIZE'
 	print('GL_MAX_COMPUTE_WORK_GROUP_SIZE = '..maxComputeWorkGroupSize)
 
 	-- the product of all local size dims must be <= this
