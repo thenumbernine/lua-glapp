@@ -112,8 +112,8 @@ void main() {
 end
 
 
-local modelViewMatrix = matrix_ffi.zeros(4,4)
-local projectionMatrix = matrix_ffi.zeros(4,4)
+local modelViewMatrix = matrix_ffi.zeros{4,4}
+local projectionMatrix = matrix_ffi.zeros{4,4}
 
 function Test:update()
 	Test.super.update(self)
