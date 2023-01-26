@@ -1,5 +1,6 @@
 #!/usr/bin/env luajit
 require 'ext'
+local class = require 'ext.class'
 local ffi = require 'ffi'
 local gl = require 'ffi.OpenGL'
 class(require 'glapp', {

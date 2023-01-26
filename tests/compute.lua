@@ -3,7 +3,6 @@
 local ffi = require 'ffi'
 local template = require 'template'
 local class = require 'ext.class'
-local table = require 'ext.table'
 local GLApp = require 'glapp'
 local gl = require 'gl'
 local glreport = require 'gl.report'
@@ -51,14 +50,14 @@ function App:initGL(...)
 		generateMipmap = true,
 	}
 	glreport'here'
-	
+
 	local img = Image(w, h, 4, 'float', function(i,j) return 0,0,0,1 end)
 	local dstTex = GLTex2D{
 		internalFormat = gl.GL_RGBA32F,
 		width = w,
 		height = h,
 		format = gl.GL_RGBA,
-		type = gl.GL_FLOAT,	
+		type = gl.GL_FLOAT,
 		data = img.buffer,	-- can data be null?
 		minFilter = gl.GL_LINEAR,
 		magFilter = gl.GL_LINEAR,
@@ -104,10 +103,10 @@ void main() {
 		math.ceil(w / tonumber(localSize.x)),
 		math.ceil(h / tonumber(localSize.y)),
 		1)
-	
+
 	gl.glMemoryBarrier(gl.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT)
 	--gl.glMemoryBarrier(gl.GL_ALL_BARRIER_BITS)
-	
+
 	--srcTex:unbindImage(1)
 	--dstTex:unbindImage(0)
 	self.computeShader:useNone()

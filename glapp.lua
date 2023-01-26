@@ -40,8 +40,7 @@ if addWGL then
 
 	ffi.cdef('void* wglGetProcAddress(const char*);')
 	for _,line in ipairs(string.split(string.trim(gl.code),'[\r\n]')) do
-		local line = line
-		local returnType, func, params, cdef
+		local returnType, func, params
 		xpcall(function()
 			if line ~= '' then
 				local rest = line:match'^extern%s+(.*)$'
@@ -60,7 +59,6 @@ if addWGL then
 			print('returnType = ', returnType)
 			print('func = ', func)
 			print('params = ', params)
-			print('cdef = ', cdef)
 			io.stderr:write(err..'\n'..debug.traceback())
 		end)
 	end
@@ -145,12 +143,12 @@ function GLApp:run()
 				gl[func] = ffi.new('PFN'..func:upper()..'PROC', gl.wglGetProcAddress(func))
 			end
 		end
-		
+
 		sdl.SDL_SetWindowSize(self.window, self.width, self.height)
 		gl.glViewport(0, 0, self.width, self.height)
 
 		if self.initGL then self:initGL(gl, 'gl') end
-	
+
 		repeat
 			while sdl.SDL_PollEvent(eventPtr) > 0 do
 				if eventPtr[0].type == sdl.SDL_QUIT then
@@ -187,9 +185,9 @@ function GLApp:run()
 					self:event(eventPtr[0], eventPtr)
 				end
 			end
-			
+
 			if self.update then self:update() end
-		
+
 --[[ screen
 			sdl.SDL_GL_SwapBuffers()
 --]]
@@ -197,14 +195,14 @@ function GLApp:run()
 			sdl.SDL_GL_SwapWindow(self.window)
 --]]
 		until self.done
-		
+
 	end, function(err)
 		print(err)
 		print(debug.traceback())
 	end)
 
 	if self.exit then self:exit() end
-	
+
 	sdl.SDL_GL_DeleteContext(self.sdlCtx)
 	sdl.SDL_DestroyWindow(self.window);
 	sdl.SDL_Quit()

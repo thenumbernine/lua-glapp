@@ -12,7 +12,7 @@ ImGuiApp = result and ImGuiApp
 return function(cl)
 	-- if no class is specified then assume the class is GLApp by default
 	cl = cl or require 'glapp'
-	
+
 	cl = class(cl)
 
 	-- make sure we have self.view == a View object
@@ -24,9 +24,9 @@ return function(cl)
 
 	function cl:init(...)
 		cl.super.init(self, ...)
-		
+
 		self.mouse = self.mouse or Mouse()
-		
+
 		self.leftShiftDown = false
 		self.rightShiftDown = false
 		self.leftGuiDown = false
@@ -42,11 +42,11 @@ return function(cl)
 		end
 
 		local canHandleMouse = true
-		local canHandleKeyboard = true
+		--local canHandleKeyboard = true
 		if ImGuiApp and ImGuiApp:isa(self) then
 			local ig = require 'imgui'
 			canHandleMouse = not ig.igGetIO()[0].WantCaptureMouse
-			canHandleKeyboard = not ig.igGetIO()[0].WantCaptureKeyboard
+			--canHandleKeyboard = not ig.igGetIO()[0].WantCaptureKeyboard
 		end
 
 		if self.mouse then	-- event() is called before init()
@@ -56,7 +56,7 @@ return function(cl)
 		local shiftDown = self.leftShiftDown or self.rightShiftDown
 		local guiDown = self.leftGuiDown or self.rightGuiDown
 		local altDown = self.leftAltDown or self.rightAltDown
-		if event.type == sdl.SDL_MOUSEMOTION 
+		if event.type == sdl.SDL_MOUSEMOTION
 		or event.type == sdl.SDL_MOUSEWHEEL
 		then
 			if canHandleMouse then

@@ -2,8 +2,8 @@
 local ffi = require 'ffi'
 
 local gl = require 'gl'
---[[ 
-ubuntu 20.04 
+--[[
+ubuntu 20.04
 valgrind luajit-openresty-2.1.0-beta3-debug
 ...finds a leak from the previous line:
 
@@ -44,7 +44,7 @@ function Test:update()
 
 	local t = sdl.SDL_GetTicks() * 1e-3
 	gl.glRotatef(t * 30, 0, 1, 0)
-	
+
 	gl.glBegin(gl.GL_TRIANGLES)
 	gl.glColor3f(1, 0, 0)
 	gl.glVertex3f(-5, -4, 0)
