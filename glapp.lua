@@ -40,11 +40,10 @@ if addWGL then
 
 	ffi.cdef('void* wglGetProcAddress(const char*);')
 	for _,line in ipairs(string.split(string.trim(gl.code),'[\r\n]')) do
-		local line = line
-		local returnType, func, params, cdef
+		local returnType, func, params
 		xpcall(function()
 			if line ~= '' then
-				local rest = line:match'^extern%s+(.*)$' 
+				local rest = line:match'^extern%s+(.*)$'
 				if rest then
 					-- looks like the windows gl.h for v1.1 doesn't use 'extern' while the glext.h does
 					-- and since we're fixing windows glext.h, how about we just skip the non-externs
@@ -56,11 +55,10 @@ if addWGL then
 				end
 			end
 		end, function(err)
-			print('line = ', line)			
+			print('line = ', line)
 			print('returnType = ', returnType)
 			print('func = ', func)
 			print('params = ', params)
-			print('cdef = ', cdef)
 			io.stderr:write(err..'\n'..debug.traceback())
 		end)
 	end
@@ -99,7 +97,7 @@ GLApp.height = 480
 
 function GLApp:run()
 	sdlAssertZero(sdl.SDL_Init(self.sdlInitFlags))
-	xpcall(function()		
+	xpcall(function()
 		if not self.gl then
 			self.gl = require 'gl'
 		end
@@ -131,8 +129,8 @@ function GLApp:run()
 				sdl.SDL_WINDOW_OPENGL,
 				sdl.SDL_WINDOW_RESIZABLE,
 				sdl.SDL_WINDOW_SHOWN)))
-		self.context = sdlAssertNonNull(sdl.SDL_GL_CreateContext(self.window))
---]]	
+		self.sdlCtx = sdlAssertNonNull(sdl.SDL_GL_CreateContext(self.window))
+--]]
 		--sdl.SDL_EnableKeyRepeat(0,0)
 		sdlAssertZero(sdl.SDL_GL_SetSwapInterval(0))
 
@@ -145,12 +143,12 @@ function GLApp:run()
 				gl[func] = ffi.new('PFN'..func:upper()..'PROC', gl.wglGetProcAddress(func))
 			end
 		end
-		
+
 		sdl.SDL_SetWindowSize(self.window, self.width, self.height)
 		gl.glViewport(0, 0, self.width, self.height)
 
 		if self.initGL then self:initGL(gl, 'gl') end
-	
+
 		repeat
 			while sdl.SDL_PollEvent(eventPtr) > 0 do
 				if eventPtr[0].type == sdl.SDL_QUIT then
@@ -187,9 +185,9 @@ function GLApp:run()
 					self:event(eventPtr[0], eventPtr)
 				end
 			end
-			
+
 			if self.update then self:update() end
-		
+
 --[[ screen
 			sdl.SDL_GL_SwapBuffers()
 --]]
@@ -197,17 +195,53 @@ function GLApp:run()
 			sdl.SDL_GL_SwapWindow(self.window)
 --]]
 		until self.done
-		
+
 	end, function(err)
 		print(err)
 		print(debug.traceback())
 	end)
 
 	if self.exit then self:exit() end
-	
-	sdl.SDL_GL_DeleteContext(self.context)
+
+	sdl.SDL_GL_DeleteContext(self.sdlCtx)
 	sdl.SDL_DestroyWindow(self.window);
 	sdl.SDL_Quit()
+end
+
+--[[
+This is a common feature so I'll put it here.
+It is based on Image, but I'll only require() Image within the function so GLApp itself doesn't depend on Image.
+I put it here vs lua-opengl because it also depends on GLApp.width and .height, so ultimately it is dependent on GLApp.
+It uses a .screenshotContext field for caching the Image buffer of the read pixels, and the buffer for flipping them before saving the screenshot.
+--]]
+function GLApp:screenshotToFile(filename)
+	local Image = require 'image'
+	local gl = self.gl
+	local w, h = self.width, self.height
+
+	self.screenshotContext = self.screenshotContext or {}
+	local ssimg = self.screenshotContext.ssimg
+	local ssflipped = self.screenshotContext.ssflipped
+	if ssimg then
+		if w ~= ssimg.width or h ~= ssimg.height then
+			ssimg = nil
+			ssflipped = nil
+		end
+	end
+	-- hmm, I'm having trouble with anything but RGBA ...
+	if not ssimg then
+		ssimg = Image(w, h, 3, 'unsigned char')
+		ssflipped = Image(w, h, 3, 'unsigned char')
+		self.screenshotContext.ssimg = ssimg
+		self.screenshotContext.ssflipped = ssflipped
+	end
+	local push = ffi.new('GLint[1]', 0)
+	gl.glGetIntegerv(gl.GL_PACK_ALIGNMENT, push)
+	gl.glPixelStorei(gl.GL_PACK_ALIGNMENT, 1)	-- PACK_ALIGNMENT is for glReadPixels
+	gl.glReadPixels(0, 0, w, h, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, ssimg.buffer)
+	gl.glPixelStorei(gl.GL_PACK_ALIGNMENT, push[0])
+	ssimg:flip(ssflipped)
+	ssflipped:save(filename)
 end
 
 return GLApp

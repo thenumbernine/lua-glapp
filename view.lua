@@ -13,7 +13,7 @@ View.fovY = 90
 
 -- static method applied to GLApp classes
 function View.apply(cl)
-	local cl = class(cl)
+	cl = class(cl)
 	function cl:init(...)
 		cl.super.init(self, ...)
 		self.view = View()
@@ -26,7 +26,7 @@ function View.apply(cl)
 			superUpdate(self, ...)
 		end
 	end
-	
+
 	-- let orbit know this class has a view, so if orbit doesn't find this flag it can call View.apply itself
 	cl.viewApplied = true
 
@@ -58,21 +58,21 @@ end
 function View:getBounds(aspectRatio)
 	if not self.ortho then
 		local tanFovY = math.tan(math.rad(self.fovY / 2))
-		return	
+		return
 			-self.znear * aspectRatio * tanFovY,
-			self.znear * aspectRatio * tanFovY,
+			 self.znear * aspectRatio * tanFovY,
 			-self.znear * tanFovY,
-			self.znear * tanFovY,
-			self.znear,
-			self.zfar
+			 self.znear * tanFovY,
+			 self.znear,
+			 self.zfar
 	else
 		return
-			-aspectRatio * self.orthoSize,
-			aspectRatio * self.orthoSize,
+			-self.orthoSize * aspectRatio,
+			 self.orthoSize * aspectRatio,
 			-self.orthoSize,
-			self.orthoSize,
-			self.znear,
-			self.zfar
+			 self.orthoSize,
+			 self.znear,
+			 self.zfar
 	end
 end
 

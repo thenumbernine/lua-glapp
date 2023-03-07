@@ -29,7 +29,7 @@ function Test:initGL()
 
 
 	local ires = 10
-	local jres = 10 
+	local jres = 10
 	numPts = ires * jres
 	self.vertexCPUData = ffi.new('vec3f_t[?]', numPts)
 	self.colorCPUData = ffi.new('vec3f_t[?]', numPts)
@@ -57,7 +57,7 @@ function Test:initGL()
 		size = numPts * ffi.sizeof'vec3f_t',
 		data = self.colorCPUData,
 	}
-	
+
 	self.attrs = {
 		pos = {
 			buffer = self.vertexGPUData,
@@ -74,7 +74,7 @@ function Test:initGL()
 			offset = 0,
 		},
 	}
-	
+
 	self.shader = GLProgram{
 		vertexCode = [[
 #version 460
@@ -112,18 +112,18 @@ void main() {
 end
 
 
-local modelViewMatrix = matrix_ffi.zeros(4,4)
-local projectionMatrix = matrix_ffi.zeros(4,4)
+local modelViewMatrix = matrix_ffi.zeros{4,4}
+local projectionMatrix = matrix_ffi.zeros{4,4}
 
 function Test:update()
 	Test.super.update(self)
-	
+
 	gl.glClearColor(0, 0, 0, 0)
 	gl.glClear(bit.bor(gl.GL_COLOR_BUFFER_BIT, gl.GL_DEPTH_BUFFER_BIT))
 
 	local t = sdl.SDL_GetTicks() / 1000	-- gettime?
 	gl.glRotatef(.3 * t * 100, 0, 1, 0)
-	
+
 	gl.glGetFloatv(gl.GL_MODELVIEW_MATRIX, modelViewMatrix.ptr)
 	gl.glGetFloatv(gl.GL_PROJECTION_MATRIX, projectionMatrix.ptr)
 
@@ -139,7 +139,7 @@ function Test:update()
 	if self.shader.vao then self.shader.vao:use() end
 	gl.glDrawArrays(gl.GL_POINTS, 0, numPts)
 	if self.shader.vao then self.shader.vao:useNone() end
-	
+
 	self.shader:useNone()
 	gl.glDisable(gl.GL_POINT_SPRITE)
 	gl.glDisable(gl.GL_PROGRAM_POINT_SIZE)
