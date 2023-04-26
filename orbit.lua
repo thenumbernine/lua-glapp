@@ -89,7 +89,7 @@ return function(cl)
 								local aspectRatio = self.width / self.height
 								local fdx = -2 * dx / self.width * self.view.orthoSize * aspectRatio
 								local fdy = 2 * dy / self.height * self.view.orthoSize
-								self.view.pos = self.view.pos + vec3d(fdx, fdy, 0)
+								self.view.pos = self.view.pos + self.view.angle:rotate(vec3d(fdx, fdy, 0))
 							else
 								local magn = math.sqrt(dx * dx + dy * dy)
 								magn = magn * math.tan(math.rad(.5 * self.view.fovY))
