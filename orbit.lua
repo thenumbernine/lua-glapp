@@ -71,36 +71,7 @@ return function(cl)
 				if (self.mouse and self.mouse.leftDown and not guiDown)
 				or event.type == sdl.SDL_MOUSEWHEEL
 				then
-					if shiftDown then
-						if dx ~= 0 or dy ~= 0 then
-							if self.view.ortho then
-								self.view.orthoSize = self.view.orthoSize * math.exp(dy * -.03)
-							else
-								self.view.pos = (self.view.pos - self.view.orbit) * math.exp(dy * -.03) + self.view.orbit
-							end
-						end
-					elseif altDown then
-						local dist = (self.view.pos - self.view.orbit):length()
-						self.view.orbit = self.view.orbit + self.view.angle:rotate(vec3d(-dx,dy,0) * (dist / self.height))
-						self.view.pos = self.view.angle:zAxis() * dist + self.view.orbit
-					else
-						if dx ~= 0 or dy ~= 0 then
-							if self.view.ortho then
-								local aspectRatio = self.width / self.height
-								local fdx = -2 * dx / self.width * self.view.orthoSize * aspectRatio
-								local fdy = 2 * dy / self.height * self.view.orthoSize
-								self.view.pos = self.view.pos + self.view.angle:rotate(vec3d(fdx, fdy, 0))
-							else
-								local magn = math.sqrt(dx * dx + dy * dy)
-								magn = magn * math.tan(math.rad(.5 * self.view.fovY))
-								local fdx = dx / magn
-								local fdy = dy / magn
-								local rotation = quatd():fromAngleAxis(-fdy, -fdx, 0, magn)
-								self.view.angle = (self.view.angle * rotation):normalize()
-								self.view.pos = self.view.angle:zAxis() * (self.view.pos - self.view.orbit):length() + self.view.orbit
-							end
-						end
-					end
+					self:mouseDownEvent(dx, dy, shiftDown, guiDown, altDown)
 				end
 			end
 		elseif event.type == sdl.SDL_KEYUP
@@ -119,6 +90,39 @@ return function(cl)
 				self.leftAltDown = down
 			elseif event.key.keysym.sym == sdl.SDLK_RALT then
 				self.rightAltDown = down
+			end
+		end
+	end
+
+	function cl:mouseDownEvent(dx, dy, shiftDown, guiDown, altDown)
+		if shiftDown then
+			if dx ~= 0 or dy ~= 0 then
+				if self.view.ortho then
+					self.view.orthoSize = self.view.orthoSize * math.exp(dy * -.03)
+				else
+					self.view.pos = (self.view.pos - self.view.orbit) * math.exp(dy * -.03) + self.view.orbit
+				end
+			end
+		elseif altDown then
+			local dist = (self.view.pos - self.view.orbit):length()
+			self.view.orbit = self.view.orbit + self.view.angle:rotate(vec3d(-dx,dy,0) * (dist / self.height))
+			self.view.pos = self.view.angle:zAxis() * dist + self.view.orbit
+		else
+			if dx ~= 0 or dy ~= 0 then
+				if self.view.ortho then
+					local aspectRatio = self.width / self.height
+					local fdx = -2 * dx / self.width * self.view.orthoSize * aspectRatio
+					local fdy = 2 * dy / self.height * self.view.orthoSize
+					self.view.pos = self.view.pos + self.view.angle:rotate(vec3d(fdx, fdy, 0))
+				else
+					local magn = math.sqrt(dx * dx + dy * dy)
+					magn = magn * math.tan(math.rad(.5 * self.view.fovY))
+					local fdx = dx / magn
+					local fdy = dy / magn
+					local rotation = quatd():fromAngleAxis(-fdy, -fdx, 0, magn)
+					self.view.angle = (self.view.angle * rotation):normalize()
+					self.view.pos = self.view.angle:zAxis() * (self.view.pos - self.view.orbit):length() + self.view.orbit
+				end
 			end
 		end
 	end
