@@ -8,7 +8,7 @@ local View = class()
 View.znear = .1
 View.zfar = 100
 View.ortho = false
-View.orthoSize = 10
+View.orthoSize = 10	-- TODO use fovY somehow?
 View.fovY = 90
 
 -- static method applied to GLApp classes

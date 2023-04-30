@@ -35,6 +35,13 @@ return function(cl)
 		self.rightAltDown = false
 	end
 
+	function cl:update(...)
+		if self.mouse then	-- event() is called before init()
+			self.mouse:update()
+		end
+		return cl.super.update(self, ...)
+	end
+
 	function cl:event(event, eventPtr)
 		local superEvent = cl.super.event
 		if superEvent then
@@ -47,10 +54,6 @@ return function(cl)
 			local ig = require 'imgui'
 			canHandleMouse = not ig.igGetIO()[0].WantCaptureMouse
 			--canHandleKeyboard = not ig.igGetIO()[0].WantCaptureKeyboard
-		end
-
-		if self.mouse then	-- event() is called before init()
-			self.mouse:update()
 		end
 
 		local shiftDown = self.leftShiftDown or self.rightShiftDown
