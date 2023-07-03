@@ -55,4 +55,4 @@ function Test:update()
 	gl.glEnd()
 end
 
-Test():run()
+return Test():run()

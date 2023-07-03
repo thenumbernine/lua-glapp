@@ -146,4 +146,4 @@ function Test:update()
 	gl.glDisable(gl.GL_DEPTH_TEST)
 end
 
-Test():run()
+return Test():run()

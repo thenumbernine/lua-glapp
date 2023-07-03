@@ -1,6 +1,5 @@
 #!/usr/bin/env luajit
-
-require'glapp'():run()
+return require'glapp'():run()
 --[[
 ubuntu 20.04
 valgrind luajit-openresty-2.1.0-beta3-debug
