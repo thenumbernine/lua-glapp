@@ -7,10 +7,47 @@ ffi_OpenGL = nil  -- for desktop GL
 --ffi_OpenGL = 'ffi.OpenGLES1'  -- for GLES1
 --ffi_OpenGL = 'ffi.OpenGLES2'    -- for GLES2
 
+local egl = require 'ffi.EGL'
 local gl = require 'gl'
 local App = require 'glapp':subclass()
 App.gl = gl
 function App:initGL()
+	-- how do I find GLES version?  cuz GL doen't show it ...
+	-- GLES/OpenGLES1.h has GL_VERSION, but GL_VERSION returns the same as it does for non-ES ...
+	-- [[ can EGL version help?
+	-- https://registry.khronos.org/EGL/sdk/docs/man/html/eglIntro.xhtml
+	-- seems no
+	local display = egl.eglGetDisplay(egl.EGL_DEFAULT_DISPLAY)
+	print('display', eglDisplay)
+	egl.eglInitialize(display, nil, nil)
+	local attributeListSrc = {egl.EGL_RED_SIZE, 1,
+		egl.EGL_GREEN_SIZE, 1,
+		egl.EGL_BLUE_SIZE, 1,
+		egl.EGL_NONE
+	}
+	local attributeList = ffi.new('EGLint[?]', #attributeListSrc)
+	for i=1,#attributeListSrc do
+		attributeList[i-1] = attributeListSrc[i]
+	end
+	local pconfig = ffi.new('EGLConfig[1]')
+	local pnumConfig = ffi.new('EGLint[1]')
+	egl.eglChooseConfig(display, attributeList, pconfig, 1, pnumConfig);
+	local context = egl.eglCreateContext(display, config, egl.EGL_NO_CONTEXT, nil)
+	print()
+	--]]
+
+	for _,field in ipairs{
+		'EGL_CLIENT_APIS',
+		'EGL_VENDOR',
+		'EGL_VERSION',
+		'EGL_EXTENSIONS',
+	} do
+		local strptr = egl.eglQueryString(egl.EGL_NO_DISPLAY, egl[field])
+		local str = strptr ~= nil and ffi.string(strptr) or 'null'
+		print(field, str)
+
+	end
+
 	for _,field in ipairs{
 		'GL_VENDOR',
 		'GL_RENDERER',
