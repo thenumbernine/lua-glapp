@@ -18,7 +18,6 @@ local colors = ffi.new('float[9]',
 )
 
 local Test = require 'glapp.orbit'()
-Test.gl = gl
 Test.title = "Spinning Triangle"
 	
 Test.viewDist = 20
