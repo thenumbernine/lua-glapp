@@ -132,9 +132,9 @@ function GLApp:run()
 		self.sdlCtx = sdlAssertNonNull(sdl.SDL_GL_CreateContext(self.window))
 --]]
 		--sdl.SDL_EnableKeyRepeat(0,0)
-		sdlAssertZero(sdl.SDL_GL_SetSwapInterval(0))
-
-		--gl.glUseProgram(0)
+		--sdlAssertZero( -- assert not really required, and it fails on raspberry pi, so ...
+		sdl.SDL_GL_SetSwapInterval(0)
+		--)
 
 		-- now that gl is loaded, if we're windows then we need to load extensions
 		if addWGL then
