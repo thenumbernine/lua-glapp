@@ -11,6 +11,9 @@ View.ortho = false
 View.orthoSize = 10	-- TODO use fovY somehow?
 View.fovY = 90
 
+-- set this to 'true' on the class before construction , or as a ctor arg
+View.useBuiltinMatrixMath = false
+
 -- static method applied to GLApp classes
 function View.apply(cl)
 	cl = class(cl)
@@ -47,6 +50,16 @@ function View:init(args)
 		self.orbit = vec3d(0,0,0)	-- orbit center
 		self.angle = quatd(0,0,0,1)
 	end
+
+	if args and args.useBuiltinMatrixMath ~= nil then
+		self.useBuiltinMatrixMath = args.useBuiltinMatrixMath
+	end
+	if self.useBuiltinMatrixMath then
+		local matrix = require 'matrix.ffi'
+		self.projMat = matrix({4,4}, 'float'):zeros():setIdent()
+		self.mvMat = matrix({4,4}, 'float'):zeros():setIdent()
+		self.mvProjMat = matrix({4,4}, 'float'):zeros():setIdent()
+	end
 end
 
 function View:setup(aspectRatio)
@@ -77,21 +90,35 @@ function View:getBounds(aspectRatio)
 end
 
 function View:setupProjection(aspectRatio)
-	gl.glMatrixMode(gl.GL_PROJECTION)
-	gl.glLoadIdentity()
-	if not self.ortho then
-		gl.glFrustum(self:getBounds(aspectRatio))
+	if not self.useBuiltinMatrixMath then
+		gl.glMatrixMode(gl.GL_PROJECTION)
+		gl.glLoadIdentity()
+		if not self.ortho then
+			gl.glFrustum(self:getBounds(aspectRatio))
+		else
+			gl.glOrtho(self:getBounds(aspectRatio))
+		end
 	else
-		gl.glOrtho(self:getBounds(aspectRatio))
+		if not self.ortho then
+			self.projMat:setFrustum(self:getBounds(aspectRatio))
+		else
+			self.projMat:setOrtho(self:getBounds(aspectRatio))
+		end
 	end
 end
 
 function View:setupModelView()
-	gl.glMatrixMode(gl.GL_MODELVIEW)
-	gl.glLoadIdentity()
-	local aa = self.angle:conjugate():toAngleAxis()
-	gl.glRotated(aa.w, aa.x, aa.y, aa.z)
-	gl.glTranslated(-self.pos.x, -self.pos.y, -self.pos.z)
+	if not self.useBuiltinMatrixMath then
+		gl.glMatrixMode(gl.GL_MODELVIEW)
+		gl.glLoadIdentity()
+		local aa = self.angle:conjugate():toAngleAxis()
+		gl.glRotated(aa.w, aa.x, aa.y, aa.z)
+		gl.glTranslated(-self.pos.x, -self.pos.y, -self.pos.z)
+	else
+		local aa = self.angle:conjugate():toAngleAxis()
+		self.mvMat:setRotate(aa.w, aa.x, aa.y, aa.z)
+			:applyTranslate(-self.pos.x, -self.pos.y, -self.pos.z)
+	end
 end
 
 return View

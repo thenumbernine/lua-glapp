@@ -23,6 +23,7 @@ build = {
       ["glapp.tests.minimal"] = "tests/minimal.lua",
       ["glapp.tests.pointtest"] = "tests/pointtest.lua",
       ["glapp.tests.test"] = "tests/test.lua",
+      ["glapp.tests.test_es"] = "tests/test_es.lua",
       ["glapp.view"] = "view.lua"
    },
 }
