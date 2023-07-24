@@ -3,14 +3,14 @@
 require 'ext'
 local ffi = require 'ffi'
 
-ffi_OpenGL = nil  -- for desktop GL
---ffi_OpenGL = 'ffi.OpenGLES1'  -- for GLES1
---ffi_OpenGL = 'ffi.OpenGLES2'    -- for GLES2
+-- specify GL version first:
+local gl = require 'gl.setup'()	-- for desktop GL
+--local gl = require 'gl.setup' 'ffi.OpenGLES1'	-- for GLES1 ... but GLES1 has no shaders afaik?
+--local gl = require 'gl.setup' 'ffi.OpenGLES2'	-- for GLES2
+--local gl = require 'gl.setup' 'ffi.OpenGLES3'	-- for GLES3
 
 local egl = require 'ffi.EGL'
-local gl = require 'gl'
 local App = require 'glapp':subclass()
-App.gl = gl
 function App:initGL()
 	-- how do I find GLES version?  cuz GL doen't show it ...
 	-- GLES/OpenGLES1.h has GL_VERSION, but GL_VERSION returns the same as it does for non-ES ...
