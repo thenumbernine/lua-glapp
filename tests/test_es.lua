@@ -1,6 +1,6 @@
 #!/usr/bin/env luajit
 local ffi = require 'ffi'
-local gl = require 'gl.setup' 'ffi.OpenGLES3'
+local gl = require 'gl.setup' (... or 'ffi.OpenGLES3')
 local getTime = require 'ext.timer'.getTime
 
 require 'glapp.view'.useBuiltinMatrixMath = true		-- don't use glMatrix* calls
@@ -29,10 +29,32 @@ function Test:initGL()
 	print'SDL_GetVersion:'
 	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
 	
+	-- Supported versions are: 1.10, 1.20, 1.30, 1.40, 1.50, 3.30, 4.00, 4.10, 4.20, 4.30, 4.40, 4.50, 4.60, 1.00 ES, 3.00 ES, 3.10 ES, and 3.20 ES
+	-- es versions:
+	--local glslversion = '320 es'	-- works
+	--local glslversion = '310 es'	-- works
+	local glslversion = '300 es'	-- works
+	--local glslversion = '100'	-- fails
+	-- non-es versions:
+	--local glslversion = '460'	-- works
+	--local glslversion = '450'	-- works
+	--local glslversion = '440'	-- works
+	--local glslversion = '430'	-- works
+	--local glslversion = '420'	-- works
+	--local glslversion = '410'	-- works
+	--local glslversion = '400'	-- works
+	--local glslversion = '330'	-- works
+	--local glslversion = '150'	-- fails
+	--local glslversion = '140'	-- fails
+	--local glslversion = '130'	-- fails
+	--local glslversion = '120'	-- fails
+	--local glslversion = '110'	-- fails
+
+
 	-- default shader
 	self.shader = require 'gl.program'{
-		vertexCode = [[
-#version 320 es
+		vertexCode = [[#version ]]..glslversion..[[
+
 precision highp float;
 layout(location=0) in vec2 vertex;
 layout(location=1) in vec4 color;
@@ -43,8 +65,8 @@ void main() {
 	gl_Position = mvProjMat * vec4(vertex, 0., 1.);
 }
 ]],
-			fragmentCode = [[
-#version 320 es
+			fragmentCode = [[#version ]]..glslversion..[[
+
 precision highp float;
 in vec4 colorv;
 out vec4 fragColor;
