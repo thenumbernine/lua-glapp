@@ -5,11 +5,11 @@ local ffi = require 'ffi'
 
 -- specify GL version first:
 local gl = require 'gl.setup'()	-- for desktop GL
---local gl = require 'gl.setup' 'ffi.OpenGLES1'	-- for GLES1 ... but GLES1 has no shaders afaik?
---local gl = require 'gl.setup' 'ffi.OpenGLES2'	-- for GLES2
---local gl = require 'gl.setup' 'ffi.OpenGLES3'	-- for GLES3
+--local gl = require 'gl.setup' 'OpenGLES1'	-- for GLES1 ... but GLES1 has no shaders afaik?
+--local gl = require 'gl.setup' 'OpenGLES2'	-- for GLES2
+--local gl = require 'gl.setup' 'OpenGLES3'	-- for GLES3
 
-local egl = require 'ffi.EGL'
+local egl = require 'ffi.req' 'EGL'
 local App = require 'glapp':subclass()
 function App:initGL()
 	-- how do I find GLES version?  cuz GL doen't show it ...

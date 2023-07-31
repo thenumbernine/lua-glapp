@@ -1,6 +1,6 @@
 #!/usr/bin/env luajit
 local ffi = require 'ffi'
-local gl = require 'gl.setup' (... or 'ffi.OpenGLES3')
+local gl = require 'gl.setup' (... or 'OpenGLES3')
 local getTime = require 'ext.timer'.getTime
 
 require 'glapp.view'.useBuiltinMatrixMath = true		-- don't use glMatrix* calls
