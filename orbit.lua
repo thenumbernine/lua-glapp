@@ -1,7 +1,7 @@
 -- This class adds orbit trackball behavior to a GLApp (or GLApp subclass).
 -- It also calls View.apply on the class if it has not yet already been applied to the class
 local class = require 'ext.class'
-local sdl = require 'ffi.sdl'
+local sdl = require 'ffi.req' 'sdl'
 local vec3d = require 'vec-ffi.vec3d'
 local quatd = require 'vec-ffi.quatd'
 local Mouse = require 'glapp.mouse'
