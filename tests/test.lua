@@ -23,7 +23,7 @@ valgrind luajit-openresty-2.1.0-beta3-debug
 ==$PID==    by 0x4011B89: call_init.part.0 (dl-init.c:72)
 --]]
 
-local sdl = require 'ffi.sdl'
+local sdl = require 'ffi.req' 'sdl'
 
 local Test = require 'glapp.orbit'()
 

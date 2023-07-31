@@ -1,6 +1,6 @@
 #!/usr/bin/env luajit
 local ffi = require 'ffi'
-local sdl = require 'ffi.sdl'
+local sdl = require 'ffi.req' 'sdl'
 local vec3f = require 'vec-ffi.vec3f'
 local gl = require 'gl'
 local GLProgram = require 'gl.program'
