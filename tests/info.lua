@@ -196,34 +196,41 @@ function App:initGL()
 	end)
 	print('GL_VERSION', version)
 
+-- https://registry.khronos.org/OpenGL-Refpages/gl4/html/glGet.xhtml
+-- https://registry.khronos.org/OpenGL-Refpages/es3.0/html/glGet.xhtml
+
 	showInt'GL_ACTIVE_TEXTURE'
 	showDouble2'GL_ALIASED_LINE_WIDTH_RANGE'
+	showDouble2'GL_ALIASED_POINT_SIZE_RANGE'		-- gles 300 but not gl 4 ?
+	showInt'GL_ALPHA_BITS'						-- gles 300 but not gl 4 ?
 	showInt'GL_ARRAY_BUFFER_BINDING'
 	showInt'GL_BLEND'
-	showInt'GL_BLEND_COLOR'	-- getting this causes a segfault upon exit ... gl driver bug?
+	showInt'GL_BLEND_COLOR'						-- getting this causes a segfault upon exit ... gl driver bug?
 	showInt'GL_BLEND_DST_ALPHA'
 	showInt'GL_BLEND_DST_RGB'
 	showInt'GL_BLEND_EQUATION_RGB'
-	showInt'GL_BLEND_EQUATION_ALPHA'
+	showInt'GL_BLEND_EQUATION_ALPHA'			-- gles 300 but not gl 4 ?
 	showInt'GL_BLEND_SRC_ALPHA'
 	showInt'GL_BLEND_SRC_RGB'
-	showInt'GL_COLOR_CLEAR_VALUE'	-- segfault upon exit
-	showInt'GL_COLOR_LOGIC_OP'
+	showInt'GL_BLUE_BITS'						-- gles 300 but not gl 4 ?
+	showInt'GL_COLOR_CLEAR_VALUE'				-- segfault upon exit
+	showInt'GL_COLOR_LOGIC_OP'					-- gl 4 but not gles 300
 	showInt'GL_COLOR_WRITEMASK'
 	showInts('GL_NUM_COMPRESSED_TEXTURE_FORMATS', 'GL_COMPRESSED_TEXTURE_FORMATS')
-	showInt'GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS'	-- segfault upon exit
+	showInt'GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS'	-- gl 4 but not gles 300.  segfault upon exit
 -- and at this point I'm giving up on flagging all getters that cause segfaults  ... 3 out of the first 16 is too much
-	showInt'GL_CONTEXT_FLAGS'
+	showInt'GL_CONTEXT_FLAGS'					-- gl 4 but not gles 300
 	showInt'GL_CULL_FACE'
 	showInt'GL_CULL_FACE_MODE'
 	showInt'GL_CURRENT_PROGRAM'
+	showInt'GL_DEPTH_BITS'						-- gles 300 but not gl 4 ?
 	showInt'GL_DEPTH_CLEAR_VALUE'
 	showInt'GL_DEPTH_FUNC'
 	showInt'GL_DEPTH_RANGE'
 	showInt'GL_DEPTH_TEST'
 	showInt'GL_DEPTH_WRITEMASK'
 	showInt'GL_DITHER'
-	showInt'GL_DOUBLEBUFFER'
+	showInt'GL_DOUBLEBUFFER'					-- gl 4 but not gles 300
 	showInt'GL_DRAW_BUFFER'
 	local maxDrawBuffers = showInt'GL_MAX_DRAW_BUFFERS'
 	--[[
@@ -231,58 +238,66 @@ function App:initGL()
 		showIntIndex('GL_DRAW_BUFFER', i)
 	end
 	--]]
-	showInt'GL_MAX_DUAL_SOURCE_DRAW_BUFFERS'
+	showInt'GL_MAX_DUAL_SOURCE_DRAW_BUFFERS'	-- gl 4 but not gles 300
 	showInt'GL_DRAW_FRAMEBUFFER_BINDING'
 	showInt'GL_READ_FRAMEBUFFER_BINDING'
 	showInt'GL_ELEMENT_ARRAY_BUFFER_BINDING'
 	showInt'GL_FRAGMENT_SHADER_DERIVATIVE_HINT'
+	showInt'GL_FRONT_FACE'						-- gles 300 but not gl 4
+	showInt'GL_GENERATE_MIPMAP_HINT'			-- gles 300 but not gl 4
+	showInt'GL_GREEN_BITS'						-- gles 300 but not gl 4
 	showInt'GL_IMPLEMENTATION_COLOR_READ_FORMAT'
 	showInt'GL_IMPLEMENTATION_COLOR_READ_TYPE'
-	showInt'GL_LINE_SMOOTH'
-	showInt'GL_LINE_SMOOTH_HINT'
+	showInt'GL_LINE_SMOOTH'						-- gl 4 but not gles 300
+	showInt'GL_LINE_SMOOTH_HINT'				-- gl 4 but not gles 300
 	showInt'GL_LINE_WIDTH'
-	showInt'GL_LOGIC_OP_MODE'
+	showInt'GL_LOGIC_OP_MODE'					-- gl 4 but not gles 300
 	showInt'GL_MAJOR_VERSION'
 	showInt'GL_MINOR_VERSION'
 	showInt'GL_MAX_3D_TEXTURE_SIZE'
 	showInt'GL_MAX_ARRAY_TEXTURE_LAYERS'
-	showInt'GL_MAX_CLIP_DISTANCES'
-	showInt'GL_MAX_COLOR_TEXTURE_SAMPLES'
-	showInt'GL_MAX_COMBINED_ATOMIC_COUNTERS'
+	showInt'GL_MAX_COLOR_ATTACHMENTS'			-- gles 300 but not gl 4
+	showInt'GL_MAX_CLIP_DISTANCES'				-- gl 4 but not gles 300
+	showInt'GL_MAX_COLOR_TEXTURE_SAMPLES'				-- gl 4 but not gles 300
+	showInt'GL_MAX_COMBINED_ATOMIC_COUNTERS'				-- gl 4 but not gles 300
 	showInt'GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS'
-	showInt'GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS'
+	showInt'GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS'				-- gl 4 but not gles 300
 	showInt'GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS'
 	showInt'GL_MAX_COMBINED_UNIFORM_BLOCKS'
 	showInt'GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS'
 	showInt'GL_MAX_CUBE_MAP_TEXTURE_SIZE'
-	showInt'GL_MAX_DEPTH_TEXTURE_SAMPLES'
+	showInt'GL_MAX_DEPTH_TEXTURE_SAMPLES'				-- gl 4 but not gles 300
 	showInt'GL_MAX_ELEMENTS_INDICES'
 	showInt'GL_MAX_ELEMENTS_VERTICES'
 	showInt'GL_MAX_FRAGMENT_INPUT_COMPONENTS'
 	showInt'GL_MAX_FRAGMENT_UNIFORM_COMPONENTS'
 	showInt'GL_MAX_FRAGMENT_UNIFORM_VECTORS'
 	showInt'GL_MAX_FRAGMENT_UNIFORM_BLOCKS'
-	showInt'GL_MAX_GEOMETRY_INPUT_COMPONENTS'
-	showInt'GL_MAX_GEOMETRY_OUTPUT_COMPONENTS'
-	showInt'GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS'
-	showInt'GL_MAX_GEOMETRY_UNIFORM_BLOCKS'
-	showInt'GL_MAX_GEOMETRY_UNIFORM_COMPONENTS'
-	showInt'GL_MAX_INTEGER_SAMPLES'
+	showInt'GL_MAX_GEOMETRY_INPUT_COMPONENTS'				-- gl 4 but not gles 300
+	showInt'GL_MAX_GEOMETRY_OUTPUT_COMPONENTS'				-- gl 4 but not gles 300
+	showInt'GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS'				-- gl 4 but not gles 300
+	showInt'GL_MAX_GEOMETRY_UNIFORM_BLOCKS'				-- gl 4 but not gles 300
+	showInt'GL_MAX_GEOMETRY_UNIFORM_COMPONENTS'				-- gl 4 but not gles 300
+	showInt'GL_MAX_INTEGER_SAMPLES'				-- gl 4 but not gles 300
 	showInt'GL_MAX_PROGRAM_TEXEL_OFFSET'
 	showInt'GL_MIN_PROGRAM_TEXEL_OFFSET'
-	showInt'GL_MAX_RECTANGLE_TEXTURE_SIZE'
+	showInt'GL_MAX_RECTANGLE_TEXTURE_SIZE'			-- gl 4 but not gles 300
 	showInt'GL_MAX_RENDERBUFFER_SIZE'
-	showInt'GL_MAX_SAMPLE_MASK_WORDS'
+	showInt'GL_MAX_SAMPLES'						-- gles 300 but not gl 4
+	showInt'GL_MAX_SAMPLE_MASK_WORDS'			-- gl 4 but not gles 300
 	showInt'GL_MAX_SERVER_WAIT_TIMEOUT'
-	showInt'GL_MAX_TEXTURE_BUFFER_SIZE'
+	showInt'GL_MAX_TEXTURE_BUFFER_SIZE'						-- gl 4 but not gles 300
 	showInt'GL_MAX_TEXTURE_IMAGE_UNITS'
 	showDouble'GL_MAX_TEXTURE_LOD_BIAS'
 	showInt'GL_MAX_TEXTURE_SIZE'
+	showInt'GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS'	-- gles 300 but not gl 4
+	showInt'GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS'	-- gles 300 but not gl 4
+	showInt'GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS'	-- gles 300 but not gl 4
 	showInt'GL_MAX_UNIFORM_BUFFER_BINDINGS'
 	showInt'GL_MAX_UNIFORM_BLOCK_SIZE'
 	showInt'GL_MAX_VARYING_COMPONENTS'
 	showInt'GL_MAX_VARYING_VECTORS'
-	showInt'GL_MAX_VARYING_FLOATS'
+	showInt'GL_MAX_VARYING_FLOATS'					-- gl 4 but not gles 300
 	showInt'GL_MAX_VERTEX_ATTRIBS'
 	showInt'GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS'
 	showInt'GL_MAX_VERTEX_UNIFORM_COMPONENTS'
@@ -293,44 +308,50 @@ function App:initGL()
 	showInt'GL_NUM_EXTENSIONS'
 	showInt'GL_NUM_SHADER_BINARY_FORMATS'
 	showInt'GL_PACK_ALIGNMENT'
-	showInt'GL_PACK_IMAGE_HEIGHT'
-	showInt'GL_PACK_LSB_FIRST'
+	showInt'GL_PACK_IMAGE_HEIGHT'			-- gl 4 but not gles 300
+	showInt'GL_PACK_LSB_FIRST'			-- gl 4 but not gles 300
 	showInt'GL_PACK_ROW_LENGTH'
-	showInt'GL_PACK_SKIP_IMAGES'
+	showInt'GL_PACK_SKIP_IMAGES'			-- gl 4 but not gles 300
 	showInt'GL_PACK_SKIP_PIXELS'
 	showInt'GL_PACK_SKIP_ROWS'
-	showInt'GL_PACK_SWAP_BYTES'
+	showInt'GL_PACK_SWAP_BYTES'			-- gl 4 but not gles 300
 	showInt'GL_PIXEL_PACK_BUFFER_BINDING'
 	showInt'GL_PIXEL_UNPACK_BUFFER_BINDING'
-	showInt'GL_POINT_FADE_THRESHOLD_SIZE'
-	showInt'GL_PRIMITIVE_RESTART_INDEX'
+	showInt'GL_POINT_FADE_THRESHOLD_SIZE'			-- gl 4 but not gles 300
+	showInt'GL_PRIMITIVE_RESTART_INDEX'			-- gl 4 but not gles 300
 	showInts('GL_NUM_PROGRAM_BINARY_FORMATS', 'GL_PROGRAM_BINARY_FORMATS')
-	showInt'GL_PROGRAM_PIPELINE_BINDING'
-	showInt'GL_PROGRAM_POINT_SIZE'
-	showInt'GL_PROVOKING_VERTEX'
-	showInt'GL_POINT_SIZE'
-	showDouble'GL_POINT_SIZE_GRANULARITY'
-	showDouble2'GL_POINT_SIZE_RANGE'
+	showInt'GL_PROGRAM_PIPELINE_BINDING'			-- gl 4 but not gles 300
+	showInt'GL_PROGRAM_POINT_SIZE'			-- gl 4 but not gles 300
+	showInt'GL_PROVOKING_VERTEX'			-- gl 4 but not gles 300
+	showInt'GL_POINT_SIZE'			-- gl 4 but not gles 300
+	showDouble'GL_POINT_SIZE_GRANULARITY'			-- gl 4 but not gles 300
+	showDouble2'GL_POINT_SIZE_RANGE'			-- gl 4 but not gles 300
 	showInt'GL_POLYGON_OFFSET_FACTOR'
 	showInt'GL_POLYGON_OFFSET_UNITS'
 	showInt'GL_POLYGON_OFFSET_FILL'
-	showInt'GL_POLYGON_OFFSET_LINE'
-	showInt'GL_POLYGON_OFFSET_POINT'
-	showInt'GL_POLYGON_SMOOTH'
-	showInt'GL_POLYGON_SMOOTH_HINT'
+	showInt'GL_POLYGON_OFFSET_LINE'			-- gl 4 but not gles 300
+	showInt'GL_POLYGON_OFFSET_POINT'			-- gl 4 but not gles 300
+	showInt'GL_POLYGON_SMOOTH'		-- gl 4 but not gles 300
+	showInt'GL_POLYGON_SMOOTH_HINT'		-- gl 4 but not gles 300
+	showInt'GL_PRIMITIVE_RESTART_FIXED_INDEX'	-- gles 300 but not gl 4
+	showInt'GL_RASTERIZER_DISCARD'	-- gles 300 but not gl 4
 	showInt'GL_READ_BUFFER'
+	showInt'GL_RED_BITS'				-- gles 300 but not gl 4
 	showInt'GL_RENDERBUFFER_BINDING'
+	showInt'GL_SAMPLE_ALPHA_TO_COVERAGE'	-- gles 300 but not gl 4
 	showInt'GL_SAMPLE_BUFFERS'
 	showDouble'GL_SAMPLE_COVERAGE_VALUE'
 	showInt'GL_SAMPLE_COVERAGE_INVERT'
-	showInt'GL_SAMPLE_MASK_VALUE'
+	showInt'GL_SAMPLE_COVERAGE'		-- gles 300 but not gl 4
+	showInt'GL_SAMPLE_MASK_VALUE'	-- gl 4 but not gles 300
 	showInt'GL_SAMPLER_BINDING'
 	showInt'GL_SAMPLES'
 	showInt4'GL_SCISSOR_BOX'
 	showInt'GL_SCISSOR_TEST'
+	showInt'GL_SHADER_BINARY_FORMATS'	-- gles 300 but not gl 4
 	showInt'GL_SHADER_COMPILER'
-	local maxShaderStorageBufferBindings = showInt'GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS'
-	showInt'GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT'
+	local maxShaderStorageBufferBindings = showInt'GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS'	-- gl 4 but not gles 300
+	showInt'GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT'	-- gl 4 but not gles 300
 	if type(maxShaderStorageBufferBindings) ~= 'string' then
 		for i=0,maxShaderStorageBufferBindings-1 do
 			--showIntIndex('GL_SHADER_STORAGE_BUFFER_BINDING', i)	-- can be indexed, but whats the index range?
@@ -342,8 +363,8 @@ function App:initGL()
 			--showInt64Index('GL_SHADER_STORAGE_BUFFER_SIZE', i)	-- can be indexed, but whats the index range?
 		end
 	end
-	showInt'GL_SMOOTH_LINE_WIDTH_RANGE'
-	showInt'GL_SMOOTH_LINE_WIDTH_GRANULARITY'
+	showInt'GL_SMOOTH_LINE_WIDTH_RANGE'			-- gl 4 but not gles 300
+	showInt'GL_SMOOTH_LINE_WIDTH_GRANULARITY'			-- gl 4 but not gles 300
 	showInt'GL_STENCIL_BACK_FAIL'
 	showInt'GL_STENCIL_BACK_FUNC'
 	showInt'GL_STENCIL_BACK_PASS_DEPTH_FAIL'
@@ -351,6 +372,7 @@ function App:initGL()
 	showInt'GL_STENCIL_BACK_REF'
 	showInt'GL_STENCIL_BACK_VALUE_MASK'
 	showInt'GL_STENCIL_BACK_WRITEMASK'
+	showInt'GL_STENCIL_BITS'				-- gles 300 but not gl 4
 	showInt'GL_STENCIL_CLEAR_VALUE'
 	showInt'GL_STENCIL_FAIL'
 	showInt'GL_STENCIL_FUNC'
@@ -360,16 +382,16 @@ function App:initGL()
 	showInt'GL_STENCIL_TEST'
 	showInt'GL_STENCIL_VALUE_MASK'
 	showInt'GL_STENCIL_WRITEMASK'
-	showInt'GL_STEREO'
+	showInt'GL_STEREO'								-- gl 4 but not gles 300
 	showInt'GL_SUBPIXEL_BITS'
-	showInt'GL_TEXTURE_BINDING_1D'
-	showInt'GL_TEXTURE_BINDING_1D_ARRAY'
+	showInt'GL_TEXTURE_BINDING_1D'	-- gl 4 but not gles 300
+	showInt'GL_TEXTURE_BINDING_1D_ARRAY'	-- gl 4 but not gles 300
 	showInt'GL_TEXTURE_BINDING_2D'
 	showInt'GL_TEXTURE_BINDING_2D_ARRAY'
-	showInt'GL_TEXTURE_BINDING_2D_MULTISAMPLE'
-	showInt'GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY'
+	showInt'GL_TEXTURE_BINDING_2D_MULTISAMPLE'	-- gl 4 but not gles 300
+	showInt'GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY'	-- gl 4 but not gles 300
 	showInt'GL_TEXTURE_BINDING_3D'
-	showInt'GL_TEXTURE_BINDING_BUFFER'
+	showInt'GL_TEXTURE_BINDING_BUFFER'	-- gl 4 but not gles 300
 	showInt'GL_TEXTURE_BINDING_CUBE_MAP'
 	showInt'GL_TEXTURE_BINDING_RECTANGLE'
 	showInt'GL_TEXTURE_COMPRESSION_HINT'
@@ -385,6 +407,9 @@ function App:initGL()
 		for i=0,maxShaderStorageBufferBindings-1 do
 			--showInt64Index('GL_TRANSFORM_FEEDBACK_BUFFER_SIZE', i)
 		end
+		--showInt64Index('GL_TRANSFORM_FEEDBACK_BINDING', i)	-- gles 300 but not gl 4
+		--showIntIndex'GL_TRANSFORM_FEEDBACK_ACTIVE'	-- gles 300 but not gl 4
+		--showIntIndex'GL_TRANSFORM_FEEDBACK_PAUSED'	-- gles 300 but not gl 4
 		-- which is the max for these?
 		for i=0,maxShaderStorageBufferBindings-1 do
 			--showIntIndex('GL_UNIFORM_BUFFER_BINDING', i)
@@ -398,28 +423,28 @@ function App:initGL()
 		if version >= 4.3 then
 			-- which is the max for these?
 			for i=0,maxShaderStorageBufferBindings-1 do
-				--showIntIndex('GL_VERTEX_BINDING_DIVISOR', i)
+				--showIntIndex('GL_VERTEX_BINDING_DIVISOR', i)	-- gl 4 but not gles 300
 			end
 			for i=0,maxShaderStorageBufferBindings-1 do
-				--showIntIndex('GL_VERTEX_BINDING_OFFSET', i)
+				--showIntIndex('GL_VERTEX_BINDING_OFFSET', i)	-- gl 4 but not gles 300
 			end
 			for i=0,maxShaderStorageBufferBindings-1 do
-				--showIntIndex('GL_VERTEX_BINDING_STRIDE', i)
+				--showIntIndex('GL_VERTEX_BINDING_STRIDE', i)	-- gl 4 but not gles 300
 			end
 			for i=0,maxShaderStorageBufferBindings-1 do
-				--showIntIndex('GL_VERTEX_BINDING_BUFFER', i)
+				--showIntIndex('GL_VERTEX_BINDING_BUFFER', i)	-- gl 4 but not gles 300
 			end
 		end
 	end
 	showInt'GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT'
 	showInt'GL_UNPACK_ALIGNMENT'
 	showInt'GL_UNPACK_IMAGE_HEIGHT'
-	showInt'GL_UNPACK_LSB_FIRST'
+	showInt'GL_UNPACK_LSB_FIRST'		-- gl 4 but not gles 300
 	showInt'GL_UNPACK_ROW_LENGTH'
 	showInt'GL_UNPACK_SKIP_IMAGES'
 	showInt'GL_UNPACK_SKIP_PIXELS'
 	showInt'GL_UNPACK_SKIP_ROWS'
-	showInt'GL_UNPACK_SWAP_BYTES'
+	showInt'GL_UNPACK_SWAP_BYTES'		-- gl 4 but not gles 300
 	showInt'GL_VERTEX_ARRAY_BINDING'
 
 	if version >= 4.1 then
