@@ -4,10 +4,12 @@ require 'ext'
 local ffi = require 'ffi'
 
 -- specify GL version first:
-local gl = require 'gl.setup'()	-- for desktop GL
+--local gl = require 'gl.setup'()	-- for desktop GL
 --local gl = require 'gl.setup' 'OpenGLES1'	-- for GLES1 ... but GLES1 has no shaders afaik?
 --local gl = require 'gl.setup' 'OpenGLES2'	-- for GLES2
 --local gl = require 'gl.setup' 'OpenGLES3'	-- for GLES3
+
+local gl = require 'gl.setup'((...))	-- choose at cmdline
 
 local egl = require 'ffi.req' 'EGL'
 local App = require 'glapp':subclass()
@@ -133,7 +135,9 @@ function App:initGL()
 		if not getter then
 			return '... no getter'
 		end
-		getter(assert(gl[name]), index, v)
+		local k = op.safeindex(gl, name)
+		if not k then return '... not defined'  end
+		getter(name, index, v)
 		return range(0,count-1):mapi(function(i)
 			return v[i]
 		end):unpack()
@@ -199,11 +203,37 @@ function App:initGL()
 -- https://registry.khronos.org/OpenGL-Refpages/gl4/html/glGet.xhtml
 -- https://registry.khronos.org/OpenGL-Refpages/es3.0/html/glGet.xhtml
 
-	showInt'GL_ACTIVE_TEXTURE'
-	showDouble2'GL_ALIASED_LINE_WIDTH_RANGE'
-	showDouble2'GL_ALIASED_POINT_SIZE_RANGE'		-- gles 300 but not gl 4 ?
+	showInt'GL_MAJOR_VERSION'
+	showInt'GL_MINOR_VERSION'
+	showInt'GL_RED_BITS'				-- gles 300 but not gl 4
+	showInt'GL_GREEN_BITS'						-- gles 300 but not gl 4
+	showInt'GL_BLUE_BITS'						-- gles 300 but not gl 4 ?
 	showInt'GL_ALPHA_BITS'						-- gles 300 but not gl 4 ?
-	showInt'GL_ARRAY_BUFFER_BINDING'
+	showInt'GL_DEPTH_BITS'						-- gles 300 but not gl 4 ?
+	showInt'GL_STENCIL_BITS'				-- gles 300 but not gl 4
+	showInt'GL_SUBPIXEL_BITS'
+
+	showInt'GL_POINT_FADE_THRESHOLD_SIZE'			-- gl 4 but not gles 300
+	showInt'GL_POINT_SIZE'			-- gl 4 but not gles 300
+	showDouble'GL_POINT_SIZE_GRANULARITY'			-- gl 4 but not gles 300
+	showDouble2'GL_POINT_SIZE_RANGE'			-- gl 4 but not gles 300
+	showDouble2'GL_ALIASED_POINT_SIZE_RANGE'		-- gles 300 but not gl 4 ?
+
+	showInt'GL_LINE_SMOOTH'						-- gl 4 but not gles 300
+	showInt'GL_LINE_SMOOTH_HINT'				-- gl 4 but not gles 300
+	showInt'GL_LINE_WIDTH'
+	showInt'GL_SMOOTH_LINE_WIDTH_RANGE'			-- gl 4 but not gles 300
+	showInt'GL_SMOOTH_LINE_WIDTH_GRANULARITY'			-- gl 4 but not gles 300
+	showDouble2'GL_ALIASED_LINE_WIDTH_RANGE'
+
+	showInt'GL_POLYGON_SMOOTH'		-- gl 4 but not gles 300
+	showInt'GL_POLYGON_SMOOTH_HINT'		-- gl 4 but not gles 300
+	showInt'GL_POLYGON_OFFSET_FACTOR'
+	showInt'GL_POLYGON_OFFSET_UNITS'
+	showInt'GL_POLYGON_OFFSET_FILL'
+	showInt'GL_POLYGON_OFFSET_LINE'			-- gl 4 but not gles 300
+	showInt'GL_POLYGON_OFFSET_POINT'			-- gl 4 but not gles 300
+
 	showInt'GL_BLEND'
 	showInt'GL_BLEND_COLOR'						-- getting this causes a segfault upon exit ... gl driver bug?
 	showInt'GL_BLEND_DST_ALPHA'
@@ -212,18 +242,19 @@ function App:initGL()
 	showInt'GL_BLEND_EQUATION_ALPHA'			-- gles 300 but not gl 4 ?
 	showInt'GL_BLEND_SRC_ALPHA'
 	showInt'GL_BLEND_SRC_RGB'
-	showInt'GL_BLUE_BITS'						-- gles 300 but not gl 4 ?
+
 	showInt'GL_COLOR_CLEAR_VALUE'				-- segfault upon exit
 	showInt'GL_COLOR_LOGIC_OP'					-- gl 4 but not gles 300
 	showInt'GL_COLOR_WRITEMASK'
+
+	showInt'GL_LOGIC_OP_MODE'					-- gl 4 but not gles 300
+
 	showInts('GL_NUM_COMPRESSED_TEXTURE_FORMATS', 'GL_COMPRESSED_TEXTURE_FORMATS')
-	showInt'GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS'	-- gl 4 but not gles 300.  segfault upon exit
 -- and at this point I'm giving up on flagging all getters that cause segfaults  ... 3 out of the first 16 is too much
 	showInt'GL_CONTEXT_FLAGS'					-- gl 4 but not gles 300
 	showInt'GL_CULL_FACE'
 	showInt'GL_CULL_FACE_MODE'
 	showInt'GL_CURRENT_PROGRAM'
-	showInt'GL_DEPTH_BITS'						-- gles 300 but not gl 4 ?
 	showInt'GL_DEPTH_CLEAR_VALUE'
 	showInt'GL_DEPTH_FUNC'
 	showInt'GL_DEPTH_RANGE'
@@ -238,22 +269,26 @@ function App:initGL()
 		showIntIndex('GL_DRAW_BUFFER', i)
 	end
 	--]]
-	showInt'GL_MAX_DUAL_SOURCE_DRAW_BUFFERS'	-- gl 4 but not gles 300
+
+	showInt'GL_ACTIVE_TEXTURE'
+	showInt'GL_ARRAY_BUFFER_BINDING'
 	showInt'GL_DRAW_FRAMEBUFFER_BINDING'
 	showInt'GL_READ_FRAMEBUFFER_BINDING'
 	showInt'GL_ELEMENT_ARRAY_BUFFER_BINDING'
+	showInt'GL_PIXEL_PACK_BUFFER_BINDING'
+	showInt'GL_PIXEL_UNPACK_BUFFER_BINDING'
+	showInt'GL_PROGRAM_PIPELINE_BINDING'			-- gl 4 but not gles 300
+	showInt'GL_RENDERBUFFER_BINDING'
+	showInt'GL_SAMPLER_BINDING'
+
 	showInt'GL_FRAGMENT_SHADER_DERIVATIVE_HINT'
 	showInt'GL_FRONT_FACE'						-- gles 300 but not gl 4
 	showInt'GL_GENERATE_MIPMAP_HINT'			-- gles 300 but not gl 4
-	showInt'GL_GREEN_BITS'						-- gles 300 but not gl 4
 	showInt'GL_IMPLEMENTATION_COLOR_READ_FORMAT'
 	showInt'GL_IMPLEMENTATION_COLOR_READ_TYPE'
-	showInt'GL_LINE_SMOOTH'						-- gl 4 but not gles 300
-	showInt'GL_LINE_SMOOTH_HINT'				-- gl 4 but not gles 300
-	showInt'GL_LINE_WIDTH'
-	showInt'GL_LOGIC_OP_MODE'					-- gl 4 but not gles 300
-	showInt'GL_MAJOR_VERSION'
-	showInt'GL_MINOR_VERSION'
+
+	showInt'GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS'	-- gl 4 but not gles 300.  segfault upon exit
+	showInt'GL_MAX_DUAL_SOURCE_DRAW_BUFFERS'	-- gl 4 but not gles 300
 	showInt'GL_MAX_3D_TEXTURE_SIZE'
 	showInt'GL_MAX_ARRAY_TEXTURE_LAYERS'
 	showInt'GL_MAX_COLOR_ATTACHMENTS'			-- gles 300 but not gl 4
@@ -315,36 +350,19 @@ function App:initGL()
 	showInt'GL_PACK_SKIP_PIXELS'
 	showInt'GL_PACK_SKIP_ROWS'
 	showInt'GL_PACK_SWAP_BYTES'			-- gl 4 but not gles 300
-	showInt'GL_PIXEL_PACK_BUFFER_BINDING'
-	showInt'GL_PIXEL_UNPACK_BUFFER_BINDING'
-	showInt'GL_POINT_FADE_THRESHOLD_SIZE'			-- gl 4 but not gles 300
 	showInt'GL_PRIMITIVE_RESTART_INDEX'			-- gl 4 but not gles 300
 	showInts('GL_NUM_PROGRAM_BINARY_FORMATS', 'GL_PROGRAM_BINARY_FORMATS')
-	showInt'GL_PROGRAM_PIPELINE_BINDING'			-- gl 4 but not gles 300
 	showInt'GL_PROGRAM_POINT_SIZE'			-- gl 4 but not gles 300
 	showInt'GL_PROVOKING_VERTEX'			-- gl 4 but not gles 300
-	showInt'GL_POINT_SIZE'			-- gl 4 but not gles 300
-	showDouble'GL_POINT_SIZE_GRANULARITY'			-- gl 4 but not gles 300
-	showDouble2'GL_POINT_SIZE_RANGE'			-- gl 4 but not gles 300
-	showInt'GL_POLYGON_OFFSET_FACTOR'
-	showInt'GL_POLYGON_OFFSET_UNITS'
-	showInt'GL_POLYGON_OFFSET_FILL'
-	showInt'GL_POLYGON_OFFSET_LINE'			-- gl 4 but not gles 300
-	showInt'GL_POLYGON_OFFSET_POINT'			-- gl 4 but not gles 300
-	showInt'GL_POLYGON_SMOOTH'		-- gl 4 but not gles 300
-	showInt'GL_POLYGON_SMOOTH_HINT'		-- gl 4 but not gles 300
 	showInt'GL_PRIMITIVE_RESTART_FIXED_INDEX'	-- gles 300 but not gl 4
 	showInt'GL_RASTERIZER_DISCARD'	-- gles 300 but not gl 4
 	showInt'GL_READ_BUFFER'
-	showInt'GL_RED_BITS'				-- gles 300 but not gl 4
-	showInt'GL_RENDERBUFFER_BINDING'
 	showInt'GL_SAMPLE_ALPHA_TO_COVERAGE'	-- gles 300 but not gl 4
 	showInt'GL_SAMPLE_BUFFERS'
 	showDouble'GL_SAMPLE_COVERAGE_VALUE'
 	showInt'GL_SAMPLE_COVERAGE_INVERT'
 	showInt'GL_SAMPLE_COVERAGE'		-- gles 300 but not gl 4
 	showInt'GL_SAMPLE_MASK_VALUE'	-- gl 4 but not gles 300
-	showInt'GL_SAMPLER_BINDING'
 	showInt'GL_SAMPLES'
 	showInt4'GL_SCISSOR_BOX'
 	showInt'GL_SCISSOR_TEST'
@@ -363,8 +381,6 @@ function App:initGL()
 			--showInt64Index('GL_SHADER_STORAGE_BUFFER_SIZE', i)	-- can be indexed, but whats the index range?
 		end
 	end
-	showInt'GL_SMOOTH_LINE_WIDTH_RANGE'			-- gl 4 but not gles 300
-	showInt'GL_SMOOTH_LINE_WIDTH_GRANULARITY'			-- gl 4 but not gles 300
 	showInt'GL_STENCIL_BACK_FAIL'
 	showInt'GL_STENCIL_BACK_FUNC'
 	showInt'GL_STENCIL_BACK_PASS_DEPTH_FAIL'
@@ -372,7 +388,6 @@ function App:initGL()
 	showInt'GL_STENCIL_BACK_REF'
 	showInt'GL_STENCIL_BACK_VALUE_MASK'
 	showInt'GL_STENCIL_BACK_WRITEMASK'
-	showInt'GL_STENCIL_BITS'				-- gles 300 but not gl 4
 	showInt'GL_STENCIL_CLEAR_VALUE'
 	showInt'GL_STENCIL_FAIL'
 	showInt'GL_STENCIL_FUNC'
@@ -383,7 +398,6 @@ function App:initGL()
 	showInt'GL_STENCIL_VALUE_MASK'
 	showInt'GL_STENCIL_WRITEMASK'
 	showInt'GL_STEREO'								-- gl 4 but not gles 300
-	showInt'GL_SUBPIXEL_BITS'
 	showInt'GL_TEXTURE_BINDING_1D'	-- gl 4 but not gles 300
 	showInt'GL_TEXTURE_BINDING_1D_ARRAY'	-- gl 4 but not gles 300
 	showInt'GL_TEXTURE_BINDING_2D'
