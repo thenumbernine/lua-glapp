@@ -63,7 +63,8 @@ void main() {
 	-- enable/disable, bind/unbind, and check state with dif shaders bound
 
 	-- is 'enable' saved per-shader?
-	gl.glEnableVertexAttribArray(0)
+	-- glEnableVertexAttribArray is bound globally *or* bound per-VAO
+	-- but not bound per-shader (as uniforms are bound per-shader)
 	
 	-- hmm next question, how to get its status
 	-- typically glGetVertexAttrib is for the currently-bound VAO
@@ -73,9 +74,43 @@ void main() {
 	-- 2nd arg: "vertex attribute parameter to be queried"
 	--GLVertexArray:get'GL_
 	-- more mysteries to be solved.
-	-- [[
 
-	print("shaders[1].attrs.vertex:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", shaders[1].attrs.vertex:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	-- [[
+	print'global state:'
+	print'enable 0 & 1'
+	gl.glEnableVertexAttribArray(0)
+	gl.glEnableVertexAttribArray(1)
+	print("GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+
+	print'disable 0'
+	gl.glDisableVertexAttribArray(0)
+	print("GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+
+	print'enable 0'
+	gl.glEnableVertexAttribArray(0)
+	print("GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	
+	print'creating/enabling vao:'
+	local vao = GLVertexArray{
+		program = shaders[1],
+	}
+	vao:bind()
+	
+	print("GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print'enable 1'
+	gl.glEnableVertexAttribArray(1)
+	print("GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+
+	print'disabling vao:'
+	vao:unbind()
+	print("GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+
 	--]]
 	-- this could double as this in my API
 	-- but I think I'm skipipng the 1st arg ...
