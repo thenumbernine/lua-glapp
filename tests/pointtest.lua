@@ -52,12 +52,12 @@ function Test:initGL()
 	self.vertexGPUData = GLArrayBuffer{
 		size = numPts * ffi.sizeof'vec3f_t',
 		data = self.vertexCPUData,
-	}
+	}:unbind()
 
 	self.colorGPUData = GLArrayBuffer{
 		size = numPts * ffi.sizeof'vec3f_t',
 		data = self.colorCPUData,
-	}
+	}:unbind()
 
 	self.attrs = {
 		pos = {
