@@ -88,15 +88,12 @@ void main() {
 			localSize = localSize,
 		})
 	}
+		-- TODO how do I get the uniform's read/write access, or its format?
+		-- or do I have to input that twice, both in the shader code as its glsl-format and in the glBindImageTexture call as a gl enum?
+		:bindImage(0, dstTex, gl.GL_RGBA32F, gl.GL_WRITE_ONLY)
+		:bindImage(1, srcTex, gl.GL_RGBA32F, gl.GL_READ_ONLY)
+
 	glreport'here'
-
-	self.computeShader:use()
-
-	-- TODO how do I get the uniform's read/write access, or its format?
-	-- or do I have to input that twice, both in the shader code as its glsl-format and in the glBindImageTexture call as a gl enum?
-
-	self.computeShader:bindImage(0, dstTex, gl.GL_RGBA32F, gl.GL_WRITE_ONLY)
-	self.computeShader:bindImage(1, srcTex, gl.GL_RGBA32F, gl.GL_READ_ONLY)
 
 	gl.glDispatchCompute(
 		math.ceil(w / tonumber(localSize.x)),
