@@ -20,18 +20,17 @@ function App:initGL(...)
 
 	-- TODO gl.get() function for global gets
 	-- each global size dim must be <= this
-	local maxComputeWorkGroupCount = GLProgram:get3'GL_MAX_COMPUTE_WORK_GROUP_COUNT'
+	local maxComputeWorkGroupCount = vec3i(GLProgram:get'GL_MAX_COMPUTE_WORK_GROUP_COUNT')
 	print('GL_MAX_COMPUTE_WORK_GROUP_COUNT = '..maxComputeWorkGroupCount)
 
 	-- each local size dim must be <= this
-	local maxComputeWorkGroupSize = GLProgram:get3'GL_MAX_COMPUTE_WORK_GROUP_SIZE'
+	local maxComputeWorkGroupSize = vec3i(GLProgram:get'GL_MAX_COMPUTE_WORK_GROUP_SIZE')
 	print('GL_MAX_COMPUTE_WORK_GROUP_SIZE = '..maxComputeWorkGroupSize)
 
 	-- the product of all local size dims must be <= this
 	-- also, this is >= 1024
-	local maxComputeWorkGroupInvocations = ffi.new('int[1]', 0)
-	gl.glGetIntegerv(gl.GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, maxComputeWorkGroupInvocations)
-	print('GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS = '..maxComputeWorkGroupInvocations[0])
+	local maxComputeWorkGroupInvocations = GLProgram:get'GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS'
+	print('GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS = '..maxComputeWorkGroupInvocations)
 	glreport'here'
 
 	local w, h = 256, 256
