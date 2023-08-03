@@ -52,10 +52,10 @@ function Test:initGL()
 
 
 	-- default shader
+	local glslheader = '#version '..glslversion..'\n'
+		..'precision highp float;\n'
 	self.shader = require 'gl.program'{
-		vertexCode = [[#version ]]..glslversion..[[
-
-precision highp float;
+		vertexCode = glslheader..[[
 layout(location=0) in vec2 vertex;
 layout(location=1) in vec4 color;
 out vec4 colorv;
@@ -65,9 +65,7 @@ void main() {
 	gl_Position = mvProjMat * vec4(vertex, 0., 1.);
 }
 ]],
-			fragmentCode = [[#version ]]..glslversion..[[
-
-precision highp float;
+			fragmentCode = glslheader..[[
 in vec4 colorv;
 out vec4 fragColor;
 void main() {

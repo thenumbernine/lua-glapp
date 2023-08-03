@@ -3,6 +3,7 @@ local ffi = require 'ffi'
 local sdl = require 'ffi.req' 'sdl'
 local vec3f = require 'vec-ffi.vec3f'
 local gl = require 'gl'
+local glreport = require 'gl.report'
 local GLProgram = require 'gl.program'
 local GLArrayBuffer = require 'gl.arraybuffer'
 
@@ -108,7 +109,7 @@ void main() {
 ]],
 		attrs = self.attrs,
 	}
-	self.shader:useNone()
+	:useNone()
 end
 
 
@@ -144,6 +145,8 @@ function Test:update()
 	gl.glDisable(gl.GL_POINT_SPRITE)
 	gl.glDisable(gl.GL_PROGRAM_POINT_SIZE)
 	gl.glDisable(gl.GL_DEPTH_TEST)
+	
+	glreport'here'
 end
 
 return Test():run()
