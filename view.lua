@@ -41,19 +41,18 @@ local function unpack(t)
 end
 
 function View:init(args)
+	self.pos = vec3d(0,0,10)
+	self.orbit = vec3d(0,0,0)	-- orbit center
+	self.angle = quatd(0,0,0,1)
 	if args then
-		self.pos = vec3d(unpack(args.pos))
-		self.orbit = vec3d(unpack(args.orbit))
-		self.angle = quatd(unpack(args.angle))
-	else
-		self.pos = vec3d(0,0,10)
-		self.orbit = vec3d(0,0,0)	-- orbit center
-		self.angle = quatd(0,0,0,1)
+		if args.pos then self.pos = vec3d(unpack(args.pos)) end
+		if args.orbit then self.orbit = vec3d(unpack(args.orbit)) end
+		if args.angle then self.angle = quatd(unpack(args.angle)) end
+		if args.useBuiltinMatrixMath ~= nil then
+			self.useBuiltinMatrixMath = args.useBuiltinMatrixMath
+		end
 	end
 
-	if args and args.useBuiltinMatrixMath ~= nil then
-		self.useBuiltinMatrixMath = args.useBuiltinMatrixMath
-	end
 	if self.useBuiltinMatrixMath then
 		local matrix = require 'matrix.ffi'
 		self.projMat = matrix({4,4}, 'float'):zeros():setIdent()
