@@ -6,6 +6,8 @@ local gl = require 'gl'
 local glreport = require 'gl.report'
 local GLProgram = require 'gl.program'
 local GLArrayBuffer = require 'gl.arraybuffer'
+local GLGeometry = require 'gl.geometry'
+local GLSceneObject = require 'gl.sceneobject'
 
 local matrix_ffi = require 'matrix.ffi'
 matrix_ffi.real = 'float'	-- default matrix_ffi type
@@ -59,23 +61,6 @@ function Test:initGL()
 		data = self.colorCPUData,
 	}:unbind()
 
-	self.attrs = {
-		pos = {
-			buffer = self.vertexGPUData,
-			size = 3,
-			type = gl.GL_FLOAT,
-			stride = ffi.sizeof'vec3f_t',
-			offset = 0,
-		},
-		color = {
-			buffer = self.colorGPUData,
-			size = 3,
-			type = gl.GL_FLOAT,
-			stride = ffi.sizeof'vec3f_t',
-			offset = 0,
-		},
-	}
-
 	self.shader = GLProgram{
 		vertexCode = [[
 #version 460
@@ -107,9 +92,21 @@ void main() {
 	colorf.rg += .5 * d;
 }
 ]],
-		attrs = self.attrs,
+	}:useNone()
+
+	self.geometry = GLGeometry{
+		mode = gl.GL_POINTS,
+		count = numPts,
 	}
-	:useNone()
+
+	self.sceneObj = GLSceneObject{
+		program = self.shader,
+		geometry = self.geometry,
+		attrs = {
+			pos = self.vertexGPUData,
+			color = self.colorGPUData,
+		},
+	}
 end
 
 
@@ -131,17 +128,11 @@ function Test:update()
 	gl.glEnable(gl.GL_DEPTH_TEST)
 	gl.glEnable(gl.GL_PROGRAM_POINT_SIZE)
 	gl.glEnable(gl.GL_POINT_SPRITE)
-	self.shader:use()
-	self.shader:setUniforms{
-		modelViewMatrix = modelViewMatrix.ptr,
-		projectionMatrix = projectionMatrix.ptr,
-	}
 
-	if self.shader.vao then self.shader.vao:use() end
-	gl.glDrawArrays(gl.GL_POINTS, 0, numPts)
-	if self.shader.vao then self.shader.vao:useNone() end
+	self.sceneObj.uniforms.modelViewMatrix = modelViewMatrix.ptr
+	self.sceneObj.uniforms.projectionMatrix = projectionMatrix.ptr
+	self.sceneObj:draw()
 
-	self.shader:useNone()
 	gl.glDisable(gl.GL_POINT_SPRITE)
 	gl.glDisable(gl.GL_PROGRAM_POINT_SIZE)
 	gl.glDisable(gl.GL_DEPTH_TEST)

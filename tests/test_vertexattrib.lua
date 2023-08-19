@@ -49,10 +49,7 @@ void main() {
 	fragColor = vec4(texcoordv, 0., 1.);
 }
 ]],
-			-- creates a vao per shader by default unless otherwise stated..
-			createVAO = false,
-		}
-		:useNone()
+		}:useNone()
 	end)
 
 	for i,sh in ipairs(shaders) do
