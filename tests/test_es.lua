@@ -85,7 +85,7 @@ function Test:update()
 	gl.glClear(gl.GL_COLOR_BUFFER_BIT)
 	
 	local t = getTime()
-	self.view.mvMat:applyRotate(t * 30, 0, 1, 0)
+	self.view.mvMat:applyRotate(math.rad(t * 30), 0, 1, 0)
 	self.view.mvProjMat:mul4x4(self.view.projMat, self.view.mvMat)
 	
 	self.shader:use()

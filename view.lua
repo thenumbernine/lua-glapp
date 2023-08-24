@@ -115,7 +115,7 @@ function View:setupModelView()
 		gl.glTranslated(-self.pos.x, -self.pos.y, -self.pos.z)
 	else
 		local aa = self.angle:conjugate():toAngleAxis()
-		self.mvMat:setRotate(aa.w, aa.x, aa.y, aa.z)
+		self.mvMat:setRotate(math.rad(aa.w), aa.x, aa.y, aa.z)
 			:applyTranslate(-self.pos.x, -self.pos.y, -self.pos.z)
 	end
 end
