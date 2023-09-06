@@ -137,7 +137,7 @@ function App:initGL()
 		end
 		local k = op.safeindex(gl, name)
 		if not k then return '... not defined'  end
-		getter(name, index, v)
+		getter(k, index, v)
 		return range(0,count-1):mapi(function(i)
 			return v[i]
 		end):unpack()
