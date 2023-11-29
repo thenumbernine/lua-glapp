@@ -1,0 +1,117 @@
+#!/usr/bin/env luajit
+local ffi = require 'ffi'
+
+local gl = require 'gl'
+
+local sdl = require 'ffi.req' 'sdl'
+
+local Test = require 'glapp.orbit'()
+
+Test.title = "Spinning Triangle"
+
+function Test:initGL()
+	local version = ffi.new'SDL_version[1]'
+	sdl.SDL_GetVersion(version)
+	print'SDL_GetVersion:'
+	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
+end
+
+function Test:update()
+	Test.super.update(self)
+
+	gl.glClearColor(0, 0, 0, 0)
+	gl.glClear(gl.GL_COLOR_BUFFER_BIT)
+
+	local t = sdl.SDL_GetTicks() * 1e-3
+	gl.glRotatef(t * 30, 0, 1, 0)
+
+	gl.glBegin(gl.GL_TRIANGLES)
+	gl.glColor3f(1, 0, 0)
+	gl.glVertex3f(-5, -4, 0)
+	gl.glColor3f(0, 1, 0)
+	gl.glVertex3f(5, -4, 0)
+	gl.glColor3f(0, 0, 1)
+	gl.glVertex3f(0, 6, 0)
+	gl.glEnd()
+end
+
+local string = require 'ext.string'
+local eventNames = string.split(string.trim[[
+SDL_FIRSTEVENT
+SDL_QUIT
+SDL_APP_TERMINATING
+SDL_APP_LOWMEMORY
+SDL_APP_WILLENTERBACKGROUND
+SDL_APP_DIDENTERBACKGROUND
+SDL_APP_WILLENTERFOREGROUND
+SDL_APP_DIDENTERFOREGROUND
+SDL_WINDOWEVENT
+	SDL_WINDOWEVENT_NONE
+	SDL_WINDOWEVENT_SHOWN
+	SDL_WINDOWEVENT_HIDDEN
+	SDL_WINDOWEVENT_EXPOSED
+	SDL_WINDOWEVENT_MOVED
+	SDL_WINDOWEVENT_RESIZED
+	SDL_WINDOWEVENT_SIZE_CHANGED
+	SDL_WINDOWEVENT_MINIMIZED
+	SDL_WINDOWEVENT_MAXIMIZED
+	SDL_WINDOWEVENT_RESTORED
+	SDL_WINDOWEVENT_ENTER
+	SDL_WINDOWEVENT_LEAVE
+	SDL_WINDOWEVENT_FOCUS_GAINED
+	SDL_WINDOWEVENT_FOCUS_LOST
+	SDL_WINDOWEVENT_CLOSE
+SDL_SYSWMEVENT
+SDL_KEYDOWN
+SDL_KEYUP
+SDL_TEXTEDITING
+SDL_TEXTINPUT
+SDL_KEYMAPCHANGED
+SDL_MOUSEMOTION
+SDL_MOUSEBUTTONDOWN
+SDL_MOUSEBUTTONUP
+SDL_MOUSEWHEEL
+SDL_JOYAXISMOTION
+SDL_JOYBALLMOTION
+SDL_JOYHATMOTION
+SDL_JOYBUTTONDOWN
+SDL_JOYBUTTONUP
+SDL_JOYDEVICEADDED
+SDL_JOYDEVICEREMOVED
+SDL_CONTROLLERAXISMOTION
+SDL_CONTROLLERBUTTONDOWN
+SDL_CONTROLLERBUTTONUP
+SDL_CONTROLLERDEVICEADDED
+SDL_CONTROLLERDEVICEREMOVED
+SDL_CONTROLLERDEVICEREMAPPED
+SDL_FINGERDOWN
+SDL_FINGERUP
+SDL_FINGERMOTION
+SDL_DOLLARGESTURE
+SDL_DOLLARRECORD
+SDL_MULTIGESTURE
+SDL_CLIPBOARDUPDATE
+SDL_DROPFILE
+SDL_AUDIODEVICEADDED
+SDL_AUDIODEVICEREMOVED
+SDL_RENDER_TARGETS_RESET
+SDL_RENDER_DEVICE_RESET
+SDL_USEREVENT
+SDL_LASTEVENT
+]], '\n'):mapi(string.trim):mapi(function(w)
+	return w, ffi.C[w]
+end):setmetatable(nil)
+
+local function nameFor(x)
+	return tostring(eventNames[x] or x)
+end
+
+function Test:event(e)
+	io.write(nameFor(e.type))
+	if e.type == sdl.SDL_WINDOWEVENT then
+		io.write(' ',nameFor(e.window.event))
+	end
+	print()
+end
+
+return Test():run()
