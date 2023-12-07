@@ -53,23 +53,15 @@ function App:initGL(...)
 	gl.glEnable(gl.GL_DEPTH_TEST)
 end
 
--- notice that the order matches global 'sides'
-cubeFaces = {
-	{5,7,3,1};		-- <- each value has the x,y,z in the 0,1,2 bits (off = 0, on = 1)
-	{6,4,0,2};
-	{2,3,7,6};
-	{4,5,1,0};
-	{6,7,5,4};
-	{0,1,3,2};
+-- each value has the x,y,z in the 0,1,2 bits (off = 0, on = 1)
+local cubeFaces = {
+	{5,7,3,1},	-- x+
+	{6,4,0,2},	-- x-
+	{2,3,7,6},	-- y+
+	{4,5,1,0},	-- y-
+	{6,7,5,4},	-- z+
+	{0,1,3,2},	-- z-
 }
-local vec2d = require 'vec-ffi.vec2d'
-local uvs = {
-	vec2d(0,0),
-	vec2d(1,0),
-	vec2d(1,1),
-	vec2d(0,1),
-}
-
 
 function App:update(...)
 	App.super.update(self, ...)
@@ -79,8 +71,36 @@ function App:update(...)
 	self.tex
 		:enable()
 		:bind()
+	gl.glEnable(gl.GL_CULL_FACE)
 	gl.glBegin(gl.GL_QUADS)
 	local s = 1
+	-- [[ using bitvectors
+	for dim=0,2 do
+		for bit2 = 0,1 do	-- plus/minus side
+			for bit1 = 0,1 do	-- v texcoord
+				for bit0 = 0,1 do	-- u texcoord
+					local i2 = bit.bor(
+						bit.bxor(bit0, bit1, bit2),
+						bit.lshift(bit1, 1),
+						bit.lshift(bit2, 2)
+					)
+					-- now rotate i2 by dim-1
+					local i = bit.bor(
+						bit.lshift(bit2, dim),
+						bit.lshift(bit.band(1, i2), (dim+1)%3),
+						bit.lshift(bit.band(1, bit.rshift(i2, 1)), (dim+2)%3)
+					)
+					local x = bit.band(1, i)
+					local y = bit.band(1, bit.rshift(i, 1))
+					local z = bit.band(1, bit.rshift(i, 2))
+					gl.glTexCoord3d(s*(x*2-1),s*(y*2-1),s*(z*2-1))
+					gl.glVertex3d(s*(x*2-1),s*(y*2-1),s*(z*2-1))
+				end
+			end
+		end
+	end
+	--]]
+	--[[ using the 'cubeFaces' table
 	for _,face in ipairs(cubeFaces) do
 		for _,i in ipairs(face) do
 			local x = bit.band(i, 1)
@@ -90,6 +110,7 @@ function App:update(...)
 			gl.glVertex3d(s*(x*2-1),s*(y*2-1),s*(z*2-1))
 		end
 	end
+	--]]
 	gl.glEnd()
 	self.tex
 		:unbind()
