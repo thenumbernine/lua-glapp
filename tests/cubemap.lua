@@ -84,12 +84,20 @@ function App:update(...)
 						bit.lshift(bit1, 1),
 						bit.lshift(bit2, 2)
 					)
-					-- now rotate i2 by dim-1
+					-- now rotate i2 by dim
+					--[=[
 					local i = bit.bor(
-						bit.lshift(bit2, dim),
-						bit.lshift(bit.band(1, i2), (dim+1)%3),
-						bit.lshift(bit.band(1, bit.rshift(i2, 1)), (dim+2)%3)
+						bit.lshift(bit.band(1, i2), (dim+0)%3),
+						bit.lshift(bit.band(1, bit.rshift(i2, 1)), (dim+1)%3),
+						bit.lshift(bit2, (dim+2)%3)
 					)
+					--]=]
+					-- [=[
+					local i = bit.band(7, bit.bor(
+						bit.lshift(i2, dim),
+						bit.rshift(i2, 3 - dim)
+					))
+					--]=]
 					local x = bit.band(1, i)
 					local y = bit.band(1, bit.rshift(i, 1))
 					local z = bit.band(1, bit.rshift(i, 2))
