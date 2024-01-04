@@ -43,8 +43,9 @@ function Mouse:update()
 
 	-- not working ... might need sdl event handling for this (i.e. openglapp)
 	self.dz = 0
-	if bit.band(sdlButtons, bit.lshift(1, sdl.SDL_BUTTON_WHEELUP-1)) ~= 0 then self.dz = self.dz + 1 end
-	if bit.band(sdlButtons, bit.lshift(1, sdl.SDL_BUTTON_WHEELDOWN-1)) ~= 0 then self.dz = self.dz - 1 end
+	-- TODO modern SDL uses SDL_MOUSEWHEEL event ...
+	--if bit.band(sdlButtons, bit.lshift(1, sdl.SDL_BUTTON_WHEELUP-1)) ~= 0 then self.dz = self.dz + 1 end
+	--if bit.band(sdlButtons, bit.lshift(1, sdl.SDL_BUTTON_WHEELDOWN-1)) ~= 0 then self.dz = self.dz - 1 end
 	-- sdl + mouse wheel is not working:
 	if self.dz ~= 0 then print('mousedz',self.dz) end
 
