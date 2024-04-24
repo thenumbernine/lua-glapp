@@ -45,9 +45,9 @@ function View:init(args)
 	self.orbit = vec3d(0,0,0)	-- orbit center
 	self.angle = quatd(0,0,0,1)
 	if args then
-		if args.pos then self.pos = vec3d(unpack(args.pos)) end
-		if args.orbit then self.orbit = vec3d(unpack(args.orbit)) end
-		if args.angle then self.angle = quatd(unpack(args.angle)) end
+		if args.pos then self.pos:set(unpack(args.pos)) end
+		if args.orbit then self.orbit:set(unpack(args.orbit)) end
+		if args.angle then self.angle:set(unpack(args.angle)):normalize(self.angle) end
 		if args.useBuiltinMatrixMath ~= nil then
 			self.useBuiltinMatrixMath = args.useBuiltinMatrixMath
 		end
