@@ -29,8 +29,16 @@ local GLProgram = require 'gl.program'
 local App = require 'glapp':subclass()
 function App:initGL()
 
+	--[[
+	TODO https://stackoverflow.com/a/27410925
+	GL 4.1 core, or GL_ARB_ES2_compatibility, maps to ... #version 100 es ... ?
+	GL 4.3 core, or GL_ARB_ES3_compatibility, maps to #version 300 es
+	GL 4.5 core, or GL_ARB_ES3_1_compatibility, maps to #version 310 es
+	... what core maps to #version 320 es ?
+	--]]
 	local glslheader = '#version 320 es\n'
 		..'precision highp float;\n'
+
 	-- minimal shader
 	local shaders = range(2):mapi(function()
 		return GLProgram{
@@ -62,7 +70,7 @@ void main() {
 	-- is 'enable' saved per-shader?
 	-- glEnableVertexAttribArray is bound globally *or* bound per-VAO
 	-- but not bound per-shader (as uniforms are bound per-shader)
-	
+
 	-- hmm next question, how to get its status
 	-- typically glGetVertexAttrib is for the currently-bound VAO
 	-- but if no VAO is bound, does it return global-state enableVerteAttribArray's?
@@ -89,13 +97,13 @@ void main() {
 	gl.glEnableVertexAttribArray(0)
 	print("GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
 	print("GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
-	
+
 	print'creating/enabling vao:'
 	local vao = GLVertexArray{
 		program = shaders[1],
 	}
 	vao:bind()
-	
+
 	print("GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
 	print("GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
 	print'enable 1'

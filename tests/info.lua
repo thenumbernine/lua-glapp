@@ -54,6 +54,7 @@ function App:initGL()
 		'GL_VENDOR',
 		'GL_RENDERER',
 		'GL_VERSION',
+		'GL_SHADING_LANGUAGE_VERSION',	-- TOOD only for version >= 4
 	} do
 		local strptr = gl.glGetString(gl[field])
 		local str = ffi.string(strptr)

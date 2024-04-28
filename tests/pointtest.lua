@@ -62,8 +62,9 @@ function Test:initGL()
 	}:unbind()
 
 	self.shader = GLProgram{
-		vertexCode = [[
-#version 460
+		vertexCode =
+GLProgram.getVersionPragma()
+..[[
 
 in vec3 pos;
 in vec3 color;
@@ -78,8 +79,9 @@ void main() {
 	gl_PointSize = dot(color, vec3(50., 10., 1.));
 }
 ]],
-		fragmentCode = [[
-#version 460
+		fragmentCode =
+GLProgram.getVersionPragma()
+..[[
 
 in vec3 colorv;
 out vec4 colorf;
@@ -136,7 +138,7 @@ function Test:update()
 	gl.glDisable(gl.GL_POINT_SPRITE)
 	gl.glDisable(gl.GL_PROGRAM_POINT_SIZE)
 	gl.glDisable(gl.GL_DEPTH_TEST)
-	
+
 	glreport'here'
 end
 

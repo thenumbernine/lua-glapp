@@ -39,7 +39,6 @@ end, function()
 end)
 
 local template = require 'template'
-local class = require 'ext.class'
 local GLApp = require 'glapp'
 local glreport = require 'gl.report'
 local GLProgram = require 'gl.program'
@@ -47,7 +46,7 @@ local GLTex2D = require 'gl.tex2d'
 local Image = require 'image'
 local vec3i = require 'vec-ffi.vec3i'
 
-local App = class(GLApp)
+local App = GLApp:subclass()
 
 function App:initGL(...)
 	if App.super.initGL then
@@ -100,10 +99,13 @@ function App:initGL(...)
 	}
 	glreport'here'
 
+	local glslVersion = GLProgram.getVersionPragma()
+
 	local localSize = vec3i(32,32,1)
 	self.computeShader = GLProgram{
-		computeCode = template([[
-#version 460
+		computeCode = template(
+glslVersion
+..[[
 
 layout(local_size_x=<?=localSize.x
 	?>, local_size_y=<?=localSize.y
