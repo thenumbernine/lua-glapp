@@ -29,14 +29,7 @@ local GLProgram = require 'gl.program'
 local App = require 'glapp':subclass()
 function App:initGL()
 
-	--[[
-	TODO https://stackoverflow.com/a/27410925
-	GL 4.1 core, or GL_ARB_ES2_compatibility, maps to ... #version 100 es ... ?
-	GL 4.3 core, or GL_ARB_ES3_compatibility, maps to #version 300 es
-	GL 4.5 core, or GL_ARB_ES3_1_compatibility, maps to #version 310 es
-	... what core maps to #version 320 es ?
-	--]]
-	local glslheader = '#version 320 es\n'
+	local glslheader = GLProgram.getVersionPragma(true)..'\n'
 		..'precision highp float;\n'
 
 	-- minimal shader

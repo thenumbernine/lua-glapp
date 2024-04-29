@@ -523,7 +523,8 @@ function App:initGL()
 	local strptr = gl.glGetString(gl.GL_EXTENSIONS)
 	local str = ffi.string(strptr)
 	print('GL_EXTENSIONS', '\n\t'..(str:trim():split' ':sort():concat
-		' '--'\n\t'
+		--' '
+		'\n\t'
 	))
 
 	self:requestExit()
