@@ -479,6 +479,8 @@ function App:initGL()
 		showInt2'GL_VIEWPORT_BOUNDS_RANGE'
 		showInt'GL_LAYER_PROVOKING_VERTEX'
 		showInt'GL_VIEWPORT_INDEX_PROVOKING_VERTEX'
+
+		showInts('GL_NUM_SHADER_BINARY_FORMATS', 'GL_SHADER_BINARY_FORMATS')
 	end
 	if version >= 4.2 then
 		print'GL version >= 4.2:'
