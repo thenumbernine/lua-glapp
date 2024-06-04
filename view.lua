@@ -64,6 +64,9 @@ end
 function View:setup(aspectRatio)
 	self:setupProjection(aspectRatio)
 	self:setupModelView()
+	if self.useBuiltinMatrixMath then
+		self.mvProjMat:mul4x4(self.projMat, self.mvMat)
+	end
 end
 
 -- get the arguments for glFrustum / glOrtho
