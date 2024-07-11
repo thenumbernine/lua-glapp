@@ -57,6 +57,8 @@ function View:init(args)
 		local matrix = require 'matrix.ffi'
 		self.projMat = matrix({4,4}, 'float'):zeros():setIdent()
 		self.mvMat = matrix({4,4}, 'float'):zeros():setIdent()
+
+		-- TODO do I even need this?  not for GL at least ...
 		self.mvProjMat = matrix({4,4}, 'float'):zeros():setIdent()
 	end
 end
