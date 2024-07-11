@@ -17,9 +17,18 @@ View.useBuiltinMatrixMath = false
 -- static method applied to GLApp classes
 function View.apply(cl)
 	cl = class(cl)
-	function cl:init(...)
-		cl.super.init(self, ...)
-		self.view = View()
+	function cl:init(args, ...)
+		cl.super.init(self, args, ...)
+		local useBuiltinMatrixMath
+		if self.viewUseBuiltinMatrixMath ~= nil then
+			useBuiltinMatrixMath = self.viewUseBuiltinMatrixMath
+		end
+		if args and args.viewUseBuiltinMatrixMath ~= nil then
+			useBuiltinMatrixMath = args.viewUseBuiltinMatrixMath
+		end
+		self.view = View{
+			useBuiltinMatrixMath = useBuiltinMatrixMath,
+		}
 		self.view.pos.z = self.viewDist or self.view.pos.z
 	end
 	function cl:update(...)
