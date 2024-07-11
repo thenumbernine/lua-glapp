@@ -3,8 +3,6 @@ local ffi = require 'ffi'
 local gl = require 'gl.setup' (... or 'OpenGLES3')
 local getTime = require 'ext.timer'.getTime
 
-require 'glapp.view'.useBuiltinMatrixMath = true		-- don't use glMatrix* calls
-
 local vertexes = ffi.new('float[9]',
 	-5, -4, 0,
 	5, -4, 0,
@@ -19,6 +17,7 @@ local colors = ffi.new('float[9]',
 
 local Test = require 'glapp.orbit'()
 Test.title = "Spinning Triangle"
+Test.viewUseBuiltinMatrixMath = true		-- don't use glMatrix* calls
 
 Test.viewDist = 20
 
