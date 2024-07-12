@@ -29,15 +29,16 @@ function Test:initGL()
 	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
 
 	print('GLES Version', ffi.string(gl.glGetString(gl.GL_VERSION)))
+	print('GL_SHADING_LANGUAGE_VERSION', ffi.string(gl.glGetString(gl.GL_SHADING_LANGUAGE_VERSION)))
 
 print('glsl version', require 'gl.program'.getVersionPragma())
 print('glsl es version', require 'gl.program'.getVersionPragma(true))
 
 	-- default shader
-	local glslheader = require 'gl.program'.getVersionPragma(true)..'\n'
-		..'precision highp float;\n'
+	local glslheader = 'precision highp float;\n'
 
 	self.shader = require 'gl.program'{
+		version = 'latest es',
 		vertexCode = glslheader..[[
 layout(location=0) in vec2 vertex;
 layout(location=1) in vec4 color;
@@ -48,7 +49,7 @@ void main() {
 	gl_Position = mvProjMat * vec4(vertex, 0., 1.);
 }
 ]],
-			fragmentCode = glslheader..[[
+		fragmentCode = glslheader..[[
 in vec4 colorv;
 out vec4 fragColor;
 void main() {
