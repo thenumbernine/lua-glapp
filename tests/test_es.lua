@@ -95,12 +95,12 @@ void main() {
 --]]
 		},
 	}
+
+	gl.glClearColor(0, 0, 0, 1)
 end
 
 function Test:update()
 	Test.super.update(self)
-
-	gl.glClearColor(0, 0, 0, 0)
 	gl.glClear(gl.GL_COLOR_BUFFER_BIT)
 
 	local t = getTime()
