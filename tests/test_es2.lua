@@ -1,5 +1,5 @@
 #!/usr/bin/env luajit
--- ES test using gl.sceneobject and objects ...
+-- ES test using raw gl calls
 local ffi = require 'ffi'
 local gl = require 'gl.setup' (... or 'OpenGLES3')
 local getTime = require 'ext.timer'.getTime
@@ -24,11 +24,10 @@ function Test:initGL()
 	self.view.ortho = true
 	self.view.orthoSize = 10
 
-	self.obj = require 'gl.sceneobject'{
-		program = require 'gl.program'{
-			version = 'latest es',
-			header = 'precision highp float;',
-			vertexCode = [[
+	self.program = require 'gl.program'{
+		version = 'latest es',
+		header = 'precision highp float;',
+		vertexCode = [[
 in vec2 vertex;
 in vec3 color;
 out vec4 colorv;
@@ -38,62 +37,54 @@ void main() {
 	gl_Position = mvProjMat * vec4(vertex, 0., 1.);
 }
 ]],
-			fragmentCode = [[
+		fragmentCode = [[
 in vec4 colorv;
 out vec4 fragColor;
 void main() {
 	fragColor = colorv;
 }
 ]],
-		},
-		geometry = {
-			mode = gl.GL_TRIANGLES,
-			count = 3,
-		},
-		attrs = {
---[[ TODO verify this works
-			vertex = {
-				buffer = {
-					data = ffi.new('float[6]',
-						-5, -4,
-						5, -4,
-						0, 6
-					),
-					size = 6 * ffi.sizeof'float',
-				},
-			},
-			color = {
-				buffer = {
-					data = ffi.new('float[9]',
-						1, 0, 0,
-						0, 1, 0,
-						0, 0, 1,
-					),
-					size = 9 * ffi.sizeof'float',
-				},
-			},
+	}
 
---]]
--- [[
+	self.geometry = require 'gl.geometry'{
+		mode = gl.GL_TRIANGLES,
+		count = 3,
+	}
+
+	self.vertexData = ffi.new('float[6]',
+		-5, -4,
+		5, -4,
+		0, 6
+	)
+	assert(ffi.sizeof(self.vertexData) == 6 * 4)
+
+	self.vertexBuffer = require 'gl.arraybuffer'{
+		data = self.vertexData,
+		size = ffi.sizeof(self.vertexData),
+	}
+
+	self.colorData = ffi.new('float[9]', 
+		1, 0, 0,
+		0, 1, 0,
+		0, 0, 1
+	)
+	assert(ffi.sizeof(self.colorData) == 9 * 4)
+
+	self.colorBuffer = require 'gl.arraybuffer'{
+		data = self.colorData,
+		size = ffi.sizeof(self.colorData),
+	}
+
+	self.obj = require 'gl.sceneobject'{
+		program = self.program,
+		geometry = self.geometry,
+		attrs = {
 			vertex = {
-				buffer = {
-					data = {
-						-5, -4,
-						5, -4,
-						0, 6,
-					},
-				},
+				buffer = self.vertexBuffer,
 			},
 			color = {
-				buffer = {
-					data = {
-						1, 0, 0,
-						0, 1, 0,
-						0, 0, 1,
-					},
-				},
+				buffer = self.colorBuffer,
 			},
---]]
 		},
 	}
 
