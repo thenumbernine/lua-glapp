@@ -24,9 +24,8 @@ function Test:initGL()
 	self.view.ortho = true
 	self.view.orthoSize = 10
 
-	local GLProgram = require 'gl.program'
-	local vertexShader = GLProgram.VertexShader{
-		code = [[
+	local vertexShaderID = gl.glCreateShader(gl.GL_VERTEX_SHADER)
+	local code = [[
 #version 300 es
 precision highp float;
 in vec2 vertex;
@@ -37,11 +36,19 @@ void main() {
 	colorv = vec4(color, 1.);
 	gl_Position = mvProjMat * vec4(vertex, 0., 1.);
 }
-]],
-	}
+]]
+	local len = ffi.new'int[1]'
+	len[0] = #code
+	local strs = ffi.new'const char*[1]'
+	strs[0] = code
+	gl.glShaderSource(vertexShaderID, 1, strs, len)
+	gl.glCompileShader(vertexShaderID)
+	local status = ffi.new'GLint[1]'
+	gl.glGetShaderiv(vertexShaderID, gl.GL_COMPILE_STATUS, status)
+	print('vertex shader compile status', status[0])
 
-	local fragmentShader = GLProgram.FragmentShader{
-		code = [[
+	local fragmentShaderID = gl.glCreateShader(gl.GL_FRAGMENT_SHADER)
+	local code = [[
 #version 300 es
 precision highp float;
 in vec4 colorv;
@@ -49,27 +56,36 @@ out vec4 fragColor;
 void main() {
 	fragColor = colorv;
 }
-]],
-	}
+]]
+	local len = ffi.new'int[1]'
+	len[0] = #code
+	local strs = ffi.new'const char*[1]'
+	strs[0] = code
+	gl.glShaderSource(fragmentShaderID, 1, strs, len)
+	gl.glCompileShader(fragmentShaderID)
+	local status = ffi.new'GLint[1]'
+	gl.glGetShaderiv(fragmentShaderID, gl.GL_COMPILE_STATUS, status)
+	print('fragment shader compile status', status[0])
 
-	local program = GLProgram{
-		shaders = {
-			vertexShader,
-			fragmentShader,
-		},
-	}
-	gl.glUseProgram(0)
-
-	self.program = program
+	local programID = gl.glCreateProgram()
+	self.programID = programID
+	gl.glAttachShader(programID, vertexShaderID)
+	gl.glAttachShader(programID, fragmentShaderID)
+	gl.glLinkProgram(programID)
+	gl.glDetachShader(programID, vertexShaderID)
+	gl.glDetachShader(programID, fragmentShaderID)
+	local status = ffi.new'GLint[1]'
+	gl.glGetProgramiv(programID, gl.GL_LINK_STATUS, status)
+	print('program link status', status[0])
 	do
 		local result = ffi.new'GLint[1]'
-		gl.glGetProgramiv(program.id, gl.GL_INFO_LOG_LENGTH, result)
+		gl.glGetProgramiv(programID, gl.GL_INFO_LOG_LENGTH, result)
 		local length = result[0]
-		print('length', length)		
+		print('length', length)
 		local log = ffi.new('char[?]',length+1)
 		local result = ffi.new'GLsizei[1]'
-		gl.glGetProgramInfoLog(program.id, length, result, log);
-		print('double check length', result[0])		
+		gl.glGetProgramInfoLog(programID, length, result, log);
+		print('double check length', result[0])
 		print('log:')
 		print(ffi.string(log))
 	end
@@ -89,7 +105,7 @@ void main() {
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
 	end
 
-	self.colorData = ffi.new('float[9]', 
+	self.colorData = ffi.new('float[9]',
 		1, 0, 0,
 		0, 1, 0,
 		0, 0, 1
@@ -104,16 +120,16 @@ void main() {
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
 	end
 
-	self.vertexAttrLoc = gl.glGetAttribLocation(program.id, 'vertex')
-	self.colorAttrLoc = gl.glGetAttribLocation(program.id, 'color')
-	
+	self.vertexAttrLoc = gl.glGetAttribLocation(programID, 'vertex')
+	self.colorAttrLoc = gl.glGetAttribLocation(programID, 'color')
+
 	--[[ vao or not
 	do
 		local id = ffi.new'GLuint[1]'
 		gl.glGenVertexArrays(1, id)
 		self.vaoID = id[0]
 		gl.glBindVertexArray(self.vaoID)
-		
+
 		gl.glEnableVertexAttribArray(self.vertexAttrLoc)
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vertexBufferID)
 		gl.glVertexAttribPointer(self.vertexAttrLoc, 2, gl.GL_FLOAT, gl.GL_FALSE, 0, ffi.null)
@@ -123,12 +139,12 @@ void main() {
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.colorBufferID)
 		gl.glVertexAttribPointer(self.colorAttrLoc, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, ffi.null)
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
-	
+
 		gl.glBindVertexArray(0)
 	end
 	--]]
 
-	self.mvProjMatUniformLoc = program.uniforms.mvProjMat.loc
+	self.mvProjMatUniformLoc = gl.glGetUniformLocation(programID, 'mvProjMat')
 	gl.glClearColor(0, 0, 0, 1)
 end
 
@@ -140,12 +156,12 @@ function Test:update()
 	self.view.mvMat:applyRotate(math.rad(t * 30), 0, 1, 0)
 	self.view.mvProjMat:mul4x4(self.view.projMat, self.view.mvMat)
 
-	local program = self.program
+	local programID = self.programID
 
-	gl.glUseProgram(program.id)
-	
+	gl.glUseProgram(programID)
+
 	gl.glUniformMatrix4fv(self.mvProjMatUniformLoc, 1, gl.GL_FALSE, self.view.mvProjMat.ptr)
-	
+
 	if self.vaoID then
 		gl.glBindVertexArray(self.vaoID)
 	else
@@ -153,13 +169,13 @@ function Test:update()
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vertexBufferID)
 		gl.glVertexAttribPointer(self.vertexAttrLoc, 2, gl.GL_FLOAT, gl.GL_FALSE, 0, ffi.null)
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
-		
+
 		gl.glEnableVertexAttribArray(self.colorAttrLoc)
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.colorBufferID)
 		gl.glVertexAttribPointer(self.colorAttrLoc, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, ffi.null)
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
 	end
-	
+
 	gl.glDrawArrays(gl.GL_TRIANGLES, 0, 6)
 
 	if self.vaoID then
