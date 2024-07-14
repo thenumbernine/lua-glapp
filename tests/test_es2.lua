@@ -180,7 +180,7 @@ void main() {
 	vertexAttrLoc = gl.glGetAttribLocation(programID, 'vertex')
 	colorAttrLoc = gl.glGetAttribLocation(programID, 'color')
 
-	--[[ vao or not
+	-- [[ vao or not
 	do
 		local id = ffi.new'GLuint[1]'
 		gl.glGenVertexArrays(1, id)
