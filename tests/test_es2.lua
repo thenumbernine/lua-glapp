@@ -2,28 +2,55 @@
 -- ES test using raw gl calls
 local ffi = require 'ffi'
 local gl = require 'gl.setup' (... or 'OpenGLES3')
+local matrix = require 'matrix.ffi'
 local getTime = require 'ext.timer'.getTime
 
-local Test = require 'glapp.orbit'()
+local Test = require 'glapp':subclass()
 Test.title = "Spinning Triangle"
-Test.viewUseBuiltinMatrixMath = true		-- don't use glMatrix* calls
 
-Test.viewDist = 20
+local znear = .1
+local zfar = 100
+local orthoSize = 10
 
 function Test:initGL()
-	local version = ffi.new'SDL_version[1]'
 	local sdl = require 'ffi.req' 'sdl'
+
+	local version = ffi.new'SDL_version[1]'
 	sdl.SDL_GetVersion(version)
 	print'SDL_GetVersion:'
-	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
+	print(math.floor(version[0].major)..'.'..math.floor(version[0].minor)..'.'..math.floor(version[0].patch))
+
 	print('GLES Version', ffi.string(gl.glGetString(gl.GL_VERSION)))
 	print('GL_SHADING_LANGUAGE_VERSION', ffi.string(gl.glGetString(gl.GL_SHADING_LANGUAGE_VERSION)))
 	print('glsl version', require 'gl.program'.getVersionPragma())
 	print('glsl es version', require 'gl.program'.getVersionPragma(true))
-	local versionHeader = require 'gl.program'.getVersionPragma(true)..'\n'
 
-	self.view.ortho = true
-	self.view.orthoSize = 10
+	local aspectRatio = self.width / self.height
+	self.projMat = matrix({4,4}, 'float'):zeros()
+		--[[
+		:setFrustum(
+			-znear * aspectRatio * tanFovY,
+			 znear * aspectRatio * tanFovY,
+			-znear * tanFovY,
+			 znear * tanFovY,
+			 znear,
+			 zfar
+		)
+		--]]
+		-- [[
+		:setOrtho(
+			-orthoSize * aspectRatio,
+			 orthoSize * aspectRatio,
+			-orthoSize,
+			 orthoSize,
+			 znear,
+			 zfar
+		)
+		--]]
+	self.mvMat = matrix({4,4}, 'float'):zeros():setIdent()
+	self.mvProjMat = matrix({4,4}, 'float'):zeros():setIdent()
+
+	local versionHeader = require 'gl.program'.getVersionPragma(true)..'\n'
 
 	local vertexShaderID = gl.glCreateShader(gl.GL_VERTEX_SHADER)
 	local code = versionHeader..[[
@@ -172,18 +199,33 @@ void main() {
 end
 
 function Test:update()
-	Test.super.update(self)
+	if Test.super.update then
+		error'here'
+		Test.super.update(self)
+	end
 	gl.glClear(gl.GL_COLOR_BUFFER_BIT)
 
+	local aspectRatio = self.width / self.height
+	self.projMat
+		:setOrtho(
+			-orthoSize * aspectRatio,
+			 orthoSize * aspectRatio,
+			-orthoSize,
+			 orthoSize,
+			 znear,
+			 zfar
+		)
+	self.mvMat:setTranslate(0, 0, -20)
+
 	local t = getTime()
-	self.view.mvMat:applyRotate(math.rad(t * 30), 0, 1, 0)
-	self.view.mvProjMat:mul4x4(self.view.projMat, self.view.mvMat)
+	self.mvMat:applyRotate(math.rad(t * 30), 0, 1, 0)
+	self.mvProjMat:mul4x4(self.projMat, self.mvMat)
 
 	local programID = self.programID
 
 	gl.glUseProgram(programID)
 
-	gl.glUniformMatrix4fv(self.mvProjMatUniformLoc, 1, gl.GL_FALSE, self.view.mvProjMat.ptr)
+	gl.glUniformMatrix4fv(self.mvProjMatUniformLoc, 1, gl.GL_FALSE, self.mvProjMat.ptr)
 
 	if self.vaoID then
 		gl.glBindVertexArray(self.vaoID)
