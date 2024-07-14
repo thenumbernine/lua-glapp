@@ -11,6 +11,14 @@ Test.title = "Spinning Triangle"
 local znear = .1
 local zfar = 100
 local orthoSize = 10
+local projMat, mvMat, mvProjMat
+local programID
+local vertexBufferID
+local colorBufferID
+local vertexAttrLoc
+local colorAttrLoc
+local mvProjMatUniformLoc
+local vaoID
 
 function Test:initGL()
 	local sdl = require 'ffi.req' 'sdl'
@@ -26,7 +34,7 @@ function Test:initGL()
 	print('glsl es version', require 'gl.program'.getVersionPragma(true))
 
 	local aspectRatio = self.width / self.height
-	self.projMat = matrix({4,4}, 'float'):zeros()
+	projMat = matrix({4,4}, 'float'):zeros()
 		--[[
 		:setFrustum(
 			-znear * aspectRatio * tanFovY,
@@ -47,8 +55,8 @@ function Test:initGL()
 			 zfar
 		)
 		--]]
-	self.mvMat = matrix({4,4}, 'float'):zeros():setIdent()
-	self.mvProjMat = matrix({4,4}, 'float'):zeros():setIdent()
+	mvMat = matrix({4,4}, 'float'):zeros():setIdent()
+	mvProjMat = matrix({4,4}, 'float'):zeros():setIdent()
 
 	local versionHeader = require 'gl.program'.getVersionPragma(true)..'\n'
 
@@ -117,8 +125,7 @@ void main() {
 		print(ffi.string(log))
 	end
 
-	local programID = gl.glCreateProgram()
-	self.programID = programID
+	programID = gl.glCreateProgram()
 	gl.glAttachShader(programID, vertexShaderID)
 	gl.glAttachShader(programID, fragmentShaderID)
 	gl.glLinkProgram(programID)
@@ -140,73 +147,69 @@ void main() {
 		print(ffi.string(log))
 	end
 
-	self.vertexData = ffi.new('float[6]',
+	local vertexData = ffi.new('float[6]',
 		-5, -4,
 		5, -4,
 		0, 6
 	)
-	assert(ffi.sizeof(self.vertexData) == 6 * 4)
+	assert(ffi.sizeof(vertexData) == 6 * 4)
 	do
 		local id = ffi.new'GLuint[1]'
 		gl.glGenBuffers(1, id)
-		self.vertexBufferID = id[0]
-		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vertexBufferID)
-		gl.glBufferData(gl.GL_ARRAY_BUFFER, 6 * 4, self.vertexData, gl.GL_STATIC_DRAW)
+		vertexBufferID = id[0]
+		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vertexBufferID)
+		gl.glBufferData(gl.GL_ARRAY_BUFFER, 6 * 4, vertexData, gl.GL_STATIC_DRAW)
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
 	end
 
-	self.colorData = ffi.new('float[9]',
+	local colorData = ffi.new('float[9]',
 		1, 0, 0,
 		0, 1, 0,
 		0, 0, 1
 	)
-	assert(ffi.sizeof(self.colorData) == 9 * 4)
+	assert(ffi.sizeof(colorData) == 9 * 4)
 	do
 		local id = ffi.new'GLuint[1]'
 		gl.glGenBuffers(1, id)
-		self.colorBufferID = id[0]
-		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.colorBufferID)
-		gl.glBufferData(gl.GL_ARRAY_BUFFER, 9 * 4, self.colorData, gl.GL_STATIC_DRAW)
+		colorBufferID = id[0]
+		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, colorBufferID)
+		gl.glBufferData(gl.GL_ARRAY_BUFFER, 9 * 4, colorData, gl.GL_STATIC_DRAW)
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
 	end
 
-	self.vertexAttrLoc = gl.glGetAttribLocation(programID, 'vertex')
-	self.colorAttrLoc = gl.glGetAttribLocation(programID, 'color')
+	vertexAttrLoc = gl.glGetAttribLocation(programID, 'vertex')
+	colorAttrLoc = gl.glGetAttribLocation(programID, 'color')
 
 	--[[ vao or not
 	do
 		local id = ffi.new'GLuint[1]'
 		gl.glGenVertexArrays(1, id)
-		self.vaoID = id[0]
-		gl.glBindVertexArray(self.vaoID)
+		vaoID = id[0]
+		gl.glBindVertexArray(vaoID)
 
-		gl.glEnableVertexAttribArray(self.vertexAttrLoc)
-		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vertexBufferID)
-		gl.glVertexAttribPointer(self.vertexAttrLoc, 2, gl.GL_FLOAT, gl.GL_FALSE, 0, ffi.null)
+		gl.glEnableVertexAttribArray(vertexAttrLoc)
+		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vertexBufferID)
+		gl.glVertexAttribPointer(vertexAttrLoc, 2, gl.GL_FLOAT, gl.GL_FALSE, 0, ffi.null)
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
 
-		gl.glEnableVertexAttribArray(self.colorAttrLoc)
-		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.colorBufferID)
-		gl.glVertexAttribPointer(self.colorAttrLoc, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, ffi.null)
+		gl.glEnableVertexAttribArray(colorAttrLoc)
+		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, colorBufferID)
+		gl.glVertexAttribPointer(colorAttrLoc, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, ffi.null)
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
 
 		gl.glBindVertexArray(0)
 	end
 	--]]
 
-	self.mvProjMatUniformLoc = gl.glGetUniformLocation(programID, 'mvProjMat')
+	mvProjMatUniformLoc = gl.glGetUniformLocation(programID, 'mvProjMat')
 	gl.glClearColor(0, 0, 0, 1)
 end
 
 function Test:update()
-	if Test.super.update then
-		error'here'
-		Test.super.update(self)
-	end
 	gl.glClear(gl.GL_COLOR_BUFFER_BIT)
 
 	local aspectRatio = self.width / self.height
-	self.projMat
+	projMat
 		:setOrtho(
 			-orthoSize * aspectRatio,
 			 orthoSize * aspectRatio,
@@ -215,39 +218,37 @@ function Test:update()
 			 znear,
 			 zfar
 		)
-	self.mvMat:setTranslate(0, 0, -20)
+	mvMat:setTranslate(0, 0, -20)
 
 	local t = getTime()
-	self.mvMat:applyRotate(math.rad(t * 30), 0, 1, 0)
-	self.mvProjMat:mul4x4(self.projMat, self.mvMat)
-
-	local programID = self.programID
+	mvMat:applyRotate(math.rad(t * 30), 0, 1, 0)
+	mvProjMat:mul4x4(projMat, mvMat)
 
 	gl.glUseProgram(programID)
 
-	gl.glUniformMatrix4fv(self.mvProjMatUniformLoc, 1, gl.GL_FALSE, self.mvProjMat.ptr)
+	gl.glUniformMatrix4fv(mvProjMatUniformLoc, 1, gl.GL_FALSE, mvProjMat.ptr)
 
-	if self.vaoID then
-		gl.glBindVertexArray(self.vaoID)
+	if vaoID then
+		gl.glBindVertexArray(vaoID)
 	else
-		gl.glEnableVertexAttribArray(self.vertexAttrLoc)
-		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vertexBufferID)
-		gl.glVertexAttribPointer(self.vertexAttrLoc, 2, gl.GL_FLOAT, gl.GL_FALSE, 0, ffi.null)
+		gl.glEnableVertexAttribArray(vertexAttrLoc)
+		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vertexBufferID)
+		gl.glVertexAttribPointer(vertexAttrLoc, 2, gl.GL_FLOAT, gl.GL_FALSE, 0, ffi.null)
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
 
-		gl.glEnableVertexAttribArray(self.colorAttrLoc)
-		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.colorBufferID)
-		gl.glVertexAttribPointer(self.colorAttrLoc, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, ffi.null)
+		gl.glEnableVertexAttribArray(colorAttrLoc)
+		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, colorBufferID)
+		gl.glVertexAttribPointer(colorAttrLoc, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, ffi.null)
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
 	end
 
 	gl.glDrawArrays(gl.GL_TRIANGLES, 0, 6)
 
-	if self.vaoID then
+	if vaoID then
 		gl.glBindVertexArray(0)
 	else
-		gl.glDisableVertexAttribArray(self.vertexAttrLoc)
-		gl.glDisableVertexAttribArray(self.colorAttrLoc)
+		gl.glDisableVertexAttribArray(vertexAttrLoc)
+		gl.glDisableVertexAttribArray(colorAttrLoc)
 	end
 
 	gl.glUseProgram(0)
