@@ -20,13 +20,13 @@ function Test:initGL()
 	print('GL_SHADING_LANGUAGE_VERSION', ffi.string(gl.glGetString(gl.GL_SHADING_LANGUAGE_VERSION)))
 	print('glsl version', require 'gl.program'.getVersionPragma())
 	print('glsl es version', require 'gl.program'.getVersionPragma(true))
+	local versionHeader = require 'gl.program'.getVersionPragma(true)..'\n'
 
 	self.view.ortho = true
 	self.view.orthoSize = 10
 
 	local vertexShaderID = gl.glCreateShader(gl.GL_VERTEX_SHADER)
-	local code = [[
-#version 300 es
+	local code = versionHeader..[[
 precision highp float;
 in vec2 vertex;
 in vec3 color;
@@ -46,10 +46,21 @@ void main() {
 	local status = ffi.new'GLint[1]'
 	gl.glGetShaderiv(vertexShaderID, gl.GL_COMPILE_STATUS, status)
 	print('vertex shader compile status', status[0])
+	do
+		local result = ffi.new'GLint[1]'
+		gl.glGetShaderiv(vertexShaderID, gl.GL_INFO_LOG_LENGTH, result)
+		local length = result[0]
+		print('length', length)
+		local log = ffi.new('char[?]',length+1)
+		local result = ffi.new'GLsizei[1]'
+		gl.glGetShaderInfoLog(vertexShaderID, length, result, log);
+		print('double check length', result[0])
+		print('log:')
+		print(ffi.string(log))
+	end
 
 	local fragmentShaderID = gl.glCreateShader(gl.GL_FRAGMENT_SHADER)
-	local code = [[
-#version 300 es
+	local code = versionHeader..[[
 precision highp float;
 in vec4 colorv;
 out vec4 fragColor;
@@ -66,6 +77,18 @@ void main() {
 	local status = ffi.new'GLint[1]'
 	gl.glGetShaderiv(fragmentShaderID, gl.GL_COMPILE_STATUS, status)
 	print('fragment shader compile status', status[0])
+	do
+		local result = ffi.new'GLint[1]'
+		gl.glGetShaderiv(fragmentShaderID, gl.GL_INFO_LOG_LENGTH, result)
+		local length = result[0]
+		print('length', length)
+		local log = ffi.new('char[?]',length+1)
+		local result = ffi.new'GLsizei[1]'
+		gl.glGetShaderInfoLog(fragmentShaderID, length, result, log);
+		print('double check length', result[0])
+		print('log:')
+		print(ffi.string(log))
+	end
 
 	local programID = gl.glCreateProgram()
 	self.programID = programID
