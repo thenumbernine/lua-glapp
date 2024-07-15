@@ -3,6 +3,8 @@
 local ffi = require 'ffi'
 local gl = require 'gl.setup' (... or 'OpenGLES3')
 local getTime = require 'ext.timer'.getTime
+local Image = require 'image'
+local GLTex2D = require 'gl.tex2d'
 
 local Test = require 'glapp.orbit'()
 Test.title = "Spinning Triangle"
@@ -24,6 +26,13 @@ function Test:initGL()
 	self.view.ortho = true
 	self.view.orthoSize = 10
 
+	local img = Image'src.png'
+	local tex = GLTex2D{
+		image = img,
+		minFilter = gl.GL_NEAREST,
+		magFilter = gl.GL_NEAREST,
+	}:unbind()
+
 	self.obj = require 'gl.sceneobject'{
 		program = require 'gl.program'{
 			version = 'latest es',
@@ -31,25 +40,33 @@ function Test:initGL()
 			vertexCode = [[
 in vec2 vertex;
 in vec3 color;
+out vec2 tcv;
 out vec4 colorv;
 uniform mat4 mvProjMat;
 void main() {
 	colorv = vec4(color, 1.);
+	tcv = vertex;
 	gl_Position = mvProjMat * vec4(vertex, 0., 1.);
 }
 ]],
 			fragmentCode = [[
+in vec2 tcv;
 in vec4 colorv;
 out vec4 fragColor;
+uniform sampler2D tex;
 void main() {
-	fragColor = colorv;
+	fragColor = colorv * texture(tex, tcv);
 }
 ]],
+			uniforms = {
+				tex = 0,
+			},
 		},
 		geometry = {
 			mode = gl.GL_TRIANGLES,
 			count = 3,
 		},
+		texs = {tex},
 		attrs = {
 			vertex = {
 				buffer = {
