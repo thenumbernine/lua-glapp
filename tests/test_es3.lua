@@ -39,13 +39,14 @@ function Test:initGL()
 			header = 'precision highp float;',
 			vertexCode = [[
 in vec2 vertex;
+in vec2 tc;
 in vec3 color;
 out vec2 tcv;
 out vec4 colorv;
 uniform mat4 mvProjMat;
 void main() {
+	tcv = tc;
 	colorv = vec4(color, 1.);
-	tcv = vertex;
 	gl_Position = mvProjMat * vec4(vertex, 0., 1.);
 }
 ]],
@@ -71,9 +72,18 @@ void main() {
 			vertex = {
 				buffer = {
 					data = {
-						-5, -4,
-						5, -4,
-						0, 6,
+						-5, 6,
+						5, 6,
+						0, -4,
+					},
+				},
+			},
+			tc = {
+				buffer = {
+					data = {
+						1, 0,
+						0, 0,
+						.5, 1,
 					},
 				},
 			},
