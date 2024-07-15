@@ -19,4 +19,10 @@ I also added view.lua and orbit.lua to add behaviors to GLApp classes
 - view.lua = View object, applied to the class via View.apply
 - orbit.lua = function to apply orbit behavior
 
-### [See it in Browser](https://thenumbernine.github.io/glapp-js/index.html?dir=lua/glapp/tests&file=test_es3.lua)
+### See it in Browser
+-	[[launch]](https://thenumbernine.github.io/glapp-js/index.html?dir=glapp/tests&file=test_es.lua)
+	[[source]](https://thenumbernine.github.io/lua/glapp/tests/test_es.lua)
+	polygon demo
+-	[[launch]](https://thenumbernine.github.io/glapp-js/index.html?dir=glapp/tests&file=test_es3.lua)
+	[[source]](https://thenumbernine.github.io/lua/glapp/tests/test_es3.lua)
+	texture demo
