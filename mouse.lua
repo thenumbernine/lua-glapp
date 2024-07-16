@@ -35,8 +35,6 @@ function Mouse:update()
 	-- update new state
 
 	local sdlButtons = sdl.SDL_GetMouseState(self.ipos.s, self.ipos.s+1)
-
-
 	-- TODO use glapp for the size, in case the viewport is set to a subset of the window
 	gl.glGetIntegerv(gl.GL_VIEWPORT, viewportInt)
 	local viewWidth, viewHeight = viewportInt[2], viewportInt[3]
@@ -60,8 +58,8 @@ function Mouse:update()
 
 	self.lastLeftDown = self.leftDown
 	self.lastRightDown = self.rightDown
-	self.leftDown = bit.band(sdlButtons, bit.lshift(1, sdl.SDL_BUTTON_LEFT-1)) ~= 0
-	self.rightDown = bit.band(sdlButtons, bit.lshift(1, sdl.SDL_BUTTON_RIGHT-1)) ~= 0
+	self.leftDown = bit.band(sdlButtons, sdl.SDL_BUTTON_LMASK) ~= 0
+	self.rightDown = bit.band(sdlButtons, sdl.SDL_BUTTON_RMASK) ~= 0
 
 	-- immediate frame states
 	self.leftClick = false
