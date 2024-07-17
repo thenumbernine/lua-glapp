@@ -25,7 +25,7 @@ function Test:initGL()
 	self.view.orthoSize = 10
 
 	self.obj = require 'gl.sceneobject'{
-		program = require 'gl.program'{
+		program = {
 			version = 'latest es',
 			header = 'precision highp float;',
 			vertexCode = [[
@@ -46,44 +46,17 @@ void main() {
 }
 ]],
 		},
+		vertexes = {
+			data = {
+				-5, -4,
+				5, -4,
+				0, 6,
+			},
+		},
 		geometry = {
 			mode = gl.GL_TRIANGLES,
-			count = 3,
 		},
 		attrs = {
---[[ TODO verify this works
-			vertex = {
-				buffer = {
-					data = ffi.new('float[6]',
-						-5, -4,
-						5, -4,
-						0, 6
-					),
-					size = 6 * ffi.sizeof'float',
-				},
-			},
-			color = {
-				buffer = {
-					data = ffi.new('float[9]',
-						1, 0, 0,
-						0, 1, 0,
-						0, 0, 1,
-					),
-					size = 9 * ffi.sizeof'float',
-				},
-			},
-
---]]
--- [[
-			vertex = {
-				buffer = {
-					data = {
-						-5, -4,
-						5, -4,
-						0, 6,
-					},
-				},
-			},
 			color = {
 				buffer = {
 					data = {
@@ -93,7 +66,6 @@ void main() {
 					},
 				},
 			},
---]]
 		},
 	}
 

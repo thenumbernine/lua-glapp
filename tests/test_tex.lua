@@ -29,12 +29,11 @@ function Test:initGL()
 	local img = Image'src.png'
 	local tex = GLTex2D{
 		image = img,
-		minFilter = gl.GL_NEAREST,
-		magFilter = gl.GL_NEAREST,
+		generateMipmap = true,
 	}:unbind()
 
 	self.obj = require 'gl.sceneobject'{
-		program = require 'gl.program'{
+		program = {
 			version = 'latest es',
 			header = 'precision highp float;',
 			vertexCode = [[
@@ -63,21 +62,18 @@ void main() {
 				tex = 0,
 			},
 		},
+		vertexes = {
+			data = {
+				-5, 6,
+				5, 6,
+				0, -4,
+			},
+		},
 		geometry = {
 			mode = gl.GL_TRIANGLES,
-			count = 3,
 		},
 		texs = {tex},
 		attrs = {
-			vertex = {
-				buffer = {
-					data = {
-						-5, 6,
-						5, 6,
-						0, -4,
-					},
-				},
-			},
 			tc = {
 				buffer = {
 					data = {
