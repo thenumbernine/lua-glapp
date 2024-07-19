@@ -30,7 +30,7 @@ function Test:initGL()
 
 	print('GLES Version', ffi.string(gl.glGetString(gl.GL_VERSION)))
 	print('GL_SHADING_LANGUAGE_VERSION', ffi.string(gl.glGetString(gl.GL_SHADING_LANGUAGE_VERSION)))
-	print('glsl version', require 'gl.program'.getVersionPragma())
+	print('glsl version', require 'gl.program'.getVersionPragma(false))
 	print('glsl es version', require 'gl.program'.getVersionPragma(true))
 
 	local aspectRatio = self.width / self.height

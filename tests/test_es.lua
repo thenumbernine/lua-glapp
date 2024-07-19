@@ -18,7 +18,7 @@ function Test:initGL()
 	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
 	print('GLES Version', ffi.string(gl.glGetString(gl.GL_VERSION)))
 	print('GL_SHADING_LANGUAGE_VERSION', ffi.string(gl.glGetString(gl.GL_SHADING_LANGUAGE_VERSION)))
-	print('glsl version', require 'gl.program'.getVersionPragma())
+	print('glsl version', require 'gl.program'.getVersionPragma(false))
 	print('glsl es version', require 'gl.program'.getVersionPragma(true))
 
 	self.view.ortho = true
