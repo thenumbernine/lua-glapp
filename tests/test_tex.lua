@@ -22,6 +22,8 @@ function Test:initGL()
 	print('GL_SHADING_LANGUAGE_VERSION', ffi.string(gl.glGetString(gl.GL_SHADING_LANGUAGE_VERSION)))
 	print('glsl version', require 'gl.program'.getVersionPragma(false))
 	print('glsl es version', require 'gl.program'.getVersionPragma(true))
+	print'GL_EXTENSIONS:'
+	print(' '..ffi.string(gl.glGetString(gl.GL_EXTENSIONS)):gsub(' ', '\n '))
 
 	self.view.ortho = true
 	self.view.orthoSize = 10
