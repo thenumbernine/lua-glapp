@@ -36,8 +36,8 @@ function Test:initGL()
 
 	self.obj = require 'gl.sceneobject'{
 		program = {
-			version = 'latest es',
-			header = 'precision highp float;',
+			version = 'latest',
+			precision = 'best',
 			vertexCode = [[
 in vec2 vertex;
 in vec2 tc;

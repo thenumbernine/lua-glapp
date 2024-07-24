@@ -58,7 +58,7 @@ function Test:initGL()
 		},
 		program = {
 			version = 'latest',
-			header = 'precision highp float;',
+			precision = 'best',
 			vertexCode = [[
 in vec3 vertex;
 in vec3 color;

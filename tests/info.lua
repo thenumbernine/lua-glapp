@@ -527,6 +527,27 @@ function App:initGL()
 		showInt'GL_MAX_VERTEX_ATTRIB_BINDINGS'
 	end
 
+	for _,shaderTypeParam in ipairs{
+		'GL_VERTEX_SHADER',
+		'GL_FRAGMENT_SHADER',
+		'GL_GEOMETRY_SHADER',
+		'GL_TESS_EVALUATION_SHADER',
+		'GL_TESS_CONTROL_SHADER',
+		'GL_COMPUTE_SHADER',
+	} do
+		if require 'ext.op'.safeindex(gl, shaderTypeParam) then
+			for _,precParam in ipairs{
+				'GL_LOW_FLOAT', 'GL_MEDIUM_FLOAT', 'GL_HIGH_FLOAT',
+				'GL_LOW_INT', 'GL_MEDIUM_INT', 'GL_HIGH_INT',
+			} do
+				local range = ffi.new'GLint[2]'
+				local precision = ffi.new'GLint[1]'
+				gl.glGetShaderPrecisionFormat(gl[shaderTypeParam], gl[precParam], range, precision)
+				print(shaderTypeParam, precParam, 'range={'..range[0]..', '..range[1]..'},\tprecision='..precision[0])
+			end
+		end
+	end
+
 	local strptr = gl.glGetString(gl.GL_EXTENSIONS)
 	local str = ffi.string(strptr)
 	print('GL_EXTENSIONS', '\n\t'..(str:trim():split' ':sort():concat
