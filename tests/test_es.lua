@@ -52,6 +52,7 @@ void main() {
 				5, -4,
 				0, 6,
 			},
+			dim = 2,
 		},
 		geometry = {
 			mode = gl.GL_TRIANGLES,
@@ -64,6 +65,7 @@ void main() {
 						0, 1, 0,
 						0, 0, 1,
 					},
+					dim = 3,
 				},
 			},
 		},
