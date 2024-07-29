@@ -428,6 +428,7 @@ function App:initGL()
 			--showInt64Index('GL_TRANSFORM_FEEDBACK_BUFFER_SIZE', i)
 		end
 		--showInt64Index('GL_TRANSFORM_FEEDBACK_BINDING', i)	-- gles 300 but not gl 4
+		showInt'GL_MAX_TRANSFORM_FEEDBACK_BUFFERS'
 		--showIntIndex'GL_TRANSFORM_FEEDBACK_ACTIVE'	-- gles 300 but not gl 4
 		--showIntIndex'GL_TRANSFORM_FEEDBACK_PAUSED'	-- gles 300 but not gl 4
 		-- which is the max for these?
