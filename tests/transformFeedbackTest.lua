@@ -29,7 +29,7 @@ void main() {
 			'outValue',
 			mode = 'interleaved',	-- TODO default mode?
 		},
-	}	-- leave bound
+	}:useNone()
 
 	local data = ffi.new('GLfloat[5]', { 1, 2, 3, 4, 5 })
 	local inBuffer = GLArrayBuffer{
@@ -45,21 +45,25 @@ void main() {
 				buffer = inBuffer,
 			},
 		},
-	}:bind()	-- unlike everything else, VAO ctors unbound (since if no attrs are provided it doenst even have to bind to begin with)
+	}
 
 	local outBuffer = GLTransformFeedbackBuffer{
 		size = ffi.sizeof'GLfloat' * 5,
+		type = gl.GL_FLOAT,
+		count = 5,
+		dim = 1,
 		usage = gl.GL_STATIC_READ,
-	}	-- leave bound
+	}:unbind()
+
+	program:use()
+	vao:bind()
 
 	-- Perform feedback transform
 	gl.glEnable(gl.GL_RASTERIZER_DISCARD)
 
-print(require 'ext.tolua'{
-	attrs = program.attrs,
-	varyings = program.varyings,
-})
-	outBuffer:bindBase()	-- () == (0) == layout(binding=...) of our one varying (is it? is binding and location the same?)
+	outBuffer
+		:bind()
+		:bindBase()	-- () == (0) == layout(binding=...) of our one varying (is it? is binding and location the same?)
 
 	gl.glBeginTransformFeedback(gl.GL_POINTS)
 	gl.glDrawArrays(gl.GL_POINTS, 0, 5)
@@ -67,6 +71,9 @@ print(require 'ext.tolua'{
 
 	gl.glDisable(gl.GL_RASTERIZER_DISCARD)
 	gl.glFlush()
+
+	program:useNone()
+	vao:unbind()
 
 	-- Fetch and print results
 	-- not available in GLES ... so how do you read data in GLES?
@@ -77,13 +84,15 @@ print(require 'ext.tolua'{
 	--]]
 	-- [[ ... but webgl2 does have glGetBufferData ... but gles3 doesn't ...
 	-- but gles does have glMapBufferRange ... but webgl doesn't ...
-	local feedback = ffi.cast('GLfloat*', gl.glMapBufferRange(gl.GL_TRANSFORM_FEEDBACK_BUFFER, 0, 5 * ffi.sizeof'GLfloat', gl.GL_MAP_READ_BIT))
+
+	-- TODO is 'length' in elements while 'offset' is in bytes?  .... smh
+	local feedback = ffi.cast('GLfloat*', outBuffer:map(gl.GL_MAP_READ_BIT))
 	print('feedback', feedback)
 	assert(feedback ~= nil)
 	print(("%f %f %f %f %f"):format(feedback[0], feedback[1], feedback[2], feedback[3], feedback[4]))
-	gl.glUnmapBuffer(gl.GL_TRANSFORM_FEEDBACK_BUFFER)
+	outBuffer:unmap()
 	--]]
-	
+
 	self:requestExit()
 end
 
