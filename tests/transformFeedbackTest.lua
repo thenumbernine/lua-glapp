@@ -78,17 +78,16 @@ void main() {
 		end
 	end
 
-	-- Perform feedback transform
-	gl.glEnable(gl.GL_RASTERIZER_DISCARD)
-
 	outBuffer
 		:bind()
 		:bindBase()	-- () == (0) == layout(binding=...) of our one varying (is it? is binding and location the same?)
+		:unbind()
 
+	-- Perform feedback transform
+	gl.glEnable(gl.GL_RASTERIZER_DISCARD)
 	gl.glBeginTransformFeedback(gl.GL_POINTS)
 	gl.glDrawArrays(gl.GL_POINTS, 0, 5)
 	gl.glEndTransformFeedback()
-
 	gl.glDisable(gl.GL_RASTERIZER_DISCARD)
 	gl.glFlush()
 
@@ -113,6 +112,7 @@ void main() {
 	-- but gles does have glMapBufferRange ... but webgl doesn't ...
 
 	-- TODO is 'length' in elements while 'offset' is in bytes?  .... smh
+	outBuffer:bind()
 	local feedback = ffi.cast('GLfloat*', outBuffer:map(gl.GL_MAP_READ_BIT))
 	print('feedback', feedback)
 	assert(feedback ~= nil)
