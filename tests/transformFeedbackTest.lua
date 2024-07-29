@@ -14,7 +14,25 @@ local GLTransformFeedbackBuffer = require 'gl.transformfeedbackbuffer'
 -- from https://open.gl/feedback
 local App = require 'glapp':subclass()
 
+local useVAO = true
+
 function App:initGL()
+
+	local data = ffi.new('GLfloat[5]', { 1, 2, 3, 4, 5 })
+	local inBuffer = GLArrayBuffer{
+		size = ffi.sizeof'GLfloat' * 5,
+		usage = gl.GL_STATIC_DRAW,
+		data = data,
+	}:unbind()
+
+	local outBuffer = GLTransformFeedbackBuffer{
+		size = ffi.sizeof'GLfloat' * 5,
+		type = gl.GL_FLOAT,
+		count = 5,
+		dim = 1,
+		usage = gl.GL_STATIC_READ,
+	}:unbind()
+
 	local program = GLProgram{
 		version = 'latest',
 		precision = 'best',
@@ -29,34 +47,36 @@ void main() {
 			'outValue',
 			mode = 'interleaved',	-- TODO default mode?
 		},
-	}:useNone()
 
-	local data = ffi.new('GLfloat[5]', { 1, 2, 3, 4, 5 })
-	local inBuffer = GLArrayBuffer{
-		size = ffi.sizeof'GLfloat' * 5,
-		usage = gl.GL_STATIC_DRAW,
-		data = data,
-	}:unbind()
-
-	local vao = GLVertexArray{
-		program = program,
-		attrs = {
+		-- ok here's me misusing GLProgram as a singleton for its attributes
+		attrs = not useVAO and {
 			inValue = {
 				buffer = inBuffer,
 			},
-		},
-	}
+		} or nil,
+	}:useNone()
 
-	local outBuffer = GLTransformFeedbackBuffer{
-		size = ffi.sizeof'GLfloat' * 5,
-		type = gl.GL_FLOAT,
-		count = 5,
-		dim = 1,
-		usage = gl.GL_STATIC_READ,
-	}:unbind()
+	local vao
+	if useVAO then
+		vao = GLVertexArray{
+			program = program,
+			attrs = {
+				inValue = {
+					buffer = inBuffer,
+				},
+			},
+		}
+	end
 
 	program:use()
-	vao:bind()
+	if vao then
+		vao:bind()
+	else
+		-- misuse program obj for buffer<->attr association
+		for name,attr in pairs(program.attrs) do
+			attr:enableAndSet()
+		end
+	end
 
 	-- Perform feedback transform
 	gl.glEnable(gl.GL_RASTERIZER_DISCARD)
@@ -73,7 +93,14 @@ void main() {
 	gl.glFlush()
 
 	program:useNone()
-	vao:unbind()
+	if vao then
+		vao:unbind()
+	else
+		-- misuse program obj for buffer<->attr association
+		for name,attr in pairs(program.attrs) do
+			attr:disable()
+		end
+	end
 
 	-- Fetch and print results
 	-- not available in GLES ... so how do you read data in GLES?
