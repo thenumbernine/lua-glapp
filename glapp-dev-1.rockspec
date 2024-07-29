@@ -30,6 +30,7 @@ build = {
 		["glapp.tests.test_es_directcalls"] = "tests/test_es_directcalls.lua",
 		["glapp.tests.test_tex"] = "tests/test_tex.lua",
 		["glapp.tests.test_vertexattrib"] = "tests/test_vertexattrib.lua",
+		["glapp.tests.transformFeedbackTest"] = "tests/transformFeedbackTest.lua",
 		["glapp.view"] = "view.lua"
 	},
 }
