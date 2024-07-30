@@ -78,18 +78,18 @@ void main() {
 	print'enable 0 & 1'
 	gl.glEnableVertexAttribArray(0)
 	gl.glEnableVertexAttribArray(1)
-	print("GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
-	print("GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=0, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=1, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
 
 	print'disable 0'
 	gl.glDisableVertexAttribArray(0)
-	print("GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
-	print("GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=0, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=1, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
 
 	print'enable 0'
 	gl.glEnableVertexAttribArray(0)
-	print("GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
-	print("GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=0, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=1, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
 
 	print'creating/enabling vao:'
 	local vao = GLVertexArray{
@@ -97,17 +97,17 @@ void main() {
 	}
 	vao:bind()
 
-	print("GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
-	print("GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=0, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=1, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
 	print'enable 1'
 	gl.glEnableVertexAttribArray(1)
-	print("GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
-	print("GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=0, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=1, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
 
 	print'disabling vao:'
 	vao:unbind()
-	print("GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
-	print("GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, size=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=0, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=0, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
+	print("GLAttribute{loc=1, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED'", GLAttribute{loc=1, type=0, dim=0}:get'GL_VERTEX_ATTRIB_ARRAY_ENABLED')
 
 	--]]
 	-- this could double as this in my API
