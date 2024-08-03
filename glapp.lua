@@ -4,6 +4,8 @@ local SDLApp = require 'sdlapp'
 local sdlAssertZero = require 'sdlapp.assert'.zero
 local sdlAssertNonNull = require 'sdlapp.assert'.nonnull
 
+local gl
+
 -- too bad for so long Windows would only ship with GL 1.1
 --  has that changed?
 local addWGL = ffi.os == 'Windows'
@@ -18,7 +20,7 @@ if addWGL then
 	local table = require 'ext.table'
 	local string = require 'ext.string'
 
-	local gl = require 'gl'	-- for GLenum's def
+	gl = require 'gl'	-- for GLenum's def
 	wglFuncs = table()
 
 	ffi.cdef('void* wglGetProcAddress(const char*);')
@@ -81,6 +83,7 @@ function GLApp:initWindow()
 		end
 	end
 
+	gl = require 'gl'
 	if self.initGL then self:initGL() end
 end
 
@@ -111,7 +114,6 @@ It uses a .screenshotContext field for caching the Image buffer of the read pixe
 --]]
 function GLApp:screenshotToFile(filename)
 	local Image = require 'image'
-	local gl = self.gl
 	local w, h = self.width, self.height
 
 	self.screenshotContext = self.screenshotContext or {}
