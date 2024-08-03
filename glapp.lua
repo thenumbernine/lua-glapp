@@ -1,8 +1,8 @@
 local ffi = require 'ffi'
 local sdl = require 'ffi.req' 'sdl'
-local SDLApp = require 'sdlapp'
-local sdlAssertZero = require 'sdlapp.assert'.zero
-local sdlAssertNonNull = require 'sdlapp.assert'.nonnull
+local SDLApp = require 'sdl.app'
+local sdlAssertZero = require 'sdl.assert'.zero
+local sdlAssertNonNull = require 'sdl.assert'.nonnull
 
 local gl
 
