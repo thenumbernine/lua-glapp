@@ -107,9 +107,9 @@ local function nameFor(x)
 end
 
 function Test:event(e)
-	io.write(nameFor(e.type))
-	if e.type == sdl.SDL_WINDOWEVENT then
-		io.write(' ',nameFor(e.window.event))
+	io.write(nameFor(e[0].type))
+	if e[0].type == sdl.SDL_WINDOWEVENT then
+		io.write(' ',nameFor(e[0].window.event))
 	end
 	print()
 end
