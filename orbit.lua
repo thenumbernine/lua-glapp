@@ -42,11 +42,8 @@ return function(cl)
 		return cl.super.update(self, ...)
 	end
 
-	function cl:event(event, eventPtr)
-		local superEvent = cl.super.event
-		if superEvent then
-			superEvent(self, event, eventPtr)
-		end
+	function cl:event(eventPtr)
+		cl.super.event(self, eventPtr)
 
 		local canHandleMouse = true
 		--local canHandleKeyboard = true
@@ -59,39 +56,39 @@ return function(cl)
 		local shiftDown = self.leftShiftDown or self.rightShiftDown
 		local guiDown = self.leftGuiDown or self.rightGuiDown
 		local altDown = self.leftAltDown or self.rightAltDown
-		if event.type == sdl.SDL_MOUSEMOTION
-		or event.type == sdl.SDL_MOUSEWHEEL
+		if eventPtr[0].type == sdl.SDL_MOUSEMOTION
+		or eventPtr[0].type == sdl.SDL_MOUSEWHEEL
 		then
 			if canHandleMouse then
 				local dx, dy
-				if event.type == sdl.SDL_MOUSEMOTION then
-					dx = event.motion.xrel
-					dy = event.motion.yrel
+				if eventPtr[0].type == sdl.SDL_MOUSEMOTION then
+					dx = eventPtr[0].motion.xrel
+					dy = eventPtr[0].motion.yrel
 				else
-					dx = 10 * event.wheel.x
-					dy = 10 * event.wheel.y
+					dx = 10 * eventPtr[0].wheel.x
+					dy = 10 * eventPtr[0].wheel.y
 				end
 				if (self.mouse and self.mouse.leftDown and not guiDown)
-				or event.type == sdl.SDL_MOUSEWHEEL
+				or eventPtr[0].type == sdl.SDL_MOUSEWHEEL
 				then
 					self:mouseDownEvent(dx, dy, shiftDown, guiDown, altDown)
 				end
 			end
-		elseif event.type == sdl.SDL_KEYUP
-		or event.type == sdl.SDL_KEYDOWN
+		elseif eventPtr[0].type == sdl.SDL_KEYUP
+		or eventPtr[0].type == sdl.SDL_KEYDOWN
 		then
-			local down = event.type == sdl.SDL_KEYDOWN
-			if event.key.keysym.sym == sdl.SDLK_LSHIFT then
+			local down = eventPtr[0].type == sdl.SDL_KEYDOWN
+			if eventPtr[0].key.keysym.sym == sdl.SDLK_LSHIFT then
 				self.leftShiftDown = down
-			elseif event.key.keysym.sym == sdl.SDLK_RSHIFT then
+			elseif eventPtr[0].key.keysym.sym == sdl.SDLK_RSHIFT then
 				self.rightShiftDown = down
-			elseif event.key.keysym.sym == sdl.SDLK_LGUI then
+			elseif eventPtr[0].key.keysym.sym == sdl.SDLK_LGUI then
 				self.leftGuiDown = down
-			elseif event.key.keysym.sym == sdl.SDLK_RGUI then
+			elseif eventPtr[0].key.keysym.sym == sdl.SDLK_RGUI then
 				self.rightGuiDown = down
-			elseif event.key.keysym.sym == sdl.SDLK_LALT then
+			elseif eventPtr[0].key.keysym.sym == sdl.SDLK_LALT then
 				self.leftAltDown = down
-			elseif event.key.keysym.sym == sdl.SDLK_RALT then
+			elseif eventPtr[0].key.keysym.sym == sdl.SDLK_RALT then
 				self.rightAltDown = down
 			end
 		end
@@ -130,5 +127,6 @@ return function(cl)
 		end
 	end
 
-	return cl
+	-- subclass so the caller doesn't override these new functions...
+	return cl:subclass()
 end

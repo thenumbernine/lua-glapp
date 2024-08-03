@@ -5,9 +5,10 @@
 ### Dependencies:
 
 - [lua-ext](https://github.com/thenumbernine/lua-ext)
+- [lua-ffi-bindings](https://github.com/thenumbernine/lua-ffi-bindings) for the OpenGL, SDL, etc. bindings
 - [vec-ffi-lua](https://github.com/thenumbernine/vec-ffi-lua)
 - [lua-gl](https://github.com/thenumbernine/lua-gl)
-- [lua-ffi-bindings](https://github.com/thenumbernine/lua-ffi-bindings) for the OpenGL, GLU, SDL bindings
+- [lua-sdlapp](https://github.com/thenumbernine/lua-sdlapp)
 - `glapp.orbit` can detect if the glapp object is a subclass of [lua-imguiapp](https://github.com/thenumbernine/lua-imguiapp) if available.
 
 Notice that this project is the reason why I left the OpenGL parsed header code readable in my lua-ffi-bindings project.

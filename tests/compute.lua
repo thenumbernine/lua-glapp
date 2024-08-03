@@ -159,7 +159,7 @@ void main() {
 	srcTex:toCPU(img.buffer, 0)
 	srcTex:unbind()
 	glreport'here'
-	img:save'src.png'
+	img:save'src-resaved.png'
 
 	-- this is reading dstTex correctly
 	img = img * 0

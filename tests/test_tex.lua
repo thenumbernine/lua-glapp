@@ -10,7 +10,7 @@ local Test = require 'glapp.orbit'()
 Test.title = "Spinning Triangle"
 Test.viewUseBuiltinMatrixMath = true		-- don't use glMatrix* calls
 
-Test.viewDist = 20
+Test.viewDist = 10
 
 function Test:initGL()
 	local version = ffi.new'SDL_version[1]'
@@ -25,8 +25,6 @@ function Test:initGL()
 	print'GL_EXTENSIONS:'
 	print(' '..ffi.string(gl.glGetString(gl.GL_EXTENSIONS)):gsub(' ', '\n '))
 
-	self.view.ortho = true
-	self.view.orthoSize = 10
 
 	local img = Image'src.png'
 	local tex = GLTex2D{
@@ -66,23 +64,28 @@ void main() {
 		},
 		vertexes = {
 			data = {
-				-5, 6,
-				5, 6,
-				0, -4,
+				-5, 5,
+				5, 5,
+				-5, -5,
+				5, -5,
 			},
 			dim = 2,
 		},
 		geometry = {
 			mode = gl.GL_TRIANGLES,
+			indexes = {
+				data = {0, 1, 2, 3, 2, 1},
+			},
 		},
 		texs = {tex},
 		attrs = {
 			tc = {
 				buffer = {
 					data = {
-						1, 0,
 						0, 0,
-						.5, 1,
+						1, 0,
+						0, 1,
+						1, 1,
 					},
 					dim = 2,
 				},
@@ -90,9 +93,10 @@ void main() {
 			color = {
 				buffer = {
 					data = {
-						1, 0, 0,
-						0, 1, 0,
-						0, 0, 1,
+						1, .3, .3,
+						.3, 1, .3,
+						.3, .3, 1,
+						1, 1, 1,
 					},
 					dim = 3,
 				},
