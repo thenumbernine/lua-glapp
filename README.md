@@ -26,3 +26,9 @@ I also added view.lua and orbit.lua to add behaviors to GLApp classes
 -	[[launch]](https://thenumbernine.github.io/glapp/?dir=glapp/tests&file=test_tex.lua)
 	[[source]](https://thenumbernine.github.io/lua/glapp/tests/test_tex.lua)
 	texture demo
+
+Thoughts on the namespace, should I move this inside of `gl` as `gl.app`?
+- `gl/app.lua` and `gl/tests/` are both available.
+- It would match `sdl/app.lua` and a few other projects whose app class goes in `name/app.lua`.
+- `imguiapp` could be moved to `imgui/app.lua`.
+- but namespace doesn't imply app, i.e. `cl` is a namespace of OpenCL functions, it doesn't need an app subclass, so there's no reason gl should either.
