@@ -1,7 +1,6 @@
 local class = require 'ext.class'
 local vec3d = require 'vec-ffi.vec3d'
 local quatd = require 'vec-ffi.quatd'
-local gl = require 'gl'
 
 local View = class()
 
@@ -102,8 +101,12 @@ function View:getBounds(aspectRatio)
 	end
 end
 
+-- don't require until you need it
+local gl
+
 function View:setupProjection(aspectRatio)
 	if not self.useBuiltinMatrixMath then
+		gl = gl or require 'gl'
 		gl.glMatrixMode(gl.GL_PROJECTION)
 		gl.glLoadIdentity()
 		if not self.ortho then
@@ -122,6 +125,7 @@ end
 
 function View:setupModelView()
 	if not self.useBuiltinMatrixMath then
+		gl = gl or require 'gl'
 		gl.glMatrixMode(gl.GL_MODELVIEW)
 		gl.glLoadIdentity()
 		local aa = self.angle:conjugate():toAngleAxis()
