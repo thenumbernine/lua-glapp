@@ -2,6 +2,7 @@
 -- test but with textures
 local ffi = require 'ffi'
 local gl = require 'gl.setup' (... or 'OpenGLES3')
+local glreport = require 'gl.report'
 local getTime = require 'ext.timer'.getTime
 local Image = require 'image'
 local GLTex2D = require 'gl.tex2d'
@@ -18,13 +19,16 @@ function Test:initGL()
 	sdl.SDL_GetVersion(version)
 	print'SDL_GetVersion:'
 	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
-	print('GLES Version', ffi.string(gl.glGetString(gl.GL_VERSION)))
+	print('GL_VERSION', ffi.string(gl.glGetString(gl.GL_VERSION)))
 	print('GL_SHADING_LANGUAGE_VERSION', ffi.string(gl.glGetString(gl.GL_SHADING_LANGUAGE_VERSION)))
 	print('glsl version', require 'gl.program'.getVersionPragma(false))
 	print('glsl es version', require 'gl.program'.getVersionPragma(true))
 	print'GL_EXTENSIONS:'
-	print(' '..ffi.string(gl.glGetString(gl.GL_EXTENSIONS)):gsub(' ', '\n '))
-
+	glreport 'before glGetString GL_EXTENSIONS'
+	local extstr = gl.glGetString(gl.GL_EXTENSIONS)
+	glreport 'after glGetString GL_EXTENSIONS'
+	extstr = extstr == nil and '' or string.trim(ffi.string(extstr))
+	print(' '..ffi.string(extstr):gsub(' ', '\n '))
 
 	local img = Image'src.png'
 	local tex = GLTex2D{

@@ -1,7 +1,7 @@
 #!/usr/bin/env luajit
 local ffi = require 'ffi'
 
-local gl = require 'gl'
+local gl = require 'gl.setup' (... or 'OpenGL')
 --[[
 ubuntu 20.04
 valgrind luajit-openresty-2.1.0-beta3-debug

@@ -66,6 +66,28 @@ function GLApp:initWindow()
 	sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_DOUBLEBUFFER, 1))
 	--]]
 
+	-- [[ OSX wants to set GL to version 2.1 even though they claim they support up to 4.1 ...
+	-- is there any way to query the highest available GL version from SDL?  Or do I just have to know that, because it's OSX, it's going to be extra-retarded?
+	-- Annnd..... this gives me a black screen with no errors.
+	-- Running without these gets us GL 2.1 compat
+	-- Running with the context version request only still gets us 2.1
+	-- Running with SDL_GL_CONTEXT_PROFILE_MASK gets us a black screen
+	-- Running with *only* SDL_GL_CONTEXT_PROFILE_MASK  says I'm getting version 4.1 ... but yeah blank screen ... and glCreateShader fails for GL_VERTEX_SHADER
+	-- This page: https://stackoverflow.com/questions/48714591/modern-opengl-macos-only-black-screen
+	-- ... sounds like I *must* create a VAO, therefore deprecated GL 1 and GL 2 stuff doesn't work with GL core 4 ...
+	-- ... which means I probably want a toggle here, for OSX: GL 2.1 or GL core 4.1 ...
+	if ffi.os == 'OSX' then
+		--local version = {2, 1}
+		--local verison = {3, 3}
+		local version = {4, 1}
+		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MAJOR_VERSION, version[1]))
+		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MINOR_VERSION, version[2]))
+		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_PROFILE_MASK, sdl.SDL_GL_CONTEXT_PROFILE_CORE))
+		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_FLAGS, sdl.SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG))
+		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_ACCELERATED_VISUAL, 1))
+	end
+	--]]
+
 	GLApp.super.initWindow(self)
 
 	self.sdlCtx = sdlAssertNonNull(sdl.SDL_GL_CreateContext(self.window))

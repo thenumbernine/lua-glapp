@@ -27,7 +27,8 @@ function App:initGL()
 		local display = egl.eglGetDisplay(egl.EGL_DEFAULT_DISPLAY)
 		print('display', eglDisplay)
 		egl.eglInitialize(display, nil, nil)
-		local attributeListSrc = {egl.EGL_RED_SIZE, 1,
+		local attributeListSrc = {
+			egl.EGL_RED_SIZE, 1,
 			egl.EGL_GREEN_SIZE, 1,
 			egl.EGL_BLUE_SIZE, 1,
 			egl.EGL_NONE
