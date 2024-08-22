@@ -1,6 +1,7 @@
 #!/usr/bin/env luajit
 -- test but with textures
 local ffi = require 'ffi'
+local string = require 'ext.string'
 local gl = require 'gl.setup' (... or 'OpenGLES3')
 local glreport = require 'gl.report'
 local getTime = require 'ext.timer'.getTime
@@ -22,7 +23,11 @@ function Test:initGL()
 	print('GL_VERSION', ffi.string(gl.glGetString(gl.GL_VERSION)))
 	print('GL_SHADING_LANGUAGE_VERSION', ffi.string(gl.glGetString(gl.GL_SHADING_LANGUAGE_VERSION)))
 	print('glsl version', require 'gl.program'.getVersionPragma(false))
-	print('glsl es version', require 'gl.program'.getVersionPragma(true))
+	xpcall(function()
+		print('glsl es version', require 'gl.program'.getVersionPragma(true))
+	end, function(err)
+		print(err..'\n'..debug.traceback())
+	end)
 	print'GL_EXTENSIONS:'
 	glreport 'before glGetString GL_EXTENSIONS'
 	local extstr = gl.glGetString(gl.GL_EXTENSIONS)

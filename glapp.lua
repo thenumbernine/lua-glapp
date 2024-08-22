@@ -6,24 +6,25 @@ local sdlAssertNonNull = require 'sdl.assert'.nonnull
 
 local gl
 
--- too bad for so long Windows would only ship with GL 1.1
---  has that changed?
-local addWGL = ffi.os == 'Windows'
+-- Too bad for so long Windows would only ship with GL 1.1 ... has that changed?
+-- In fact no, things got worse, as now Apple has thrown its hat into the ring of shoddy OpenGL support.
+-- But if we go the GLEW-like route for OSX, we can do >2.1 stuff via extensions, however it still only gives us GLSL support up to 1.20 ... smh
+local addGLFuncsFromGetProcAddress = ffi.os == 'Windows'
+	-- or ffi.os == 'OSX' -- getting a require loop from this.  how does it work in windows but not osx?
 
 -- this has to be requestExit for all windows opengl programs, so I figure as much to do it here ...
 -- that makes this piece of code not-cross-platform
 -- the danger is, the whole purpose of passing gl through init args is to provide non-ffi.gl gl's (like EGL)
 -- of course that was experimental to begin with
 -- this code preys explicitly upon ffi.gl
-local wglFuncs
-if addWGL then
+local glFuncs
+if addGLFuncsFromGetProcAddress then
 	local table = require 'ext.table'
 	local string = require 'ext.string'
 
 	gl = require 'gl'	-- for GLenum's def
-	wglFuncs = table()
+	glFuncs = table()
 
-	ffi.cdef('void* wglGetProcAddress(const char*);')
 	for _,line in ipairs(string.split(string.trim(gl.code),'[\r\n]')) do
 		local returnType, func, params
 		xpcall(function()
@@ -36,7 +37,7 @@ if addWGL then
 					-- lazy tokenizer:
 					line = line:gsub('%*', ' * '):gsub('%s+', ' ')	-- help the lazy tokenzier parse return types
 					returnType, func, params = line:match('^(.+)%s+(%S+)%s*%((.*)%);%s*$')
-					wglFuncs:insert{returnType=returnType, func=func, params=params}
+					glFuncs:insert{returnType=returnType, func=func, params=params}
 				end
 			end
 		end, function(err)
@@ -76,6 +77,9 @@ function GLApp:initWindow()
 	-- This page: https://stackoverflow.com/questions/48714591/modern-opengl-macos-only-black-screen
 	-- ... sounds like I *must* create a VAO, therefore deprecated GL 1 and GL 2 stuff doesn't work with GL core 4 ...
 	-- ... which means I probably want a toggle here, for OSX: GL 2.1 or GL core 4.1 ...
+	-- I want to use OpenGL 2.1 w/extensions, and get the best of old and new OpenGL
+	--  however when I choose this, OSX only gives me GLSL up to 1.20 ... smh
+	-- So if I want new GLSL then I am forced to use OpenGL 4.1 core ...
 	if ffi.os == 'OSX' then
 		--local version = {2, 1}
 		--local verison = {3, 3}
@@ -98,10 +102,10 @@ function GLApp:initWindow()
 	--)
 
 	-- now that gl is loaded, if we're windows then we need to load extensions
-	if addWGL then
-		for _,info in ipairs(wglFuncs) do
+	if addGLFuncsFromGetProcAddress then
+		for _,info in ipairs(glFuncs) do
 			local func = info.func
-			gl[func] = ffi.new('PFN'..func:upper()..'PROC', gl.wglGetProcAddress(func))
+			gl[func] = ffi.new('PFN'..func:upper()..'PROC', sdl.SDL_GL_GetProcAddress(func))
 		end
 	end
 
