@@ -6,7 +6,6 @@ local getTime = require 'ext.timer'.getTime
 
 local Test = require 'glapp.orbit'()
 Test.title = "Spinning Triangle"
-Test.viewUseBuiltinMatrixMath = true		-- don't use glMatrix* calls
 
 Test.viewDist = 20
 

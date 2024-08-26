@@ -13,7 +13,6 @@ matrix_ffi.real = 'float'	-- default matrix_ffi type
 
 
 local Test = require 'glapp.orbit'()
-Test.viewUseBuiltinMatrixMath = true
 Test.title = "Spinning Points"
 
 local numPts

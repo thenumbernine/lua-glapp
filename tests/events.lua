@@ -6,7 +6,7 @@ local gl = require 'gl'
 local sdl = require 'ffi.req' 'sdl'
 
 local Test = require 'glapp.orbit'()
-
+Test.viewUseGLMatrixMode = true
 Test.title = "Spinning Triangle"
 
 function Test:initGL()

@@ -10,7 +10,6 @@ local GLTex2D = require 'gl.tex2d'
 
 local Test = require 'glapp.orbit'()
 Test.title = "Spinning Triangle"
-Test.viewUseBuiltinMatrixMath = true		-- don't use glMatrix* calls
 
 Test.viewDist = 10
 

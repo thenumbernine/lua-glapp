@@ -11,22 +11,22 @@ View.orthoSize = 10	-- TODO use fovY somehow?
 View.fovY = 90
 
 -- set this to 'true' on the class before construction , or as a ctor arg
-View.useBuiltinMatrixMath = false
+View.useGLMatrixMode = false
 
 -- static method applied to GLApp classes
 function View.apply(cl)
 	cl = class(cl)
 	function cl:init(args, ...)
 		cl.super.init(self, args, ...)
-		local useBuiltinMatrixMath
-		if self.viewUseBuiltinMatrixMath ~= nil then
-			useBuiltinMatrixMath = self.viewUseBuiltinMatrixMath
+		local useGLMatrixMode
+		if self.viewUseGLMatrixMode ~= nil then
+			useGLMatrixMode = self.viewUseGLMatrixMode
 		end
-		if args and args.viewUseBuiltinMatrixMath ~= nil then
-			useBuiltinMatrixMath = args.viewUseBuiltinMatrixMath
+		if args and args.viewUseGLMatrixMode ~= nil then
+			useGLMatrixMode = args.viewUseGLMatrixMode
 		end
 		self.view = View{
-			useBuiltinMatrixMath = useBuiltinMatrixMath,
+			useGLMatrixMode = useGLMatrixMode,
 		}
 		self.view.pos.z = self.viewDist or self.view.pos.z
 	end
@@ -56,12 +56,12 @@ function View:init(args)
 		if args.pos then self.pos:set(unpack(args.pos)) end
 		if args.orbit then self.orbit:set(unpack(args.orbit)) end
 		if args.angle then self.angle:set(unpack(args.angle)):normalize(self.angle) end
-		if args.useBuiltinMatrixMath ~= nil then
-			self.useBuiltinMatrixMath = args.useBuiltinMatrixMath
+		if args.useGLMatrixMode ~= nil then
+			self.useGLMatrixMode = args.useGLMatrixMode
 		end
 	end
 
-	if self.useBuiltinMatrixMath then
+	if not self.useGLMatrixMode then
 		local matrix = require 'matrix.ffi'
 		self.projMat = matrix({4,4}, 'float'):zeros():setIdent()
 		self.mvMat = matrix({4,4}, 'float'):zeros():setIdent()
@@ -74,7 +74,7 @@ end
 function View:setup(aspectRatio)
 	self:setupProjection(aspectRatio)
 	self:setupModelView()
-	if self.useBuiltinMatrixMath then
+	if not self.useGLMatrixMode then
 		self.mvProjMat:mul4x4(self.projMat, self.mvMat)
 	end
 end
@@ -105,7 +105,7 @@ end
 local gl
 
 function View:setupProjection(aspectRatio)
-	if not self.useBuiltinMatrixMath then
+	if self.useGLMatrixMode then
 		gl = gl or require 'gl'
 		gl.glMatrixMode(gl.GL_PROJECTION)
 		gl.glLoadIdentity()
@@ -124,7 +124,7 @@ function View:setupProjection(aspectRatio)
 end
 
 function View:setupModelView()
-	if not self.useBuiltinMatrixMath then
+	if self.useGLMatrixMode then
 		gl = gl or require 'gl'
 		gl.glMatrixMode(gl.GL_MODELVIEW)
 		gl.glLoadIdentity()

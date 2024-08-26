@@ -7,7 +7,7 @@ local GLTexCube = require 'gl.texcube'
 --local App = require 'glapp.orbit'()
 local App = require 'imguiapp.withorbit'()
 
-App.title = "Spinning Triangle"
+App.title = "Cubemaps"
 
 -- TODO provide your own skybox
 local base = ...
