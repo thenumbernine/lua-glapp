@@ -58,7 +58,7 @@ function Test:initGL()
 	mvMat = matrix({4,4}, 'float'):zeros():setIdent()
 	mvProjMat = matrix({4,4}, 'float'):zeros():setIdent()
 
-	local versionHeader = require 'gl.program'.getVersionPragma(true)..'\n'
+	local versionHeader = require 'gl.program'.getVersionPragma()..'\n'
 
 	local vertexShaderID = gl.glCreateShader(gl.GL_VERTEX_SHADER)
 	local code = versionHeader..[[

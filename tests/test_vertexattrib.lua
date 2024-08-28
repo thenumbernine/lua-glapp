@@ -29,7 +29,7 @@ local GLProgram = require 'gl.program'
 local App = require 'glapp':subclass()
 function App:initGL()
 
-	local glslheader = GLProgram.getVersionPragma(true)..'\n'
+	local glslheader = GLProgram.getVersionPragma()..'\n'
 		..'precision highp float;\n'
 
 	-- minimal shader

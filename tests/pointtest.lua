@@ -100,6 +100,7 @@ void main() {
 end
 
 local hasPointSize = op.safeindex(gl, 'GL_PROGRAM_POINT_SIZE')
+local hasPointSprite = op.safeindex(gl, 'GL_POINT_SPRITE')
 function Test:update()
 	Test.super.update(self)
 
@@ -111,7 +112,7 @@ function Test:update()
 	self.view.mvProjMat:mul4x4(self.view.projMat, self.view.mvMat)
 
 	gl.glEnable(gl.GL_DEPTH_TEST)
-	if hasPointSize then
+	if hasPointSize and hasPointSprite then
 		gl.glEnable(gl.GL_PROGRAM_POINT_SIZE)
 		gl.glEnable(gl.GL_POINT_SPRITE)
 	end
@@ -120,7 +121,7 @@ function Test:update()
 	self.sceneObj.uniforms.projectionMatrix = self.view.projMat.ptr
 	self.sceneObj:draw()
 
-	if hasPointSize then
+	if hasPointSize and hasPointSprite then
 		gl.glDisable(gl.GL_POINT_SPRITE)
 		gl.glDisable(gl.GL_PROGRAM_POINT_SIZE)
 	end
