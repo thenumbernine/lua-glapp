@@ -61,7 +61,6 @@ function App:initGL()
 		return glGlobal:get(name, ...)
 	end
 	local function show(name, ...)
---print('show', name, ...)
 		local result = table.pack(get(name, ...))
 		io.write(name)
 		local n = select('#', ...)
@@ -77,6 +76,12 @@ function App:initGL()
 		return result:unpack()
 	end
 
+--[[ can it be this easy? ... not yet .. and also TODO store them as indexes also for in-order iteration
+	for _,name in ipairs(table.keys(glGlobal.getInfo):sort()) do
+		show(name)
+	end
+do self:requestExit() return end
+--]]
 	show'GL_VENDOR'
 	show'GL_RENDERER'
 	show'GL_VERSION'
