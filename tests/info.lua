@@ -61,6 +61,7 @@ function App:initGL()
 		return glGlobal:get(name, ...)
 	end
 	local function show(name, ...)
+--print('show', name, ...)
 		local result = table.pack(get(name, ...))
 		io.write(name)
 		local n = select('#', ...)
@@ -130,7 +131,7 @@ function App:initGL()
 	show'GL_POLYGON_OFFSET_POINT'			-- gl 4 but not gles 300
 
 	show'GL_BLEND'
-	show'GL_BLEND_COLOR'						-- getting this causes a segfault upon exit ... gl driver bug?
+	show'GL_BLEND_COLOR'
 	show'GL_BLEND_DST_ALPHA'
 	show'GL_BLEND_DST_RGB'
 	show'GL_BLEND_EQUATION_RGB'
@@ -138,7 +139,7 @@ function App:initGL()
 	show'GL_BLEND_SRC_ALPHA'
 	show'GL_BLEND_SRC_RGB'
 
-	show'GL_COLOR_CLEAR_VALUE'				-- segfault upon exit
+	show'GL_COLOR_CLEAR_VALUE'
 	show'GL_COLOR_LOGIC_OP'					-- gl 4 but not gles 300
 	show'GL_COLOR_WRITEMASK'
 
