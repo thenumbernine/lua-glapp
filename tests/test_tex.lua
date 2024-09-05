@@ -19,20 +19,20 @@ function Test:initGL()
 	sdl.SDL_GetVersion(version)
 	print'SDL_GetVersion:'
 	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
-	print('GL_VERSION', ffi.string(gl.glGetString(gl.GL_VERSION)))
-	print('GL_SHADING_LANGUAGE_VERSION', ffi.string(gl.glGetString(gl.GL_SHADING_LANGUAGE_VERSION)))
+	
+	local glGlobal = require 'gl.global'
+	print('GL_VERSION', glGlobal:get'GL_VERSION')
+	print('GL_SHADING_LANGUAGE_VERSION', glGlobal:get'GL_SHADING_LANGUAGE_VERSION')
 	print('glsl version', require 'gl.program'.getVersionPragma(false))
 	xpcall(function()
 		print('glsl es version', require 'gl.program'.getVersionPragma(true))
 	end, function(err)
 		print(err..'\n'..debug.traceback())
 	end)
+	
 	print'GL_EXTENSIONS:'
-	glreport 'before glGetString GL_EXTENSIONS'
-	local extstr = gl.glGetString(gl.GL_EXTENSIONS)
-	glreport 'after glGetString GL_EXTENSIONS'
-	extstr = extstr == nil and '' or string.trim(ffi.string(extstr))
-	print(' '..ffi.string(extstr):gsub(' ', '\n '))
+	local extstr = glGlobal:get'GL_EXTENSIONS' or ''
+	print(' '..extstr:gsub(' ', '\n '))
 
 	local img = Image'src.png'
 	local tex = GLTex2D{
