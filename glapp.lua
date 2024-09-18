@@ -57,7 +57,7 @@ GLApp.title = "OpenGL App"
 
 GLApp.sdlCreateWindowFlags = bit.bor(GLApp.sdlCreateWindowFlags, sdl.SDL_WINDOW_OPENGL)
 
-function GLApp:initWindow()
+function GLApp:sdlGLSetAttributes()
 	-- [[ needed for windows, not for ... android? I forget ...
 	sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_RED_SIZE, 8))
 	sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_GREEN_SIZE, 8))
@@ -91,7 +91,10 @@ function GLApp:initWindow()
 		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_ACCELERATED_VISUAL, 1))
 	end
 	--]]
+end
 
+function GLApp:initWindow()
+	self:sdlGLSetAttributes()
 	GLApp.super.initWindow(self)
 
 	self.sdlCtx = sdlAssertNonNull(sdl.SDL_GL_CreateContext(self.window))
