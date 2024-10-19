@@ -2,8 +2,9 @@
 -- ES test using raw gl calls
 local ffi = require 'ffi'
 local gl = require 'gl.setup' (... or 'OpenGLES3')
-local matrix = require 'matrix.ffi'
+local assert = require 'ext.assert'
 local getTime = require 'ext.timer'.getTime
+local matrix = require 'matrix.ffi'
 
 local Test = require 'glapp':subclass()
 Test.title = "Spinning Triangle"
@@ -152,7 +153,7 @@ void main() {
 		5, -4,
 		0, 6
 	)
-	assert(ffi.sizeof(vertexData) == 6 * 4)
+	assert.eq(ffi.sizeof(vertexData), 6 * 4)
 	do
 		local id = ffi.new'GLuint[1]'
 		gl.glGenBuffers(1, id)
@@ -167,7 +168,7 @@ void main() {
 		0, 1, 0,
 		0, 0, 1
 	)
-	assert(ffi.sizeof(colorData) == 9 * 4)
+	assert.eq(ffi.sizeof(colorData), 9 * 4)
 	do
 		local id = ffi.new'GLuint[1]'
 		gl.glGenBuffers(1, id)
@@ -242,7 +243,7 @@ function Test:update()
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
 	end
 
-	gl.glDrawArrays(gl.GL_TRIANGLES, 0, 6)
+	gl.glDrawArrays(gl.GL_TRIANGLES, 0, 3)
 
 	if vaoID then
 		gl.glBindVertexArray(0)
