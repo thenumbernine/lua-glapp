@@ -124,15 +124,14 @@ function View:setupProjection(aspectRatio)
 end
 
 function View:setupModelView()
+	local aa = self.angle:conjugate():toAngleAxis()
 	if self.useGLMatrixMode then
 		gl = gl or require 'gl'
 		gl.glMatrixMode(gl.GL_MODELVIEW)
 		gl.glLoadIdentity()
-		local aa = self.angle:conjugate():toAngleAxis()
 		gl.glRotated(aa.w, aa.x, aa.y, aa.z)
 		gl.glTranslated(-self.pos.x, -self.pos.y, -self.pos.z)
 	else
-		local aa = self.angle:conjugate():toAngleAxis()
 		self.mvMat:setRotate(math.rad(aa.w), aa.x, aa.y, aa.z)
 			:applyTranslate(-self.pos.x, -self.pos.y, -self.pos.z)
 	end
