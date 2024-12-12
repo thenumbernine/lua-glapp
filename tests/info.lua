@@ -27,17 +27,17 @@ function App:initGL()
 		-- seems no
 		local display = egl.eglGetDisplay(egl.EGL_DEFAULT_DISPLAY)
 		print('display', eglDisplay)
-		egl.eglInitialize(display, nil, nil)
+		local eglVersion = ffi.new('EGLint[2]')
+		egl.eglInitialize(display, eglVersion+0, eglVersion+1)
+		print('EGL version from eglInitialize:', eglVersion[0], eglVersion[1])
 		local attributeListSrc = {
 			egl.EGL_RED_SIZE, 1,
 			egl.EGL_GREEN_SIZE, 1,
 			egl.EGL_BLUE_SIZE, 1,
+			EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,	-- tell EGL to use GLES3 ... that's right, GLES3, even tho it says ES2 ...
 			egl.EGL_NONE
 		}
-		local attributeList = ffi.new('EGLint[?]', #attributeListSrc)
-		for i=1,#attributeListSrc do
-			attributeList[i-1] = attributeListSrc[i]
-		end
+		local attributeList = ffi.new('EGLint['..#attributeListSrc..']', attributeListSrc)
 		local pconfig = ffi.new('EGLConfig[1]')
 		local pnumConfig = ffi.new('EGLint[1]')
 		egl.eglChooseConfig(display, attributeList, pconfig, 1, pnumConfig);
