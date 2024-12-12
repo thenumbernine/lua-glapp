@@ -1,7 +1,8 @@
 #!/usr/bin/env luajit
 -- ES test using gl.sceneobject and objects ...
+local cmdline = require 'ext.cmdline'(...)
 local ffi = require 'ffi'
-local gl = require 'gl.setup' (... or 'OpenGLES3')
+local gl = require 'gl.setup' (cmdline.gl or 'OpenGLES3')
 local getTime = require 'ext.timer'.getTime
 
 local Test = require 'glapp.orbit'()
@@ -19,15 +20,26 @@ function Test:initGL()
 	local glGlobal = require 'gl.global'
 	print('GL_VERSION', glGlobal:get'GL_VERSION')
 	print('GL_SHADING_LANGUAGE_VERSION', glGlobal:get'GL_SHADING_LANGUAGE_VERSION')
-	print('glsl version', require 'gl.program'.getVersionPragma(false))
-	print('glsl es version', require 'gl.program'.getVersionPragma(true))
+	io.write'glsl version\t'
+	xpcall(function()
+		print(require 'gl.program'.getVersionPragma(false))
+	end, function(err)
+		print('error: '..tostring(err))
+	end)
+
+	io.write'glsl es version\t'
+	xpcall(function()
+		print(require 'gl.program'.getVersionPragma(true))
+	end, function(err)
+		print('error: '..tostring(err))
+	end)
 
 	self.view.ortho = true
 	self.view.orthoSize = 10
 
 	self.obj = require 'gl.sceneobject'{
 		program = {
-			version = 'latest',
+			version = cmdline.glsl or 'latest',
 			precision = 'best',
 			vertexCode = [[
 in vec2 vertex;

@@ -82,8 +82,9 @@ function GLApp:sdlGLSetAttributes()
 	-- So if I want new GLSL then I am forced to use OpenGL 4.1 core ...
 	if ffi.os == 'OSX' then
 		--local version = {2, 1}
-		--local verison = {3, 3}
+		--local version = {3, 3}
 		local version = {4, 1}
+		--local version = {4, 6}
 		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MAJOR_VERSION, version[1]))
 		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MINOR_VERSION, version[2]))
 		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_PROFILE_MASK, sdl.SDL_GL_CONTEXT_PROFILE_CORE))
