@@ -16,10 +16,11 @@ function Test:initGL()
 	sdl.SDL_GetVersion(version)
 	print'SDL_GetVersion:'
 	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
-	
+
 	local glGlobal = require 'gl.global'
 	print('GL_VERSION', glGlobal:get'GL_VERSION')
 	print('GL_SHADING_LANGUAGE_VERSION', glGlobal:get'GL_SHADING_LANGUAGE_VERSION')
+
 	io.write'glsl version\t'
 	xpcall(function()
 		print(require 'gl.program'.getVersionPragma(false))

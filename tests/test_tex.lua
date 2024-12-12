@@ -1,8 +1,9 @@
 #!/usr/bin/env luajit
 -- test but with textures
+local cmdline = require 'ext.cmdline'(...)
 local ffi = require 'ffi'
 local string = require 'ext.string'
-local gl = require 'gl.setup' (... or 'OpenGLES3')
+local gl = require 'gl.setup' (cmdline.gl or 'OpenGLES3')
 local glreport = require 'gl.report'
 local getTime = require 'ext.timer'.getTime
 local Image = require 'image'
@@ -19,17 +20,25 @@ function Test:initGL()
 	sdl.SDL_GetVersion(version)
 	print'SDL_GetVersion:'
 	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
-	
+
 	local glGlobal = require 'gl.global'
 	print('GL_VERSION', glGlobal:get'GL_VERSION')
 	print('GL_SHADING_LANGUAGE_VERSION', glGlobal:get'GL_SHADING_LANGUAGE_VERSION')
-	print('glsl version', require 'gl.program'.getVersionPragma(false))
+
+	io.write'glsl version\t'
 	xpcall(function()
-		print('glsl es version', require 'gl.program'.getVersionPragma(true))
+		print(require 'gl.program'.getVersionPragma(false))
+	end, function(err)
+		print('error: '..tostring(err))
+	end)
+
+	io.write'glsl es version\t'
+	xpcall(function()
+		print(require 'gl.program'.getVersionPragma(true))
 	end, function(err)
 		print(err..'\n'..debug.traceback())
 	end)
-	
+
 	print'GL_EXTENSIONS:'
 	local extstr = glGlobal:get'GL_EXTENSIONS' or ''
 	print(' '..extstr:gsub(' ', '\n '))
@@ -42,7 +51,7 @@ function Test:initGL()
 
 	self.obj = require 'gl.sceneobject'{
 		program = {
-			version = 'latest',
+			version = cmdline.glsl or 'latest',
 			precision = 'best',
 			vertexCode = [[
 in vec2 vertex;
