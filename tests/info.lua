@@ -15,11 +15,10 @@ local App = require 'glapp':subclass()
 function App:initGL()
 	local glGlobal = require 'gl.global'
 
-	local ffireq = require 'ffi.req'
-	local egl = op.land(pcall(ffireq, 'EGL'))
-	if not egl then
-		print('EGL not found')
-	else
+	xpcall(function()
+		local ffireq = require 'ffi.req'
+		local egl = assert(op.land(pcall(ffireq, 'EGL')), 'EGL not found')
+
 		-- how do I find GLES version?  cuz GL doen't show it ...
 		-- GLES/OpenGLES1.h has GL_VERSION, but GL_VERSION returns the same as it does for non-ES ...
 		-- [[ can EGL version help?
@@ -27,15 +26,20 @@ function App:initGL()
 		-- seems no
 		local display = egl.eglGetDisplay(egl.EGL_DEFAULT_DISPLAY)
 		print('display', display)
+		assert.ne(display, egl.EGL_NO_DISPLAY, "eglGetDisplay(EGL_DEFAULT_DISPLAY) failed")
+
 		local eglVersion = ffi.new('EGLint[2]')
+		-- how to debug eglInitialize failing:
+		-- env DYLD_PRINT_BINDINGS=YES DYLD_PRINT_LIBRARIES=YES ./info.lua
 		assert.eq(egl.EGL_TRUE, egl.eglInitialize(display, eglVersion+0, eglVersion+1), 'eglInitialize failed')
 		print('EGL version from eglInitialize:', eglVersion[0], eglVersion[1])
+
 		local attributeListSrc = {
 			egl.EGL_RED_SIZE, 1,
 			egl.EGL_GREEN_SIZE, 1,
 			egl.EGL_BLUE_SIZE, 1,
-			EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,	-- tell EGL to use GLES3 ... that's right, GLES3, even tho it says ES2 ...
-			egl.EGL_NONE
+			egl.EGL_RENDERABLE_TYPE, egl.EGL_OPENGL_ES2_BIT,	-- tell EGL to use GLES3 ... that's right, GLES3, even tho it says ES2 ...
+			egl.EGL_NONE,
 		}
 		local attributeList = ffi.new('EGLint['..#attributeListSrc..']', attributeListSrc)
 		local pconfig = ffi.new('EGLConfig[1]')
@@ -55,7 +59,9 @@ function App:initGL()
 			local str = strptr ~= nil and ffi.string(strptr) or 'null'
 			print(field, str)
 		end
-	end
+	end, function(err)
+		print(err)
+	end)
 
 	local function get(name, ...)
 		return glGlobal:get(name, ...)
