@@ -26,9 +26,9 @@ function App:initGL()
 		-- https://registry.khronos.org/EGL/sdk/docs/man/html/eglIntro.xhtml
 		-- seems no
 		local display = egl.eglGetDisplay(egl.EGL_DEFAULT_DISPLAY)
-		print('display', eglDisplay)
+		print('display', display)
 		local eglVersion = ffi.new('EGLint[2]')
-		egl.eglInitialize(display, eglVersion+0, eglVersion+1)
+		assert.eq(egl.EGL_TRUE, egl.eglInitialize(display, eglVersion+0, eglVersion+1), 'eglInitialize failed')
 		print('EGL version from eglInitialize:', eglVersion[0], eglVersion[1])
 		local attributeListSrc = {
 			egl.EGL_RED_SIZE, 1,
