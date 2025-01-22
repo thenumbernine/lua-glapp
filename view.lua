@@ -56,6 +56,11 @@ function View:init(args)
 		if args.pos then self.pos:set(unpack(args.pos)) end
 		if args.orbit then self.orbit:set(unpack(args.orbit)) end
 		if args.angle then self.angle:set(unpack(args.angle)):normalize(self.angle) end
+		self.znear = args.znear
+		self.zfar = args.zfar
+		if args.ortho ~= nil then self.ortho = args.ortho end
+		self.orthoSize = args.orthoSize
+		self.fovY = args.fovY
 		if args.useGLMatrixMode ~= nil then
 			self.useGLMatrixMode = args.useGLMatrixMode
 		end
