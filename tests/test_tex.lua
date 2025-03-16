@@ -3,7 +3,7 @@
 local cmdline = require 'ext.cmdline'(...)
 local ffi = require 'ffi'
 local string = require 'ext.string'
-local gl = require 'gl.setup' (cmdline.gl or 'OpenGLES3')
+local gl = require 'gl.setup' (cmdline.gl or (js and 'OpenGLES3' or nil))	-- if js i.e. web wrapper then use OpenGLES3
 local glreport = require 'gl.report'
 local getTime = require 'ext.timer'.getTime
 local Image = require 'image'
