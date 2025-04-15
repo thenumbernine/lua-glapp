@@ -2,7 +2,7 @@
 local cmdline = require 'ext.cmdline'(...)
 local op = require 'ext.op'
 local ffi = require 'ffi'
-local sdl = require 'ffi.req' 'sdl'
+local sdl = require 'sdl'
 local vec3f = require 'vec-ffi.vec3f'
 local gl = require 'gl.setup'(cmdline.gl or 'OpenGL')
 local glreport = require 'gl.report'

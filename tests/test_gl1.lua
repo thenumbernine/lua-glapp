@@ -3,7 +3,7 @@ local ffi = require 'ffi'
 
 local gl = require 'gl.setup' (... or 'OpenGL')
 
-local sdl = require 'ffi.req' 'sdl'
+local sdl = require 'sdl'
 
 local Test = require 'glapp.orbit'()
 Test.viewUseGLMatrixMode = true

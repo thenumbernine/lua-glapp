@@ -22,7 +22,7 @@ local mvProjMatUniformLoc
 local vaoID
 
 function Test:initGL()
-	local sdl = require 'ffi.req' 'sdl'
+	local sdl = require 'sdl'
 
 	local version = ffi.new'SDL_version[1]'
 	sdl.SDL_GetVersion(version)

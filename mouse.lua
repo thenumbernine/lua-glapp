@@ -5,7 +5,7 @@ this might end up in openglapp ...
 
 local ffi = require 'ffi'
 local gl = require 'gl'
-local sdl = require 'ffi.req' 'sdl'
+local sdl = require 'sdl'
 local bit = require 'bit'
 local class = require 'ext.class'
 local vec2i = require 'vec-ffi.vec2i'

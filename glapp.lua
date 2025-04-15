@@ -1,5 +1,5 @@
 local ffi = require 'ffi'
-local sdl = require 'ffi.req' 'sdl'
+local sdl = require 'sdl'
 local SDLApp = require 'sdl.app'
 local sdlAssertZero = require 'sdl.assert'.zero
 local sdlAssertNonNull = require 'sdl.assert'.nonnull

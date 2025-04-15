@@ -16,7 +16,7 @@ Test.viewDist = 10
 
 function Test:initGL()
 	local version = ffi.new'SDL_version[1]'
-	local sdl = require 'ffi.req' 'sdl'
+	local sdl = require 'sdl'
 	sdl.SDL_GetVersion(version)
 	print'SDL_GetVersion:'
 	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
