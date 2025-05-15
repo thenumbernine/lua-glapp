@@ -9,7 +9,7 @@
 - [vec-ffi-lua](https://github.com/thenumbernine/vec-ffi-lua)
 - [lua-gl](https://github.com/thenumbernine/lua-gl)
 - [lua-sdl](https://github.com/thenumbernine/lua-sdl)
-- `glapp.orbit` can detect if the glapp object is a subclass of [lua-imguiapp](https://github.com/thenumbernine/lua-imguiapp) if available.
+- `glapp.orbit` can detect if the glapp object is a subclass of [lua-imgui](https://github.com/thenumbernine/lua-imgui)'s ImGuiApp subclass if available.
 
 Notice that this project is the reason why I left the OpenGL parsed header code readable in my lua-ffi-bindings project.
 In the event that you're using Windows (you poor, poor soul) it will sift through the GL header code and pick out the proper GL functions and load them using `wglGetProcAddress`.  
@@ -26,9 +26,3 @@ I also added view.lua and orbit.lua to add behaviors to GLApp classes
 -	[[launch]](https://thenumbernine.github.io/glapp/?dir=glapp/tests&file=test_tex.lua)
 	[[source]](https://thenumbernine.github.io/lua/glapp/tests/test_tex.lua)
 	texture demo
-
-Thoughts on the namespace, should I move this inside of `gl` as `gl.app`?
-- `gl/app.lua` and `gl/tests/` are both available.
-- It would match `sdl/app.lua` and a few other projects whose app class goes in `name/app.lua`.
-- `imguiapp` could be moved to `imgui/app.lua`.
-- but namespace doesn't imply app, i.e. `cl` is a namespace of OpenCL functions, it doesn't need an app subclass, so there's no reason gl should either.
