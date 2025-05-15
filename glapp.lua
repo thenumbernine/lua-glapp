@@ -92,7 +92,7 @@ function GLApp:sdlGLSetAttributes()
 		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_FLAGS, sdl.SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG))
 		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_ACCELERATED_VISUAL, 1))
 		--]=]
-		--[=[ trying to get GLES3 working on OSX
+		--[=[ trying to get GLES3 working on OSX ... getting "SDL_GetError(): Could not initialize OpenGL / GLES library"
 		sdl.SDL_SetHint("SDL_HINT_OPENGL_ES_DRIVER", "1")
 		sdl.SDL_SetHint("SDL_HINT_RENDER_DRIVER", "opengles")
 		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_EGL, 1))
