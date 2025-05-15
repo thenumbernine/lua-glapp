@@ -2,9 +2,62 @@
 -- It also calls View.apply on the class if it has not yet already been applied to the class
 local class = require 'ext.class'
 local sdl = require 'sdl'
+local SDLApp = require 'sdl.app'
 local vec3d = require 'vec-ffi.vec3d'
 local quatd = require 'vec-ffi.quatd'
 local Mouse = require 'glapp.mouse'
+
+-- a case for a preprocessing ext.load shim layer ...
+local keyUpEventType
+local keyDownEventType
+local mouseMotionEventType
+local mouseWheelEventType
+local handleKeyUpDown
+if SDLApp.sdlMajorVersion == 2 then
+	keyUpEventType = sdl.SDL_KEYUP
+	keyDownEventType = sdl.SDL_KEYDOWN
+	mouseMotionEventType = sdl.SDL_MOUSEMOTION
+	mouseWheelEventType = sdl.SDL_MOUSEWHEEL
+	function handleKeyUpDown(self, eventPtr)
+		local down = eventPtr[0].type == keyDownEventType
+		if eventPtr[0].key.keysym.sym == sdl.SDLK_LSHIFT then
+			self.leftShiftDown = down
+		elseif eventPtr[0].key.keysym.sym == sdl.SDLK_RSHIFT then
+			self.rightShiftDown = down
+		elseif eventPtr[0].key.keysym.sym == sdl.SDLK_LGUI then
+			self.leftGuiDown = down
+		elseif eventPtr[0].key.keysym.sym == sdl.SDLK_RGUI then
+			self.rightGuiDown = down
+		elseif eventPtr[0].key.keysym.sym == sdl.SDLK_LALT then
+			self.leftAltDown = down
+		elseif eventPtr[0].key.keysym.sym == sdl.SDLK_RALT then
+			self.rightAltDown = down
+		end
+	end
+elseif SDLApp.sdlMajorVersion == 3 then
+	keyUpEventType = sdl.SDL_EVENT_KEY_UP
+	keyDownEventType = sdl.SDL_EVENT_KEY_DOWN
+	mouseMotionEventType = sdl.SDL_EVENT_MOUSE_MOTION
+	mouseWheelEventType = sdl.SDL_EVENT_MOUSE_WHEEL
+	function handleKeyUpDown(self, eventPtr)
+		local down = eventPtr[0].type == keyDownEventType
+		if eventPtr[0].key.key == sdl.SDLK_LSHIFT then
+			self.leftShiftDown = down
+		elseif eventPtr[0].key.key == sdl.SDLK_RSHIFT then
+			self.rightShiftDown = down
+		elseif eventPtr[0].key.key == sdl.SDLK_LGUI then
+			self.leftGuiDown = down
+		elseif eventPtr[0].key.key == sdl.SDLK_RGUI then
+			self.rightGuiDown = down
+		elseif eventPtr[0].key.key == sdl.SDLK_LALT then
+			self.leftAltDown = down
+		elseif eventPtr[0].key.key == sdl.SDLK_RALT then
+			self.rightAltDown = down
+		end
+	end
+else
+	error("SDLApp.sdlMajorVersion is unknown: "..require'ext.tolua'(SDLApp.sdlMajorVersion))
+end
 
 local result, ImGuiApp = pcall(require, 'imguiapp')
 ImGuiApp = result and ImGuiApp
@@ -56,12 +109,12 @@ return function(cl)
 		local shiftDown = self.leftShiftDown or self.rightShiftDown
 		local guiDown = self.leftGuiDown or self.rightGuiDown
 		local altDown = self.leftAltDown or self.rightAltDown
-		if eventPtr[0].type == sdl.SDL_MOUSEMOTION
-		or eventPtr[0].type == sdl.SDL_MOUSEWHEEL
+		if eventPtr[0].type == mouseMotionEventType
+		or eventPtr[0].type == mouseWheelEventType
 		then
 			if canHandleMouse then
 				local dx, dy
-				if eventPtr[0].type == sdl.SDL_MOUSEMOTION then
+				if eventPtr[0].type == mouseMotionEventType then
 					dx = eventPtr[0].motion.xrel
 					dy = eventPtr[0].motion.yrel
 				else
@@ -69,28 +122,15 @@ return function(cl)
 					dy = 10 * eventPtr[0].wheel.y
 				end
 				if (self.mouse and self.mouse.leftDown and not guiDown)
-				or eventPtr[0].type == sdl.SDL_MOUSEWHEEL
+				or eventPtr[0].type == mouseWheelEventType
 				then
 					self:mouseDownEvent(dx, dy, shiftDown, guiDown, altDown)
 				end
 			end
-		elseif eventPtr[0].type == sdl.SDL_KEYUP
-		or eventPtr[0].type == sdl.SDL_KEYDOWN
+		elseif eventPtr[0].type == keyUpEventType
+		or eventPtr[0].type == keyDownEventType
 		then
-			local down = eventPtr[0].type == sdl.SDL_KEYDOWN
-			if eventPtr[0].key.keysym.sym == sdl.SDLK_LSHIFT then
-				self.leftShiftDown = down
-			elseif eventPtr[0].key.keysym.sym == sdl.SDLK_RSHIFT then
-				self.rightShiftDown = down
-			elseif eventPtr[0].key.keysym.sym == sdl.SDLK_LGUI then
-				self.leftGuiDown = down
-			elseif eventPtr[0].key.keysym.sym == sdl.SDLK_RGUI then
-				self.rightGuiDown = down
-			elseif eventPtr[0].key.keysym.sym == sdl.SDLK_LALT then
-				self.leftAltDown = down
-			elseif eventPtr[0].key.keysym.sym == sdl.SDLK_RALT then
-				self.rightAltDown = down
-			end
+			handleKeyUpDown(self, eventPtr)
 		end
 	end
 

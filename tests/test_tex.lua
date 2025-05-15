@@ -3,7 +3,8 @@
 local cmdline = require 'ext.cmdline'(...)
 local ffi = require 'ffi'
 local string = require 'ext.string'
-local gl = require 'gl.setup' (cmdline.gl or (js and 'OpenGLES3' or nil))	-- if js i.e. web wrapper then use OpenGLES3
+local sdl, SDLApp = require 'sdl.setup' (cmdline.sdl or '2')
+local gl = require 'gl.setup' (cmdline.gl)
 local glreport = require 'gl.report'
 local getTime = require 'ext.timer'.getTime
 local Image = require 'image'
@@ -15,11 +16,17 @@ Test.title = "Spinning Triangle"
 Test.viewDist = 10
 
 function Test:initGL()
-	local version = ffi.new'SDL_version[1]'
-	local sdl = require 'sdl'
-	sdl.SDL_GetVersion(version)
-	print'SDL_GetVersion:'
-	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
+	-- TODO abstract this in sdl.app? or nah?
+	if SDLApp.sdlMajorVersion == 2 then
+		local version = ffi.new'SDL_version[1]'
+		sdl.SDL_GetVersion(version)
+		print('SDL_GetVersion:', version[0].major..'.'..version[0].minor..'.'..version[0].patch)
+	elseif SDLApp.sdlMajorVersion == 3 then
+		local version = sdl.SDL_GetVersion()
+		print('SDL_GetVersion:', ('%x'):format(version))
+	else
+		error("SDLApp.sdlMajorVersion is unknown: "..require'ext.tolua'(SDLApp.sdlMajorVersion))
+	end
 
 	local glGlobal = require 'gl.global'
 	print('GL_VERSION', glGlobal:get'GL_VERSION')

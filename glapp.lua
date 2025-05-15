@@ -1,7 +1,6 @@
 local ffi = require 'ffi'
 local sdl = require 'sdl'
 local SDLApp = require 'sdl.app'
-local sdlAssertZero = require 'sdl.assert'.zero
 local sdlAssertNonNull = require 'sdl.assert'.nonnull
 
 local gl
@@ -59,12 +58,12 @@ GLApp.sdlCreateWindowFlags = bit.bor(GLApp.sdlCreateWindowFlags, sdl.SDL_WINDOW_
 
 function GLApp:sdlGLSetAttributes()
 	-- [[ needed for windows, not for ... android? I forget ...
-	sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_RED_SIZE, 8))
-	sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_GREEN_SIZE, 8))
-	sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_BLUE_SIZE, 8))
-	sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_ALPHA_SIZE, 8))
-	sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_DEPTH_SIZE, 24))
-	sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_DOUBLEBUFFER, 1))
+	self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_RED_SIZE, 8))
+	self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_GREEN_SIZE, 8))
+	self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_BLUE_SIZE, 8))
+	self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_ALPHA_SIZE, 8))
+	self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_DEPTH_SIZE, 24))
+	self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_DOUBLEBUFFER, 1))
 	--]]
 
 	-- [[ OSX wants to set GL to version 2.1 even though they claim they support up to 4.1 ...
@@ -86,19 +85,24 @@ function GLApp:sdlGLSetAttributes()
 		--local version = {3, 3}
 		local version = {4, 1}		-- glGet GL_VERSION comes back 4.1
 		--local version = {4, 6}
-		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MAJOR_VERSION, version[1]))
-		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MINOR_VERSION, version[2]))
-		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_PROFILE_MASK, sdl.SDL_GL_CONTEXT_PROFILE_CORE))
-		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_FLAGS, sdl.SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG))
-		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_ACCELERATED_VISUAL, 1))
+		self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MAJOR_VERSION, version[1]))
+		self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MINOR_VERSION, version[2]))
+		self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_PROFILE_MASK, sdl.SDL_GL_CONTEXT_PROFILE_CORE))
+		self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_FLAGS, sdl.SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG))
+		self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_ACCELERATED_VISUAL, 1))
 		--]=]
 		--[=[ trying to get GLES3 working on OSX ... getting "SDL_GetError(): Could not initialize OpenGL / GLES library"
+		-- TODO TODO TODO on OSX still haven't figured this out, even with SDL3
 		sdl.SDL_SetHint("SDL_HINT_OPENGL_ES_DRIVER", "1")
 		sdl.SDL_SetHint("SDL_HINT_RENDER_DRIVER", "opengles")
-		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_EGL, 1))
-		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_PROFILE_MASK, sdl.SDL_GL_CONTEXT_PROFILE_ES))
-		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MAJOR_VERSION, 3))
-		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MINOR_VERSION, 0))
+		sdl.SDL_SetHint("SDL_HINT_OPENGL_LIBRARY", "GLESv2")	-- need a full path here?
+		sdl.SDL_SetHint("SDL_HINT_EGL_LIBRARY", "EGL")
+		if self.sdlMajorVersion == 2 then	-- only for SDL2, not for SDL3
+			self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_EGL, 1))
+		end
+		self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_PROFILE_MASK, sdl.SDL_GL_CONTEXT_PROFILE_ES))
+		self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MAJOR_VERSION, 3))
+		self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MINOR_VERSION, 0))
 		--]=]
 	end
 	--]]
@@ -111,7 +115,7 @@ function GLApp:initWindow()
 	self.sdlCtx = sdlAssertNonNull(sdl.SDL_GL_CreateContext(self.window))
 
 	--sdl.SDL_EnableKeyRepeat(0,0)
-	--sdlAssertZero( -- assert not really required, and it fails on raspberry pi, so ...
+	--self.sdlAssert( -- assert not really required, and it fails on raspberry pi, so ...
 	sdl.SDL_GL_SetSwapInterval(0)
 	--)
 
@@ -141,8 +145,13 @@ function GLApp:postUpdate()
 end
 
 function GLApp:exit()
-	sdl.SDL_GL_DeleteContext(self.sdlCtx)
-
+	if self.sdlMajorVersion == 2 then
+		sdl.SDL_GL_DeleteContext(self.sdlCtx)
+	elseif self.sdlMajorVersion == 3 then
+		sdl.SDL_GL_DestroyContext(self.sdlCtx)
+	else
+		error("SDLApp.sdlMajorVersion is unknown: "..require'ext.tolua'(SDLApp.sdlMajorVersion))
+	end
 	GLApp.super.exit(self)
 end
 

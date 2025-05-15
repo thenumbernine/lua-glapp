@@ -6,15 +6,26 @@ this might end up in openglapp ...
 local ffi = require 'ffi'
 local gl = require 'gl'
 local sdl = require 'sdl'
+local SDLApp = require 'sdl.app'
 local bit = require 'bit'
 local class = require 'ext.class'
 local vec2i = require 'vec-ffi.vec2i'
+local vec2f = require 'vec-ffi.vec2f'
 local vec2d = require 'vec-ffi.vec2d'
 
 local Mouse = class()
 
 function Mouse:init()
+	-- this is the pixel position
+	-- it was integer in sdl2
+	-- but it is float in sdl3
+	-- sooo ...
+	-- for compat reasons for now i'll store a separate 'pixelPosf' for now and convert
+	-- but eventually it'll be self.pixelPos = vec2f()
 	self.ipos = vec2i()
+	self.pixelPosf = vec2f()	-- sdl subpixel access
+
+	-- this is the window fractional position, as a percent of the window resolution
 	self.pos = vec2d()
 	self.lastPos = vec2d()
 	self.deltaPos = vec2d()
@@ -34,7 +45,17 @@ function Mouse:update()
 
 	-- update new state
 
-	local sdlButtons = sdl.SDL_GetMouseState(self.ipos.s, self.ipos.s+1)
+	local sdlButtons
+	if SDLApp.sdlMajorVersion == 2 then
+		sdlButtons = sdl.SDL_GetMouseState(self.ipos.s, self.ipos.s+1)
+	elseif SDLApp.sdlMajorVersion == 3 then
+		sdlButtons = sdl.SDL_GetMouseState(self.pixelPosf.s, self.pixelPosf.s+1)
+		-- and for compat for now, convert/store the integer pixel positions
+		self.ipos.x, self.ipos.y = self.pixelPosf.x, self.pixelPosf.y
+	else
+		error("SDLApp.sdlMajorVersion is unknown: "..require'ext.tolua'(SDLApp.sdlMajorVersion))
+	end
+
 	-- TODO use glapp for the size, in case the viewport is set to a subset of the window
 	gl.glGetIntegerv(gl.GL_VIEWPORT, viewportInt)
 	local viewWidth, viewHeight = viewportInt[2], viewportInt[3]
