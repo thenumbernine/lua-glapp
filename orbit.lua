@@ -59,7 +59,7 @@ else
 	error("SDLApp.sdlMajorVersion is unknown: "..require'ext.tolua'(SDLApp.sdlMajorVersion))
 end
 
-local result, ImGuiApp = pcall(require, 'imguiapp')
+local result, ImGuiApp = pcall(require, 'imgui.app')
 ImGuiApp = result and ImGuiApp
 
 return function(cl)

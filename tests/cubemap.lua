@@ -1,11 +1,11 @@
 #!/usr/bin/env luajit
--- put this here or in gl ? or in imguiapp ?
+-- put this here or in gl ? or in imgui.app ?
 local ffi = require 'ffi'
 local gl = require 'gl'
 local GLTexCube = require 'gl.texcube'
 
 --local App = require 'glapp.orbit'()
-local App = require 'imguiapp.withorbit'()
+local App = require 'imgui.appwithorbit'()
 
 App.title = "Cubemaps"
 
