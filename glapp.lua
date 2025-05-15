@@ -81,15 +81,25 @@ function GLApp:sdlGLSetAttributes()
 	--  however when I choose this, OSX only gives me GLSL up to 1.20 ... smh
 	-- So if I want new GLSL then I am forced to use OpenGL 4.1 core ...
 	if ffi.os == 'OSX' then
+		-- [=[ using OSX builtin GL which is 4.1
 		--local version = {2, 1}
 		--local version = {3, 3}
-		local version = {4, 1}
+		local version = {4, 1}		-- glGet GL_VERSION comes back 4.1
 		--local version = {4, 6}
 		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MAJOR_VERSION, version[1]))
 		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MINOR_VERSION, version[2]))
 		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_PROFILE_MASK, sdl.SDL_GL_CONTEXT_PROFILE_CORE))
 		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_FLAGS, sdl.SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG))
 		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_ACCELERATED_VISUAL, 1))
+		--]=]
+		--[=[ trying to get GLES3 working on OSX
+		sdl.SDL_SetHint("SDL_HINT_OPENGL_ES_DRIVER", "1")
+		sdl.SDL_SetHint("SDL_HINT_RENDER_DRIVER", "opengles")
+		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_EGL, 1))
+		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_PROFILE_MASK, sdl.SDL_GL_CONTEXT_PROFILE_ES))
+		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MAJOR_VERSION, 3))
+		sdlAssertZero(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MINOR_VERSION, 0))
+		--]=]
 	end
 	--]]
 end
