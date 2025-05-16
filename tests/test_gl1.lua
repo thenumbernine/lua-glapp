@@ -3,7 +3,7 @@ local cmdline = require 'ext.cmdline'(...)
 local ffi = require 'ffi'
 
 local sdl, SDLApp = require 'sdl.setup' (cmdline.sdl or '2')
-local gl = require 'gl.setup' (cmdline.gl or 'OpenGLES3')
+local gl = require 'gl.setup' (cmdline.gl or 'OpenGL')
 
 
 local Test = require 'glapp.orbit'()

@@ -80,32 +80,53 @@ function GLApp:sdlGLSetAttributes()
 	--  however when I choose this, OSX only gives me GLSL up to 1.20 ... smh
 	-- So if I want new GLSL then I am forced to use OpenGL 4.1 core ...
 	if ffi.os == 'OSX' then
-		-- [=[ using OSX builtin GL which is 4.1
-		--local version = {2, 1}
-		--local version = {3, 3}
-		local version = {4, 1}		-- glGet GL_VERSION comes back 4.1
-		--local version = {4, 6}
-		self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MAJOR_VERSION, version[1]))
-		self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MINOR_VERSION, version[2]))
-		self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_PROFILE_MASK, sdl.SDL_GL_CONTEXT_PROFILE_CORE))
-		self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_FLAGS, sdl.SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG))
-		self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_ACCELERATED_VISUAL, 1))
-		--]=]
-		--[=[ trying to get GLES3 working on OSX ... getting "SDL_GetError(): Could not initialize OpenGL / GLES library"
-		-- TODO TODO TODO on OSX still haven't figured this out, even with SDL3
-		sdl.SDL_SetHint("SDL_HINT_OPENGL_ES_DRIVER", "1")
-		sdl.SDL_SetHint("SDL_HINT_RENDER_DRIVER", "opengles")
-		--sdl.SDL_SetHint("SDL_HINT_OPENGL_LIBRARY", "GLESv2")
-		--sdl.SDL_SetHint("SDL_HINT_EGL_LIBRARY", "EGL")
-		sdl.SDL_SetHint("SDL_HINT_OPENGL_LIBRARY", "/usr/local/opt/mesa/lib/libGLESv2.dylib")
-		sdl.SDL_SetHint("SDL_HINT_EGL_LIBRARY", "/usr/local/opt/mesa/lib/libEGL.dylib")
-		if self.sdlMajorVersion == 2 then	-- only for SDL2, not for SDL3
-			self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_EGL, 1))
+		-- is there a good way to look inside gl.setup and determine which one was picked?
+		local loaded2 = package.loaded['ffi.OSX.OpenGL2']
+		local loaded3 = package.loaded['ffi.OSX.OpenGL3']
+		local loadedMesa = package.loaded['ffi.OSX.OpenGLMesa']
+		local loadedES = package.loaded['ffi.OpenGLES3'] or package.loaded['ffi.OpenGLES2'] or package.loaded['ffi.OpenGLES1']
+		-- ... and then choose this accordingly?
+		if loadedMesa then
+			-- hmmmmmmm do I want to assume mesa wants to cripple itself like OSX-builtin-gl3 does?
+			-- or TODO how about I rename mesa's header to OpenGL_Mesa and make OpenGL a switch?
+			-- AND MESA WORKS WITHOUT CRIPPLING ITSELF! CONGRATULATIONS MESA! APPLE, TAKE SOME NOTES.
+		elseif loaded3 then
+			-- [=[ using OSX framework GL 4.1 core-context
+			-- from OpenGL.framework's OpenGL/gl3.h:
+			-- use this with 'gl.setup' 'OpenGL_3'
+			-- or else you'll probably get a black screen
+			self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MAJOR_VERSION, 4))
+			self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MINOR_VERSION, 1))
+			self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_PROFILE_MASK, sdl.SDL_GL_CONTEXT_PROFILE_CORE))
+			self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_FLAGS, sdl.SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG))
+			self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_ACCELERATED_VISUAL, 1))
+			--]=]
+		elseif loaded2 then
+			-- [=[ using OSX framework GL 2.0
+			-- from OpenGL.framework's OpenGL/gl.h:
+			-- use this with 'gl.setup' 'OpenGL_2'
+			self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MAJOR_VERSION, 2))
+			self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MINOR_VERSION, 0))
+			self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_FLAGS, sdl.SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG))
+			self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_ACCELERATED_VISUAL, 1))
+			--]=]
+		elseif loadedES then
+			-- [=[ trying to get GLES3 working on OSX ... getting "SDL_GetError(): Could not initialize OpenGL / GLES library"
+			-- TODO TODO TODO on OSX still haven't figured this out, even with SDL3
+			sdl.SDL_SetHint("SDL_HINT_OPENGL_ES_DRIVER", "1")
+			sdl.SDL_SetHint("SDL_HINT_RENDER_DRIVER", "opengles")
+			--sdl.SDL_SetHint("SDL_HINT_OPENGL_LIBRARY", "GLESv2")
+			--sdl.SDL_SetHint("SDL_HINT_EGL_LIBRARY", "EGL")
+			sdl.SDL_SetHint("SDL_HINT_OPENGL_LIBRARY", "/usr/local/opt/mesa/lib/libGLESv2.dylib")
+			sdl.SDL_SetHint("SDL_HINT_EGL_LIBRARY", "/usr/local/opt/mesa/lib/libEGL.dylib")
+			if self.sdlMajorVersion == 2 then	-- only for SDL2, not for SDL3
+				self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_EGL, 1))
+			end
+			self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_PROFILE_MASK, sdl.SDL_GL_CONTEXT_PROFILE_ES))
+			self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MAJOR_VERSION, 3))
+			self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MINOR_VERSION, 0))
+			--]=]
 		end
-		self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_PROFILE_MASK, sdl.SDL_GL_CONTEXT_PROFILE_ES))
-		self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MAJOR_VERSION, 3))
-		self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MINOR_VERSION, 0))
-		--]=]
 	end
 	--]]
 end
