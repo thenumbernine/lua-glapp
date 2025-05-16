@@ -1,10 +1,10 @@
 #!/usr/bin/env luajit
 local cmdline = require 'ext.cmdline'(...)
+local sdl = require 'sdl.setup'(cmdline.sdl or '2')
+local gl = require 'gl.setup'(cmdline.gl or 'OpenGL')
 local op = require 'ext.op'
 local ffi = require 'ffi'
-local sdl = require 'sdl'
 local vec3f = require 'vec-ffi.vec3f'
-local gl = require 'gl.setup'(cmdline.gl or 'OpenGL')
 local glreport = require 'gl.report'
 local GLSceneObject = require 'gl.sceneobject'
 
@@ -18,15 +18,7 @@ Test.title = "Spinning Points"
 local numPts
 
 function Test:initGL()
-	--[[ present in 1.3.0, which is what Malkia's UFO uses
-	local version = sdl.SDL_Linked_Version()
-	print'SDL_Linked_Version:'
-	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
-	--]]
-	local version = ffi.new'SDL_version[1]'
-	sdl.SDL_GetVersion(version)
-	print'SDL_GetVersion:'
-	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
+	print('SDL_GetVersion:', self.sdlGetVersion())
 
 	local ires = 10
 	local jres = 10

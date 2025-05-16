@@ -12,17 +12,7 @@ Test.title = "Spinning Triangle"
 Test.viewDist = 20
 
 function Test:initGL()
-	-- TODO abstract this in sdl.app? or nah?
-	if SDLApp.sdlMajorVersion == 2 then
-		local version = ffi.new'SDL_version[1]'
-		sdl.SDL_GetVersion(version)
-		print('SDL_GetVersion:', version[0].major..'.'..version[0].minor..'.'..version[0].patch)
-	elseif SDLApp.sdlMajorVersion == 3 then
-		local version = sdl.SDL_GetVersion()
-		print('SDL_GetVersion:', ('%x'):format(version))
-	else
-		error("SDLApp.sdlMajorVersion is unknown: "..require'ext.tolua'(SDLApp.sdlMajorVersion))
-	end
+	print('SDL_GetVersion:', self.sdlGetVersion())
 
 	local glGlobal = require 'gl.global'
 	print('GL_VERSION', glGlobal:get'GL_VERSION')

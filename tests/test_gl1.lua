@@ -1,9 +1,10 @@
 #!/usr/bin/env luajit
+local cmdline = require 'ext.cmdline'(...)
 local ffi = require 'ffi'
 
-local gl = require 'gl.setup' (... or 'OpenGL')
+local sdl, SDLApp = require 'sdl.setup' (cmdline.sdl or '2')
+local gl = require 'gl.setup' (cmdline.gl or 'OpenGLES3')
 
-local sdl = require 'sdl'
 
 local Test = require 'glapp.orbit'()
 Test.viewUseGLMatrixMode = true
@@ -11,10 +12,7 @@ Test.viewUseGLMatrixMode = true
 Test.title = "Spinning Triangle"
 
 function Test:initGL()
-	local version = ffi.new'SDL_version[1]'
-	sdl.SDL_GetVersion(version)
-	print'SDL_GetVersion:'
-	print(version[0].major..'.'..version[0].minor..'.'..version[0].patch)
+	print('SDL_GetVersion:', self.sdlGetVersion())
 end
 
 function Test:update()

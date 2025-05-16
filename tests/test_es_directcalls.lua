@@ -1,7 +1,10 @@
 #!/usr/bin/env luajit
 -- ES test using raw gl calls
+local cmdline = require 'ext.cmdline'(...)
+local sdl = require 'sdl.setup'(cmdline.sdl or '2')
+local gl = require 'gl.setup'(cmdline.gl or 'OpenGLES3')
+
 local ffi = require 'ffi'
-local gl = require 'gl.setup' (... or 'OpenGLES3')
 local assert = require 'ext.assert'
 local getTime = require 'ext.timer'.getTime
 local matrix = require 'matrix.ffi'
@@ -24,10 +27,7 @@ local vaoID
 function Test:initGL()
 	local sdl = require 'sdl'
 
-	local version = ffi.new'SDL_version[1]'
-	sdl.SDL_GetVersion(version)
-	print'SDL_GetVersion:'
-	print(math.floor(version[0].major)..'.'..math.floor(version[0].minor)..'.'..math.floor(version[0].patch))
+	print('SDL_GetVersion:', self.sdlGetVersion())
 
 	print('GLES Version', ffi.string(gl.glGetString(gl.GL_VERSION)))
 	print('GL_SHADING_LANGUAGE_VERSION', ffi.string(gl.glGetString(gl.GL_SHADING_LANGUAGE_VERSION)))
