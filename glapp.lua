@@ -95,8 +95,10 @@ function GLApp:sdlGLSetAttributes()
 		-- TODO TODO TODO on OSX still haven't figured this out, even with SDL3
 		sdl.SDL_SetHint("SDL_HINT_OPENGL_ES_DRIVER", "1")
 		sdl.SDL_SetHint("SDL_HINT_RENDER_DRIVER", "opengles")
-		sdl.SDL_SetHint("SDL_HINT_OPENGL_LIBRARY", "GLESv2")	-- need a full path here?
-		sdl.SDL_SetHint("SDL_HINT_EGL_LIBRARY", "EGL")
+		--sdl.SDL_SetHint("SDL_HINT_OPENGL_LIBRARY", "GLESv2")
+		--sdl.SDL_SetHint("SDL_HINT_EGL_LIBRARY", "EGL")
+		sdl.SDL_SetHint("SDL_HINT_OPENGL_LIBRARY", "/usr/local/opt/mesa/lib/libGLESv2.dylib")
+		sdl.SDL_SetHint("SDL_HINT_EGL_LIBRARY", "/usr/local/opt/mesa/lib/libEGL.dylib")
 		if self.sdlMajorVersion == 2 then	-- only for SDL2, not for SDL3
 			self.sdlAssert(sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_EGL, 1))
 		end
