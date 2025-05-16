@@ -1,7 +1,10 @@
 #!/usr/bin/env luajit
 -- put this here or in gl ? or in imgui.app ?
+local cmdline = require 'ext.cmdline'(...)
+local sdl, SDLApp = require 'sdl.setup' (cmdline.sdl or '2')
+local gl = require 'gl.setup' (cmdline.gl or 'OpenGLES3')
 local ffi = require 'ffi'
-local gl = require 'gl'
+
 local GLTexCube = require 'gl.texcube'
 
 --local App = require 'glapp.orbit'()
@@ -10,7 +13,7 @@ local App = require 'imgui.appwithorbit'()
 App.title = "Cubemaps"
 
 -- TODO provide your own skybox
-local base = ...
+local base = cmdline.skybox
 --base = base or '../../seashell/beach-skyboxes/HeartInTheSand/'	-- uses pos/neg xyz
 base = base or '../../seashell/cloudy/bluecloud_'	-- uses ft bk up dn rt lf
 

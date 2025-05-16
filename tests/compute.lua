@@ -1,7 +1,8 @@
 #!/usr/bin/env luajit
-
+local cmdline = require 'ext.cmdline'(...)
+local sdl, SDLApp = require 'sdl.setup' (cmdline.sdl or '2')
+local gl = require 'gl.setup' (cmdline.gl or 'OpenGLES3')
 local ffi = require 'ffi'
-local gl = require 'gl.setup' (... or 'OpenGL')
 
 -- gles3 doesn't define compute so ...
 -- TODO go by this?
