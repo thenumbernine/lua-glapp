@@ -1,7 +1,7 @@
 #!/usr/bin/env luajit
 local cmdline = require 'ext.cmdline'(...)
-local sdl = require 'sdl.setup'(cmdline.sdl or '2')
-local gl = require 'gl.setup'(cmdline.gl or 'OpenGL')
+local sdl = require 'sdl.setup'(cmdline.sdl)
+local gl = require 'gl.setup'(cmdline.gl)
 local op = require 'ext.op'
 local ffi = require 'ffi'
 local vec3f = require 'vec-ffi.vec3f'

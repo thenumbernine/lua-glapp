@@ -1,6 +1,6 @@
 #!/usr/bin/env luajit
 local ffi = require 'ffi'
-local gl = require 'gl.setup'(... or 'OpenGL')
+local gl = require 'gl.setup'(...)
 local GLProgram = require 'gl.program'
 local GLArrayBuffer = require 'gl.arraybuffer'
 local GLVertexArray = require 'gl.vertexarray'

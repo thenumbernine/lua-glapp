@@ -1,7 +1,6 @@
 #!/usr/bin/env luajit
-
 local ffi = require 'ffi'
-local gl = require 'gl.setup' (... or 'OpenGL')
+local gl = require 'gl.setup' (...)
 local path = require 'ext.path'
 local table = require 'ext.table'
 local os = require 'ext.os'

@@ -1,9 +1,8 @@
 #!/usr/bin/env luajit
 local cmdline = require 'ext.cmdline'(...)
+local sdl, SDLApp = require 'sdl.setup' (cmdline.sdl)
+local gl = require 'gl.setup' (cmdline.gl)
 local ffi = require 'ffi'
-
-local sdl, SDLApp = require 'sdl.setup' (cmdline.sdl or '2')
-local gl = require 'gl.setup' (cmdline.gl or 'OpenGL')
 
 
 local Test = require 'glapp.orbit'()

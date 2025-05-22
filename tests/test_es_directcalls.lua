@@ -1,8 +1,8 @@
 #!/usr/bin/env luajit
 -- ES test using raw gl calls
 local cmdline = require 'ext.cmdline'(...)
-local sdl = require 'sdl.setup'(cmdline.sdl or '2')
-local gl = require 'gl.setup'(cmdline.gl or 'OpenGLES3')
+local sdl = require 'sdl.setup'(cmdline.sdl)
+local gl = require 'gl.setup'(cmdline.gl)
 
 local ffi = require 'ffi'
 local assert = require 'ext.assert'

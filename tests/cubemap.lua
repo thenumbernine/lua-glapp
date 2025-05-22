@@ -1,9 +1,10 @@
 #!/usr/bin/env luajit
 -- put this here or in gl ? or in imgui.app ?
 local cmdline = require 'ext.cmdline'(...)
-local sdl, SDLApp = require 'sdl.setup' (cmdline.sdl or '2')
-local gl = require 'gl.setup' (cmdline.gl or 'OpenGLES3')
+local sdl, SDLApp = require 'sdl.setup' (cmdline.sdl)
+local gl = require 'gl.setup' (cmdline.gl)
 local ffi = require 'ffi'
+local table = require 'ext.table'
 
 local GLTexCube = require 'gl.texcube'
 
@@ -19,10 +20,20 @@ base = base or '../../seashell/cloudy/bluecloud_'	-- uses ft bk up dn rt lf
 
 App.viewDist = 1e-7
 
+-- each value has the x,y,z in the 0,1,2 bits (off = 0, on = 1)
+local cubeFaces = {
+	{5,7,3,1},	-- x+
+	{6,4,0,2},	-- x-
+	{2,3,7,6},	-- y+
+	{4,5,1,0},	-- y-
+	{6,7,5,4},	-- z+
+	{0,1,3,2},	-- z-
+}
+
 function App:initGL(...)
 	App.super.initGL(self, ...)
 	
-	self.tex = GLTexCube{
+	local tex = GLTexCube{
 		--[[
 		filenames = {
 			base..'posx.jpg',
@@ -51,35 +62,13 @@ function App:initGL(...)
 		magFilter = gl.GL_LINEAR,
 		minFilter = gl.GL_LINEAR,
 	}:unbind()
-	
-	gl.glClearColor(0, 0, 0, 0)
-	gl.glEnable(gl.GL_DEPTH_TEST)
-end
 
--- each value has the x,y,z in the 0,1,2 bits (off = 0, on = 1)
-local cubeFaces = {
-	{5,7,3,1},	-- x+
-	{6,4,0,2},	-- x-
-	{2,3,7,6},	-- y+
-	{4,5,1,0},	-- y-
-	{6,7,5,4},	-- z+
-	{0,1,3,2},	-- z-
-}
-
-function App:update(...)
-	App.super.update(self, ...)
-
-	gl.glClear(bit.bor(gl.GL_COLOR_BUFFER_BIT, gl.GL_DEPTH_BUFFER_BIT))
-
-	self.tex
-		:enable()
-		:bind()
-	gl.glEnable(gl.GL_CULL_FACE)
-	gl.glBegin(gl.GL_QUADS)
+	local vtxdata = table()
 	local s = 1
 	-- [[ using bitvectors
 	for dim=0,2 do
 		for bit2 = 0,1 do	-- plus/minus side
+			local quad = table()
 			for bit1 = 0,1 do	-- v texcoord
 				for bit0 = 0,1 do	-- u texcoord
 					local i2 = bit.bor(
@@ -104,28 +93,77 @@ function App:update(...)
 					local x = bit.band(1, i)
 					local y = bit.band(1, bit.rshift(i, 1))
 					local z = bit.band(1, bit.rshift(i, 2))
-					gl.glTexCoord3d(s*(x*2-1),s*(y*2-1),s*(z*2-1))
-					gl.glVertex3d(s*(x*2-1),s*(y*2-1),s*(z*2-1))
+					quad:insert{s*(x*2-1),s*(y*2-1),s*(z*2-1)}
 				end
+			end
+			for _,i in ipairs{1,2,4,4,2,3} do
+				vtxdata:append(quad[i])
 			end
 		end
 	end
 	--]]
-	--[[ using the 'cubeFaces' table
+	--[[ using cubeFaces
 	for _,face in ipairs(cubeFaces) do
+		local quad = table()
 		for _,i in ipairs(face) do
 			local x = bit.band(i, 1)
 			local y = bit.band(bit.rshift(i, 1), 1)
 			local z = bit.band(bit.rshift(i, 2), 1)
-			gl.glTexCoord3d(s*(x*2-1),s*(y*2-1),s*(z*2-1))
-			gl.glVertex3d(s*(x*2-1),s*(y*2-1),s*(z*2-1))
+			quad:insert{s*(x*2-1),s*(y*2-1),s*(z*2-1)}
+		end
+		for _,i in ipairs{1,2,4,4,2,3} do
+			vtxdata:append(quad[i])
 		end
 	end
 	--]]
-	gl.glEnd()
-	self.tex
-		:unbind()
-		:disable()
+
+	self.cubeObj = require 'gl.sceneobject'{
+		program = {
+			version = 'latest',
+			precision = 'best',
+			vertexCode = [[
+in vec3 vertex;
+out vec3 tcv;
+uniform mat4 mvProjMat;
+void main() {
+	tcv = vertex;
+	gl_Position = mvProjMat * vec4(vertex, 1.);
+}
+]],
+			fragmentCode = [[
+in vec3 tcv;
+out vec4 fragColor;
+uniform samplerCube tex;
+void main() {
+	fragColor = texture(tex, tcv);
+}
+]],
+			uniforms = {
+				tex = 0,
+			},
+		},
+		geometry = {
+			mode = gl.GL_TRIANGLES,
+		},
+		vertexes = {
+			dim = 3,
+			data = vtxdata,
+		},
+		texs = {tex},
+		uniforms = {
+			mvProjMat = self.view.mvProjMat.ptr,
+		},
+	}
+
+	gl.glClearColor(0, 0, 0, 0)
+	gl.glEnable(gl.GL_DEPTH_TEST)
+	gl.glEnable(gl.GL_CULL_FACE)
+end
+
+function App:update(...)
+	App.super.update(self, ...)
+	gl.glClear(bit.bor(gl.GL_COLOR_BUFFER_BIT, gl.GL_DEPTH_BUFFER_BIT))
+	self.cubeObj:draw()
 end
 
 return App():run()
