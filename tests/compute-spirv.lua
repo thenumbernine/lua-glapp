@@ -9,8 +9,7 @@ local os = require 'ext.os'
 -- gles3 doesn't define compute so ...
 -- TODO go by this?
 --   https://community.arm.com/arm-community-blogs/b/graphics-gaming-and-vr-blog/posts/get-started-with-compute-shaders
-xpcall(function()
-	ffi.cdef[[
+for l in ([[
 enum { GL_COMPUTE_SHADER = 37305 };
 enum { GL_MAX_COMPUTE_UNIFORM_BLOCKS = 37307 };
 enum { GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS = 37308 };
@@ -37,9 +36,13 @@ typedef void ( * PFNGLDISPATCHCOMPUTEPROC) (GLuint num_groups_x, GLuint num_grou
 typedef void ( * PFNGLDISPATCHCOMPUTEINDIRECTPROC) (GLintptr indirect);
 enum { GL_IMAGE_2D = 36941 };
 enum { GL_WRITE_ONLY = 35001 };
-]]
-end, function()
-end)
+]]):gmatch'[^\n]+' do
+	xpcall(function()
+		ffi.cdef(l)
+	end, function(err)
+		print(err)
+	end)
+end
 
 local template = require 'template'
 local GLApp = require 'glapp'
@@ -56,18 +59,20 @@ function App:initGL(...)
 		App.super.initGL(self, ...)
 	end
 
+	local GLGlobal = require 'gl.global'
+
 	-- TODO gl.get() function for global gets
 	-- each global size dim must be <= this
-	local maxComputeWorkGroupCount = vec3i(GLProgram:get'GL_MAX_COMPUTE_WORK_GROUP_COUNT')
+	local maxComputeWorkGroupCount = vec3i(GLGlobal:get'GL_MAX_COMPUTE_WORK_GROUP_COUNT')
 	print('GL_MAX_COMPUTE_WORK_GROUP_COUNT = '..maxComputeWorkGroupCount)
 
 	-- each local size dim must be <= this
-	local maxComputeWorkGroupSize = vec3i(GLProgram:get'GL_MAX_COMPUTE_WORK_GROUP_SIZE')
+	local maxComputeWorkGroupSize = vec3i(GLGlobal:get'GL_MAX_COMPUTE_WORK_GROUP_SIZE')
 	print('GL_MAX_COMPUTE_WORK_GROUP_SIZE = '..maxComputeWorkGroupSize)
 
 	-- the product of all local size dims must be <= this
 	-- also, this is >= 1024
-	local maxComputeWorkGroupInvocations = GLProgram:get'GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS'
+	local maxComputeWorkGroupInvocations = GLGlobal:get'GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS'
 	print('GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS = '..maxComputeWorkGroupInvocations)
 	glreport'here'
 
@@ -104,13 +109,13 @@ function App:initGL(...)
 
 	local glslVersion = GLProgram.getVersionPragma()
 	local localSize = vec3i(32,32,1)
-	
+
 	-- works with glslangValidator
-	local entryname = 'main'	
-	
+	local entryname = 'main'
+
 	-- doesn't work with glslangValidator
 	-- ok so if Compute shaders only want 'main' entry points ... and CL kernels can't use 'main' ... ????? how to fix this.
-	--local entryname = 'testEntry'	
+	--local entryname = 'testEntry'
 
 	local computeCode = template(
 glslVersion
@@ -141,17 +146,17 @@ void <?=entryname?>() {
 		computeCode = computeCode,
 	}
 	--]==]
-	--[==[ separating out shader construction first 
+	--[==[ separating out shader construction first
 	local computeShader = GLProgram.ComputeShader(computeCode)	-- compiles and verifies and prints errors if fails
 	self.computeProgram = GLProgram{
 		shaders = {computeShader},
 	}
 	--]==]
 	-- [==[ make the program with spirv
-	
+
 	-- do the compiling here ...
 	-- check out cl/tests/cpptest.lua for an example
-	
+
 	local bcfn = path'compute-spirv.bc'
 	local spvfn = path'compute-spirv.spv'
 
@@ -170,11 +175,11 @@ void <?=entryname?>() {
 	-- but idk the fine details about how you'd write a compute shader as a CL shader
 	local computeCLCPPCode = template([[
 const int width = <?=width?>;
-	
+
 global float4 * dstTex;
 global const float4 * srcTex;
 
-kernel 
+kernel
 __attribute__((reqd_work_group_size(<?=table.concat({localSize:unpack()}, ',')?>))) 		// TODO can I ever get around this fixed-local-size in Compute?
 void <?=entryname?>(
 ) {
@@ -199,7 +204,7 @@ void <?=entryname?>(
 			dsts = {bcfn.path},
 			rule = function()
 				os.exec(table{
-					'clang', '-v', '-Xclang','-finclude-default-header', '--target=spirv64-unknown-unknown', '-emit-llvm', '-c', 
+					'clang', '-v', '-Xclang','-finclude-default-header', '--target=spirv64-unknown-unknown', '-emit-llvm', '-c',
 					'-o', ('%q'):format(bcfn.path), ('%q'):format(clcppfn.path),
 				}:concat' ')
 			end,
@@ -230,7 +235,7 @@ void <?=entryname?>(
 	-- manually call gc collect resources ...
 	GLProgram.ComputeShader	-- ... the Shader subclass stored in gl.program
 		.super	-- ... gl.shader
-		.super	-- ... getbehavior gcwrapper 
+		.super	-- ... getbehavior gcwrapper
 		.init(computeShader)
 	glreport'here'
 	-- manually call glShaderBinary.  mind you we can initialize more than one shader object at a time here ...
@@ -241,7 +246,7 @@ void <?=entryname?>(
 	local binaryLen = #binaryData
 	gl.glShaderBinary(1, computeShaderIDs, binaryFormat, binaryData, binaryLen)
 	glreport'here'
-	
+
 	-- https://www.khronos.org/opengl/wiki/Example/SPIRV_Full_Compile_Linking
 	gl.glSpecializeShader(computeShader.id, entryname, 0, nil, nil)
 	glreport'here'
@@ -250,13 +255,13 @@ void <?=entryname?>(
 	--glreport'here'
 	computeShader:checkCompileStatus()	-- also no need?
 	glreport'here'
-	
+
 	self.computeProgram = GLProgram{
 		shaders = {computeShader},
 	}
 
 	--]==]
-	
+
 	self.computeProgram
 		-- TODO how do I get the uniform's read/write access, or its format?
 		-- or do I have to input that twice, both in the shader code as its glsl-format and in the glBindImageTexture call as a gl enum?

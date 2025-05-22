@@ -1,14 +1,13 @@
 #!/usr/bin/env luajit
 local cmdline = require 'ext.cmdline'(...)
-local sdl, SDLApp = require 'sdl.setup' (cmdline.sdl or '2')
-local gl = require 'gl.setup' (cmdline.gl or 'OpenGLES3')
+local sdl, SDLApp = require 'sdl.setup'(cmdline.sdl or '2')
+local gl = require 'gl.setup'(cmdline.gl or 'OpenGL')
 local ffi = require 'ffi'
 
 -- gles3 doesn't define compute so ...
 -- TODO go by this?
 --   https://community.arm.com/arm-community-blogs/b/graphics-gaming-and-vr-blog/posts/get-started-with-compute-shaders
-xpcall(function()
-	ffi.cdef[[
+for l in ([[
 enum { GL_COMPUTE_SHADER = 37305 };
 enum { GL_MAX_COMPUTE_UNIFORM_BLOCKS = 37307 };
 enum { GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS = 37308 };
@@ -35,14 +34,17 @@ typedef void ( * PFNGLDISPATCHCOMPUTEPROC) (GLuint num_groups_x, GLuint num_grou
 typedef void ( * PFNGLDISPATCHCOMPUTEINDIRECTPROC) (GLintptr indirect);
 enum { GL_IMAGE_2D = 36941 };
 enum { GL_WRITE_ONLY = 35001 };
-]]
-end, function()
-end)
+]]):gmatch'[^\n]+' do
+	xpcall(function()
+		ffi.cdef(l)
+	end, function(err)
+		print(err)
+	end)
+end
 
 local template = require 'template'
 local GLApp = require 'glapp'
 local glreport = require 'gl.report'
-local GLProgram = require 'gl.program'
 local GLTex2D = require 'gl.tex2d'
 local Image = require 'image'
 local vec3i = require 'vec-ffi.vec3i'
@@ -54,18 +56,20 @@ function App:initGL(...)
 		App.super.initGL(self, ...)
 	end
 
-	-- TODO gl.get() function for global gets
+	local GLGlobal = require 'gl.global'
+
 	-- each global size dim must be <= this
-	local maxComputeWorkGroupCount = vec3i(GLProgram:get'GL_MAX_COMPUTE_WORK_GROUP_COUNT')
+	print(GLGlobal:get'GL_MAX_COMPUTE_WORK_GROUP_COUNT')
+	local maxComputeWorkGroupCount = vec3i(GLGlobal:get'GL_MAX_COMPUTE_WORK_GROUP_COUNT')
 	print('GL_MAX_COMPUTE_WORK_GROUP_COUNT = '..maxComputeWorkGroupCount)
 
 	-- each local size dim must be <= this
-	local maxComputeWorkGroupSize = vec3i(GLProgram:get'GL_MAX_COMPUTE_WORK_GROUP_SIZE')
+	local maxComputeWorkGroupSize = vec3i(GLGlobal:get'GL_MAX_COMPUTE_WORK_GROUP_SIZE')
 	print('GL_MAX_COMPUTE_WORK_GROUP_SIZE = '..maxComputeWorkGroupSize)
 
 	-- the product of all local size dims must be <= this
 	-- also, this is >= 1024
-	local maxComputeWorkGroupInvocations = GLProgram:get'GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS'
+	local maxComputeWorkGroupInvocations = GLGlobal:get'GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS'
 	print('GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS = '..maxComputeWorkGroupInvocations)
 	glreport'here'
 
@@ -100,14 +104,11 @@ function App:initGL(...)
 	}
 	glreport'here'
 
-	local glslVersion = GLProgram.getVersionPragma()
-
 	local localSize = vec3i(32,32,1)
-	self.computeShader = GLProgram{
-		computeCode = template(
-glslVersion
-..[[
-
+	self.computeShader = require 'gl.program'{
+		version = 'latest',
+		precision = 'best',
+		computeCode = template([[
 layout(local_size_x=<?=localSize.x
 	?>, local_size_y=<?=localSize.y
 	?>, local_size_z=<?=localSize.z
