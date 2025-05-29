@@ -3,7 +3,7 @@
 local cmdline = require 'ext.cmdline'(...)
 local ffi = require 'ffi'
 local string = require 'ext.string'
-local sdl, SDLApp = require 'sdl.setup' (cmdline.sdl or '2')
+local sdl, SDLApp = require 'sdl.setup' (cmdline.sdl)
 local gl = require 'gl.setup' (cmdline.gl)
 local glreport = require 'gl.report'
 local getTime = require 'ext.timer'.getTime

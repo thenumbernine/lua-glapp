@@ -1,7 +1,7 @@
 #!/usr/bin/env luajit
 -- ES test using gl.sceneobject and objects ...
 local cmdline = require 'ext.cmdline'(...)
-local sdl, SDLApp = require 'sdl.setup' (cmdline.sdl or '2')
+local sdl, SDLApp = require 'sdl.setup' (cmdline.sdl)
 local gl = require 'gl.setup' (cmdline.gl or 'OpenGLES3')
 local ffi = require 'ffi'
 local getTime = require 'ext.timer'.getTime

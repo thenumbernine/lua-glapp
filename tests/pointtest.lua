@@ -2,6 +2,7 @@
 local cmdline = require 'ext.cmdline'(...)
 local sdl = require 'sdl.setup'(cmdline.sdl)
 local gl = require 'gl.setup'(cmdline.gl)
+local getTime = require 'ext.timer'.getTime
 local op = require 'ext.op'
 local ffi = require 'ffi'
 local vec3f = require 'vec-ffi.vec3f'
@@ -99,7 +100,7 @@ function Test:update()
 	gl.glClearColor(0, 0, 0, 0)
 	gl.glClear(bit.bor(gl.GL_COLOR_BUFFER_BIT, gl.GL_DEPTH_BUFFER_BIT))
 
-	local t = sdl.SDL_GetTicks() / 1000	-- gettime?
+	local t = getTime() % 360
 	self.view.mvMat:applyRotate(math.rad(t * 30), 0, 1, 0)
 	self.view.mvProjMat:mul4x4(self.view.projMat, self.view.mvMat)
 

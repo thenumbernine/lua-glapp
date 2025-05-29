@@ -1,6 +1,7 @@
 #!/usr/bin/env luajit
 local cmdline = require 'ext.cmdline'(...)
 local sdl, SDLApp = require 'sdl.setup' (cmdline.sdl)
+local getTime = require 'ext.timer'.getTime
 local gl = require 'gl.setup' (cmdline.gl)
 local ffi = require 'ffi'
 
@@ -20,7 +21,7 @@ function Test:update()
 	gl.glClearColor(0, 0, 0, 0)
 	gl.glClear(gl.GL_COLOR_BUFFER_BIT)
 
-	local t = sdl.SDL_GetTicks() * 1e-3
+	local t = getTime() % 360
 	gl.glRotatef(t * 30, 0, 1, 0)
 
 	gl.glBegin(gl.GL_TRIANGLES)
