@@ -113,18 +113,22 @@ return function(cl)
 		or eventPtr[0].type == mouseWheelEventType
 		then
 			if canHandleMouse then
-				local dx, dy
+				local dx, dy, x, y
 				if eventPtr[0].type == mouseMotionEventType then
+					x = eventPtr[0].motion.x
+					y = eventPtr[0].motion.y
 					dx = eventPtr[0].motion.xrel
 					dy = eventPtr[0].motion.yrel
 				else
+					x = eventPtr[0].wheel.x
+					y = eventPtr[0].wheel.y
 					dx = 10 * eventPtr[0].wheel.x
 					dy = 10 * eventPtr[0].wheel.y
 				end
 				if (self.mouse and self.mouse.leftDown and not guiDown)
 				or eventPtr[0].type == mouseWheelEventType
 				then
-					self:mouseDownEvent(dx, dy, shiftDown, guiDown, altDown)
+					self:mouseDownEvent(dx, dy, shiftDown, guiDown, altDown, x, y)
 				end
 			end
 		elseif eventPtr[0].type == keyUpEventType
@@ -134,35 +138,50 @@ return function(cl)
 		end
 	end
 
-	function cl:mouseDownEvent(dx, dy, shiftDown, guiDown, altDown)
+	function cl:mouseDownEvent(dx, dy, shiftDown, guiDown, altDown, x, y)
+		if dx == 0 and dy == 0 then return end
 		if shiftDown then
-			if dx ~= 0 or dy ~= 0 then
-				if self.view.ortho then
-					self.view.orthoSize = self.view.orthoSize * math.exp(dy * -.03)
-				else
-					self.view.pos = (self.view.pos - self.view.orbit) * math.exp(dy * -.03) + self.view.orbit
-				end
+			if self.view.ortho then
+				-- ortho = shrink / grow view size
+				self.view.orthoSize = self.view.orthoSize * math.exp(dy * -.03)
+			else
+				-- frustum = zoom dist in and out
+				self.view.pos = (self.view.pos - self.view.orbit) * math.exp(dy * -.03) + self.view.orbit
 			end
 		elseif altDown then
-			local dist = (self.view.pos - self.view.orbit):length()
-			self.view.orbit = self.view.orbit + self.view.angle:rotate(vec3d(-dx,dy,0) * (dist / self.height))
-			self.view.pos = self.view.angle:zAxis() * dist + self.view.orbit
+			if self.view.ortho then
+				-- ortho = rotate view
+				-- will this be this frames delta or last frames delta, eh?
+				local aspectRatio = self.width / self.height
+				local rx = aspectRatio * (self.mouse.pos.x - .5) * 2
+				local ry = (self.mouse.pos.y - .5) * 2
+				local rx2 = aspectRatio * (x / self.width - .5) * 2
+				local ry2 = ((1 - y / self.height) - .5) * 2
+				local angle = math.asin((rx2 * ry - ry2 * rx) / math.sqrt((rx^2 + ry^2) * (rx2^2 + ry2^2)))
+				local rotation = quatd():fromAngleAxis(0, 0, 1, math.deg(angle))
+				self.view.angle = (self.view.angle * rotation):normalize()
+			else
+				-- frustum = move orbit center
+				local dist = (self.view.pos - self.view.orbit):length()
+				self.view.orbit = self.view.orbit + self.view.angle:rotate(vec3d(-dx,dy,0) * (dist / self.height))
+				self.view.pos = self.view.angle:zAxis() * dist + self.view.orbit
+			end
 		else
-			if dx ~= 0 or dy ~= 0 then
-				if self.view.ortho then
-					local aspectRatio = self.width / self.height
-					local fdx = -2 * dx / self.width * self.view.orthoSize * aspectRatio
-					local fdy = 2 * dy / self.height * self.view.orthoSize
-					self.view.pos = self.view.pos + self.view.angle:rotate(vec3d(fdx, fdy, 0))
-				else
-					local magn = math.sqrt(dx * dx + dy * dy)
-					magn = magn * math.tan(math.rad(.5 * self.view.fovY))
-					local fdx = dx / magn
-					local fdy = dy / magn
-					local rotation = quatd():fromAngleAxis(-fdy, -fdx, 0, magn)
-					self.view.angle = (self.view.angle * rotation):normalize()
-					self.view.pos = self.view.angle:zAxis() * (self.view.pos - self.view.orbit):length() + self.view.orbit
-				end
+			if self.view.ortho then
+				-- ortho = drag
+				local aspectRatio = self.width / self.height
+				local fdx = -2 * dx / self.width * self.view.orthoSize * aspectRatio
+				local fdy = 2 * dy / self.height * self.view.orthoSize
+				self.view.pos = self.view.pos + self.view.angle:rotate(vec3d(fdx, fdy, 0))
+			else
+				-- frustum = rotate around orbit
+				local magn = math.sqrt(dx * dx + dy * dy)
+				magn = magn * math.tan(math.rad(.5 * self.view.fovY))
+				local fdx = dx / magn
+				local fdy = dy / magn
+				local rotation = quatd():fromAngleAxis(-fdy, -fdx, 0, magn)
+				self.view.angle = (self.view.angle * rotation):normalize()
+				self.view.pos = self.view.angle:zAxis() * (self.view.pos - self.view.orbit):length() + self.view.orbit
 			end
 		end
 	end
