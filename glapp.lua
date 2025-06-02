@@ -146,7 +146,7 @@ function GLApp:initWindow()
 	if addGLFuncsFromGetProcAddress then
 		for _,info in ipairs(glFuncs) do
 			local func = info.func
-			gl[func] = ffi.new('PFN'..func:upper()..'PROC', sdl.SDL_GL_GetProcAddress(func))
+			gl[func] = ffi.cast('PFN'..func:upper()..'PROC', sdl.SDL_GL_GetProcAddress(func))
 		end
 	end
 
