@@ -4,6 +4,7 @@ local sdl, SDLApp = require 'sdl.setup'(cmdline.sdl)
 local gl = require 'gl.setup'(cmdline.gl)
 local ffi = require 'ffi'
 
+--[=[ no need with my latest binding file?
 -- gles3 doesn't define compute so ...
 -- TODO go by this?
 --   https://community.arm.com/arm-community-blogs/b/graphics-gaming-and-vr-blog/posts/get-started-with-compute-shaders
@@ -41,6 +42,7 @@ enum { GL_WRITE_ONLY = 35001 };
 		print(err)
 	end)
 end
+--]=]
 
 local template = require 'template'
 local GLApp = require 'glapp'
@@ -57,14 +59,33 @@ function App:initGL(...)
 	end
 
 	local GLGlobal = require 'gl.global'
+	glreport'here'
 
 	-- each global size dim must be <= this
-	print(GLGlobal:get'GL_MAX_COMPUTE_WORK_GROUP_COUNT')
+	--print(GLGlobal:get'GL_MAX_COMPUTE_WORK_GROUP_COUNT')
+
+	--[[
 	local maxComputeWorkGroupCount = vec3i(GLGlobal:get'GL_MAX_COMPUTE_WORK_GROUP_COUNT')
+	--]]
+	-- [[ uhh TODO this in gl/global.lua
+	-- some getters use glGetIntegerv, other getters use glGetIntegeri_v, and you just gotta know which is which I guess.
+	local maxComputeWorkGroupCount = vec3i()
+	gl.glGetIntegeri_v(gl.GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, maxComputeWorkGroupCount.s+0)
+	gl.glGetIntegeri_v(gl.GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, maxComputeWorkGroupCount.s+1)
+	gl.glGetIntegeri_v(gl.GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, maxComputeWorkGroupCount.s+2)
+	--]]
 	print('GL_MAX_COMPUTE_WORK_GROUP_COUNT = '..maxComputeWorkGroupCount)
 
 	-- each local size dim must be <= this
+	--[[
 	local maxComputeWorkGroupSize = vec3i(GLGlobal:get'GL_MAX_COMPUTE_WORK_GROUP_SIZE')
+	--]]
+	-- [[
+	local maxComputeWorkGroupSize = vec3i()
+	gl.glGetIntegeri_v(gl.GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, maxComputeWorkGroupSize.s+0)
+	gl.glGetIntegeri_v(gl.GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, maxComputeWorkGroupSize.s+1)
+	gl.glGetIntegeri_v(gl.GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, maxComputeWorkGroupSize.s+2)
+	--]]
 	print('GL_MAX_COMPUTE_WORK_GROUP_SIZE = '..maxComputeWorkGroupSize)
 
 	-- the product of all local size dims must be <= this
