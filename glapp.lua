@@ -3,6 +3,8 @@ local sdl = require 'sdl'
 local SDLApp = require 'sdl.app'
 local sdlAssertNonNull = require 'sdl.assert'.nonnull
 
+local GLint_1 = ffi.typeof'GLint[1]'
+
 local gl
 
 -- Too bad for so long Windows would only ship with GL 1.1 ... has that changed?
@@ -204,7 +206,7 @@ function GLApp:screenshotToFile(filename)
 		self.screenshotContext.ssimg = ssimg
 		self.screenshotContext.ssflipped = ssflipped
 	end
-	local push = ffi.new('GLint[1]', 0)
+	local push = GLint_1(0)
 	gl.glGetIntegerv(gl.GL_PACK_ALIGNMENT, push)
 	gl.glPixelStorei(gl.GL_PACK_ALIGNMENT, 1)	-- PACK_ALIGNMENT is for glReadPixels
 	gl.glReadPixels(0, 0, w, h, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, ssimg.buffer)
