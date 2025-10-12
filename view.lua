@@ -1,6 +1,9 @@
+local ffi = require 'ffi'
 local class = require 'ext.class'
 local vec3d = require 'vec-ffi.vec3d'
 local quatd = require 'vec-ffi.quatd'
+
+local float = ffi.typeof'float'
 
 local View = class()
 
@@ -68,11 +71,11 @@ function View:init(args)
 
 	if not self.useGLMatrixMode then
 		local matrix = require 'matrix.ffi'
-		self.projMat = matrix({4,4}, 'float'):zeros():setIdent()
-		self.mvMat = matrix({4,4}, 'float'):zeros():setIdent()
+		self.projMat = matrix({4,4}, float):zeros():setIdent()
+		self.mvMat = matrix({4,4}, float):zeros():setIdent()
 
 		-- TODO do I even need this?  not for GL at least ...
-		self.mvProjMat = matrix({4,4}, 'float'):zeros():setIdent()
+		self.mvProjMat = matrix({4,4}, float):zeros():setIdent()
 	end
 end
 
