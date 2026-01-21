@@ -2,52 +2,7 @@ local ffi = require 'ffi'
 local sdl = require 'sdl'
 local SDLApp = require 'sdl.app'
 local sdlAssertNonNull = require 'sdl.assert'.nonnull
-
-local gl
-
--- Too bad for so long Windows would only ship with GL 1.1 ... has that changed?
--- In fact no, things got worse, as now Apple has thrown its hat into the ring of shoddy OpenGL support.
--- But if we go the GLEW-like route for OSX, we can do >2.1 stuff via extensions, however it still only gives us GLSL support up to 1.20 ... smh
-local addGLFuncsFromGetProcAddress = ffi.os == 'Windows'
-	-- or ffi.os == 'OSX' -- getting a require loop from this.  how does it work in windows but not osx?
-
--- this has to be requestExit for all windows opengl programs, so I figure as much to do it here ...
--- that makes this piece of code not-cross-platform
--- the danger is, the whole purpose of passing gl through init args is to provide non-ffi.gl gl's (like EGL)
--- of course that was experimental to begin with
--- this code preys explicitly upon ffi.gl
-local glFuncs
-if addGLFuncsFromGetProcAddress then
-	local table = require 'ext.table'
-	local string = require 'ext.string'
-
-	gl = require 'gl'	-- for GLenum's def
-	glFuncs = table()
-
-	for _,line in ipairs(string.split(string.trim(gl.code),'[\r\n]')) do
-		local returnType, func, params
-		xpcall(function()
-			if line ~= '' then
-				local rest = line:match'^extern%s+(.*)$'
-				if rest then
-					-- looks like the windows gl.h for v1.1 doesn't use 'extern' while the glext.h does
-					-- and since we're fixing windows glext.h, how about we just skip the non-externs
-					-- all else should be function defs
-					-- lazy tokenizer:
-					line = line:gsub('%*', ' * '):gsub('%s+', ' ')	-- help the lazy tokenzier parse return types
-					returnType, func, params = line:match('^(.+)%s+(%S+)%s*%((.*)%);%s*$')
-					glFuncs:insert{returnType=returnType, func=func, params=params}
-				end
-			end
-		end, function(err)
-			print('line = ', line)
-			print('returnType = ', returnType)
-			print('func = ', func)
-			print('params = ', params)
-			io.stderr:write(err..'\n'..debug.traceback())
-		end)
-	end
-end
+local gl = require 'gl'
 
 
 local GLApp = SDLApp:subclass()
@@ -142,15 +97,6 @@ function GLApp:initWindow()
 	sdl.SDL_GL_SetSwapInterval(0)
 	--)
 
-	-- now that gl is loaded, if we're windows then we need to load extensions
-	if addGLFuncsFromGetProcAddress then
-		for _,info in ipairs(glFuncs) do
-			local func = info.func
-			gl[func] = ffi.cast('PFN'..func:upper()..'PROC', sdl.SDL_GL_GetProcAddress(func))
-		end
-	end
-
-	gl = require 'gl'
 	if self.initGL then self:initGL() end
 end
 
@@ -168,6 +114,14 @@ function GLApp:postUpdate()
 end
 
 function GLApp:exit()
+	--[[ manually clean up function pointer closures before the library unloads
+	if ffi.os == 'Windows' then
+		collectgarbage()
+		getmetatable(gl).__gc()
+		collectgarbage()
+	end
+	--]]
+
 	if self.sdlMajorVersion == 2 then
 		sdl.SDL_GL_DeleteContext(self.sdlCtx)
 	elseif self.sdlMajorVersion == 3 then
@@ -175,7 +129,17 @@ function GLApp:exit()
 	else
 		error("SDLApp.sdlMajorVersion is unknown: "..require'ext.tolua'(SDLApp.sdlMajorVersion))
 	end
+
 	GLApp.super.exit(self)
+
+	if ffi.os == 'Windows' then
+		--collectgarbage('stop')
+		--jit.off()
+		-- got sick of "Error in finalizer" when cleaning up the GL library
+		-- or if I tried manually freeing callbacks I got "bad callback"
+		-- soooo ... just exit early.
+		os.exit()
+	end
 end
 
 --[[
