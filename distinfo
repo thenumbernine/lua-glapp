@@ -1,7 +1,12 @@
+--------------------------------------------
+-- generated with dist/build-distinfo.rua --
+--------------------------------------------
+
 name = "glapp"
 files = {
 	["LICENSE"] = "glapp/LICENSE",
 	["README.md"] = "glapp/README.md",
+	["distinfo"] = "glapp/distinfo",
 	["glapp-dev-1.rockspec"] = "glapp/glapp-dev-1.rockspec",
 	["glapp.lua"] = "glapp/glapp.lua",
 	["mouse.lua"] = "glapp/mouse.lua",
@@ -18,12 +23,12 @@ files = {
 	["tests/test_es_directcalls.lua"] = "glapp/tests/test_es_directcalls.lua",
 	["tests/test_gl1.lua"] = "glapp/tests/test_gl1.lua",
 	["tests/test_tex.lua"] = "glapp/tests/test_tex.lua",
+	["tests/test_uniformblock.rua"] = "glapp/tests/test_uniformblock.rua",
 	["tests/test_vertexattrib.lua"] = "glapp/tests/test_vertexattrib.lua",
 	["tests/transformFeedbackTest.lua"] = "glapp/tests/transformFeedbackTest.lua",
 	["view.lua"] = "glapp/view.lua",
 }
 deps = {
-	"bit",
 	"ext",
 	"ffi",
 	"gl",
