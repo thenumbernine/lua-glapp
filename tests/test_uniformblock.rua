@@ -27,7 +27,9 @@ App.initGL = |:|do
 layout(location=0) in vec2 vertex;
 out vec2 vertexv;
 
-layout(std140, binding=0) uniform VtxMatrices {
+layout(std140
+	// , binding=0	// works in Mesa desktop GLES3, not in Chrome ANGLE GLES3 WebGL2
+) uniform VtxMatrices {
 	mat4 modelMat;
 	mat4 viewMat;
 	mat4 projMat;
@@ -45,7 +47,9 @@ in vec2 vertexv;
 
 layout(location=0) out vec4 fragColor;
 
-layout(std140, binding=1) uniform FragMatrices {
+layout(std140
+	//, binding=1
+) uniform FragMatrices {
 	mat4 colorMat;
 };
 
@@ -53,6 +57,15 @@ void main() {
 	fragColor = colorMat * vec4(vertexv - .5, 0, 1.);
 }
 ]],
+			-- setup bindings here since GLES3-WebGL2-ANGLE doesn't let us set layout(bindings)
+			uniformBlocks = {
+				VtxMatrices = {
+					binding = 0,
+				},
+				FragMatrices = {
+					binding = 1,
+				},
+			},
 		},
 		vertexes = {
 			data = {
@@ -92,13 +105,27 @@ void main() {
 	self.colorMat:setIdent()
 		:applyTranslate(.5, .5, .5)
 
+	gl.glUniformBlockBinding(
+		self.obj.program.id, 
+		self.obj.program.uniformBlocks.VtxMatrices.blockIndex, 
+		0
+	)
+	gl.glUniformBlockBinding(
+		self.obj.program.id, 
+		self.obj.program.uniformBlocks.FragMatrices.blockIndex, 
+		1
+	)
 
 assert.eq(ffi.sizeof(VtxMatricesType), self.obj.program.uniformBlocks.VtxMatrices.dataSize)
 	self.vtxMatricesBuf = GLUniformBuffer{
 		data = self.vtxMatricesCPU,
 		size = ffi.sizeof(self.vtxMatricesCPU),
 		usage = gl.GL_DYNAMIC_DRAW,
-		binding = self.obj.program.uniformBlocks.VtxMatrices.binding,
+		-- I would do this in GLSL and read it here via introspection but ...
+		--binding = self.obj.program.uniformBlocks.VtxMatrices.binding,
+		-- ... while desktop-Mesa-GLES3 does support GLSL layout(binding) ...
+		-- ... WebGL2's GLES3 (Angle) does not ... so I have to do this instead:
+		binding = 0,
 	}:unbind()
 assert.eq(ffi.sizeof(VtxMatricesType), self.vtxMatricesBuf.size)
 
@@ -108,7 +135,8 @@ assert.eq(ffi.sizeof(FragMatricesType), self.obj.program.uniformBlocks.FragMatri
 		data = self.fragMatricesCPU,
 		size = ffi.sizeof(self.fragMatricesCPU),
 		usage = gl.GL_DYNAMIC_DRAW,
-		binding = self.obj.program.uniformBlocks.FragMatrices.binding,
+		--binding = self.obj.program.uniformBlocks.FragMatrices.binding,
+		binding = 1,
 	}:unbind()
 assert.eq(ffi.sizeof(FragMatricesType), self.fragMatricesBuf.size)
 
