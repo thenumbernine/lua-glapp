@@ -94,23 +94,23 @@ void main() {
 
 
 assert.eq(ffi.sizeof(VtxMatricesType), self.obj.program.uniformBlocks.VtxMatrices.dataSize)
-assert.eq(ffi.sizeof(VtxMatricesType), self.vtxMatricesBuf.size)
 	self.vtxMatricesBuf = GLUniformBuffer{
 		data = self.vtxMatricesCPU,
 		size = ffi.sizeof(self.vtxMatricesCPU),
 		usage = gl.GL_DYNAMIC_DRAW,
 		binding = self.obj.program.uniformBlocks.VtxMatrices.binding,
 	}:unbind()
+assert.eq(ffi.sizeof(VtxMatricesType), self.vtxMatricesBuf.size)
 
 
 assert.eq(ffi.sizeof(FragMatricesType), self.obj.program.uniformBlocks.FragMatrices.dataSize)
-assert.eq(ffi.sizeof(FragMatricesType), self.fragMatricesBuf.size)
 	self.fragMatricesBuf = GLUniformBuffer{
 		data = self.fragMatricesCPU,
 		size = ffi.sizeof(self.fragMatricesCPU),
 		usage = gl.GL_DYNAMIC_DRAW,
 		binding = self.obj.program.uniformBlocks.FragMatrices.binding,
 	}:unbind()
+assert.eq(ffi.sizeof(FragMatricesType), self.fragMatricesBuf.size)
 
 
 	self.obj.program:useNone()
