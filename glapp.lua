@@ -36,10 +36,12 @@ function GLApp:sdlGLSetAttributes()
 	-- So if I want new GLSL then I am forced to use OpenGL 4.1 core ...
 	if ffi.os == 'OSX' then
 		-- is there a good way to look inside gl.setup and determine which one was picked?
-		local loaded2 = package.loaded['ffi.OSX.OpenGL2']
-		local loaded3 = package.loaded['ffi.OSX.OpenGL3']
-		local loadedMesa = package.loaded['ffi.OSX.OpenGLMesa']
-		local loadedES = package.loaded['ffi.OpenGLES3'] or package.loaded['ffi.OpenGLES2'] or package.loaded['ffi.OpenGLES1']
+		local loaded2 = package.loaded['gl.ffi.OSX.OpenGL2']
+		local loaded3 = package.loaded['gl.ffi.OSX.OpenGL3']
+		local loadedMesa = package.loaded['gl.ffi.OSX.OpenGLMesa']
+		local loadedES = package.loaded['gl.ffi.OpenGLES3']
+			or package.loaded['gl.ffi.OpenGLES2']
+			or package.loaded['gl.ffi.OpenGLES1']
 		-- ... and then choose this accordingly?
 		if loadedMesa then
 			-- With the /usr/local/opt/mesa/lib/libGL.dylib
