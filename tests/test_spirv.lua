@@ -29,10 +29,12 @@ function App:initGL()
 	local binaryFormats = table{glGlobal:get'GL_SHADER_BINARY_FORMATS'}
 	print('GL_SHADER_BINARY_FORMATS', tolua(binaryFormats))
 
-	assert(binaryFormats:find(gl.GL_SHADER_BINARY_FORMAT_SPIR_V), "failed to find GL_SHADER_BINARY_FORMAT_SPIR_V supported binary format")
+	local GL_SHADER_BINARY_FORMAT_SPIR_V = op.safeindex(gl, 'GL_SHADER_BINARY_FORMAT_SPIR_V') or 38225
+	local binaryFormat = GL_SHADER_BINARY_FORMAT_SPIR_V
+	assert(binaryFormats:find(GL_SHADER_BINARY_FORMAT_SPIR_V), "failed to find GL_SHADER_BINARY_FORMAT_SPIR_V supported binary format")
 
 	local vertexCode = [[
-#version 460
+#version 450
 precision highp float;
 layout(location=0) in vec2 vertex;
 layout(location=0) out vec2 posv;
@@ -44,10 +46,12 @@ void main() {
 ]]
 
 	local fragmentCode = [[
-#version 460
+#version 450
 precision highp float;
 layout(location=0) in vec2 posv;
 layout(location=0) out vec4 fragColor;
+#define dvec2 vec2
+#define double float
 void main() {
 	dvec2 c = posv;
 	dvec2 z = vec2(0., 0.);
@@ -70,18 +74,27 @@ void main() {
 	if useSPIRV then
 		path'shader.vert':write(vertexCode)
 		path'shader.frag':write(fragmentCode)
-		assert(os.exec'glslangValidator -G -S vert shader.vert -o shader-vert.spv')
-		assert(os.exec'glslangValidator -G -S frag shader.frag -o shader-frag.spv')
+		assert(os.exec'glslangValidator -S vert --glsl-version 450 --target-env opengl shader.vert -o shader-vert.spv')
+		assert(os.exec'glslangValidator -S frag --glsl-version 450 --target-env opengl shader.frag -o shader-frag.spv')
+		assert(os.exec'spirv-link shader-vert.spv shader-frag.spv -o shader.spv')
 	end
 	self.sceneObj = GLSceneObject{
 		program = not useSPIRV and {
 			vertexCode = vertexCode,
 			fragmentCode = fragmentCode,
 		} or {
-			binaryFormat = gl.GL_SHADER_BINARY_FORMAT_SPIR_V,
+			binaryFormat = binaryFormat,
+			-- [[ loading one binary shader-module at a time...
+-- NOT WORKING AND NO ERROR
 			vertexBinary = assert(path'shader-vert.spv':read()),
 			fragmentBinary = assert(path'shader-frag.spv':read()),
-			-- TODO specialize-shader entry-point and constants...
+			--]]
+			--[[ loading all binaries together
+-- NOT WORKING AND NO ERROR
+			multipleBinary = assert(path'shader.spv':read()),
+			-- can you infer this from the file?
+			multipleBinaryStages = {'vertex', 'fragment'},
+			--]]
 		},
 		vertexes = {
 			dim = 2,
