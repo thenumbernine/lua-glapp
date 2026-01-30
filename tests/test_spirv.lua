@@ -84,12 +84,12 @@ void main() {
 			fragmentCode = fragmentCode,
 		} or {
 			binaryFormat = binaryFormat,
-			-- [[ loading one binary shader-module at a time...
+			--[[ loading one binary shader-module at a time...
 -- NOT WORKING AND NO ERROR
 			vertexBinary = assert(path'shader-vert.spv':read()),
 			fragmentBinary = assert(path'shader-frag.spv':read()),
 			--]]
-			--[[ loading all binaries together
+			-- [[ loading all binaries together
 -- NOT WORKING AND NO ERROR
 			multipleBinary = assert(path'shader.spv':read()),
 			-- can you infer this from the file?
