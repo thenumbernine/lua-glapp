@@ -22,10 +22,11 @@ files = {
 	"tests/test_es.lua",
 	"tests/test_es_directcalls.lua",
 	"tests/test_gl1.lua",
+	"tests/test_spirv.lua",
 	"tests/test_tex.lua",
 	"tests/test_uniformblock.rua",
 	"tests/test_vertexattrib.lua",
-	"tests/transformFeedbackTest.lua",
+	"tests/test_transformFeedbackTest.lua",
 	"view.lua",
 }
 deps = {
