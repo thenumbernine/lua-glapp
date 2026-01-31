@@ -14,7 +14,15 @@ local GLSceneObject = require 'gl.sceneobject'
 local GLUniformBuffer = require 'gl.uniformbuffer'
 --]]
 
-local useSPIRV = true
+--[[
+local shaderMethod = 'source'			-- from multiple glShaderSource's
+local shaderMethod = 'binary'			-- from glProgramBinary
+local shaderMethod = 'spirvPerShader'	-- from a glShaderBinary per shader module
+local shaderMethod = 'spirvMultiple'	-- from one single glShaderBinary for the entire program
+--]]
+-- so far the only thing that works is glShaderSource()
+local shaderMethod = cmdline.method or cmdline[1] or 'source'
+
 
 local App = require 'imgui.appwithorbit'()
 
@@ -84,44 +92,76 @@ void main() {
 	fragColor = vec4(zangle, znorm, iter, 1.);
 }
 ]]
-	if useSPIRV then
-		path'shader.vert':write(vertexCode)
-		path'shader.frag':write(fragmentCode)
-		assert(os.exec'glslangValidator -S vert --glsl-version 450 --target-env opengl shader.vert -o shader-vert.spv')
-		assert(os.exec'glslangValidator -S frag --glsl-version 450 --target-env opengl shader.frag -o shader-frag.spv')
-		assert(os.exec'spirv-link shader-vert.spv shader-frag.spv -o shader.spv')
-	end
-	self.sceneObj = GLSceneObject{
-		program = not useSPIRV and {
-			vertexCode = vertexCode,
-			fragmentCode = fragmentCode,
 
-			--[[
-			For using uniform-blocks instead of uniforms.
-			Fun Fact:
-			With glShaderSource with GLES3, you cannot specify binding= in the GLSL
-			But with glShaderBinary + SPIRV you *can only* specify the block binding in the GLSL
-				(since the compile phase seems to lose all names, so you have no other way to identify blocks beyond checking sizes or random guesses)
-			--]]
-			uniformBlocks = {
-				VertexUniforms = {
-					binding = 0,
-				},
-			},
-		} or {
-			binaryFormat = binaryFormat,
-			--[[ loading one binary shader-module at a time per glShaderBinary() call
--- NOT WORKING AND NO ERROR
-			vertexBinary = assert(path'shader-vert.spv':read()),
-			fragmentBinary = assert(path'shader-frag.spv':read()),
-			--]]
-			-- [[ loading all binaries in one single glShaderBinary() call
--- NOT WORKING AND NO ERROR
-			multipleBinary = assert(path'shader.spv':read()),
-			-- can you infer this from the file?
-			multipleBinaryStages = {'vertex', 'fragment'},
-			--]]
-		},
+	-- used for shaderMethod is spirvPerShader or spirvMultiple
+	local shaderVertSrc = path'test_spirv_shader.vert'
+	local shaderFragSrc = path'test_spirv_shader.frag'
+	local shaderVertSPV = path'test_spirv_shader-vert.spv'
+	local shaderFragSPV = path'test_spirv_shader-frag.spv'
+	local shaderLinkedSPV = path'test_spirv_shader.spv'
+	local function glslangValidatorCompile()
+		shaderVertSrc:write(vertexCode)
+		shaderFragSrc:write(fragmentCode)
+		assert(os.exec('glslangValidator -S vert --glsl-version 450 --target-env opengl '..shaderVertSrc:escape()..' -o '..shaderVertSPV:escape()))
+		assert(os.exec('glslangValidator -S frag --glsl-version 450 --target-env opengl '..shaderFragSrc:escape()..' -o '..shaderFragSPV:escape()))
+		assert(os.exec('spirv-link '..shaderVertSPV:escape()..' '..shaderFragSPV:escape()..' -o '..shaderLinkedSPV:escape()))
+	end
+
+	-- used for shaderMethod == binary
+	local progBinPath = path'test_spirv_programBinaryOut.bin'
+
+	self.sceneObj = GLSceneObject{
+		program = assert.index({
+			source = function()
+				return {
+					-- by source code
+					vertexCode = vertexCode,
+					fragmentCode = fragmentCode,
+
+					--[[
+					For using uniform-blocks instead of uniforms.
+					Fun Fact:
+					With glShaderSource with GLES3, you cannot specify binding= in the GLSL
+					But with glShaderBinary + SPIRV you *can only* specify the block binding in the GLSL
+						(since the compile phase seems to lose all names, so you have no other way to identify blocks beyond checking sizes or random guesses)
+					--]]
+					uniformBlocks = {
+						VertexUniforms = {
+							binding = 0,
+						},
+					},
+				}
+			end,
+			binary = function()
+				local progBin = assert(progBinPath:read())
+				return {
+					-- by previously saved program:getBinary()
+					binaryFormat = ffi.cast('uint32_t*', progBin)[0],
+					programBinary = progBin:sub(5),
+				}
+			end,
+			spirvPerShader = function()
+				glslangValidatorCompile()
+				return {
+					-- loading one binary shader-module at a time per glShaderBinary() call
+					-- NOT WORKING AND NO ERROR
+					binaryFormat = binaryFormat,
+					vertexBinary = assert(shaderVertSPV:read()),
+					fragmentBinary = assert(shaderFragSPV:read()),
+				}
+			end,
+			spirvMultiple = function()
+				glslangValidatorCompile()
+				return {
+					-- loading all binaries in one single glShaderBinary() call
+					-- NOT WORKING AND NO ERROR
+					binaryFormat = binaryFormat,
+					shadersBinary = assert(shaderLinkedSPV:read()),
+					-- can you infer the shader-module stages in a SPIR-V from its file?
+					shadersBinaryStages = {'vertex', 'fragment'},
+				}
+			end,
+		}, shaderMethod)(),
 		vertexes = {
 			dim = 2,
 			data = {
@@ -137,7 +177,8 @@ void main() {
 		},
 	}
 
-	local uniformBlocks = self.sceneObj.program.uniformBlocks
+	local program = self.sceneObj.program
+	local uniformBlocks = program.uniformBlocks
 	print('uniform blocks:')
 	print(tolua(table.mapi(uniformBlocks, function(x) return x end)))
 
@@ -154,6 +195,22 @@ assert.eq(vertexUniformBlock.dataSize, ffi.sizeof'float' * 16)
 		usage = gl.GL_DYNAMIC_DRAW,
 		binding = vertexUniformBlock.binding,
 	}:unbind()
+
+	-- if I load the SPIR-V shader ... and get my no-errors black-screen ... and then try to save the program ...
+	-- OpenGL segfaults.
+	if not (
+		shaderMethod == 'spirvPerShader'
+		or shaderMethod == 'spirvMultiple'
+	) then
+		-- [[ for glShaderSource() pathway, lets get the program-binary back and see what it is
+		local programBinary, programBinaryFormat = program:getBinary()
+		print('binary format:', programBinaryFormat)	-- on Linux this turns out to be GL_PROGRAM_BINARY_FORMAT_MESA = 34655
+		progBinPath:write(
+			ffi.string(ffi.new('uint32_t[1]', programBinaryFormat), 4)
+			..programBinary
+		)
+		--]]
+	end
 end
 
 function App:update()
