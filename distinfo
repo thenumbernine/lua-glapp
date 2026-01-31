@@ -24,9 +24,9 @@ files = {
 	"tests/test_gl1.lua",
 	"tests/test_spirv.lua",
 	"tests/test_tex.lua",
+	"tests/test_transformFeedbackTest.lua",
 	"tests/test_uniformblock.rua",
 	"tests/test_vertexattrib.lua",
-	"tests/test_transformFeedbackTest.lua",
 	"view.lua",
 }
 deps = {
@@ -34,7 +34,6 @@ deps = {
 	"ffi",
 	"gl",
 	"image",
-	"matrix",
 	"sdl",
 	"template",
 	"vec-ffi",

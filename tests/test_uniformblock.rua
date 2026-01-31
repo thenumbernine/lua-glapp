@@ -1,5 +1,5 @@
 #!/usr/bin/env rua
-local matrix_ffi = require 'matrix.ffi'
+local vec4x4f = require 'vec-ffi.vec4x4f'
 local gl = require 'gl.setup'(cmdline.gl)
 local GLUniformBuffer = require 'gl.uniformbuffer'
 local GLSceneObject = require 'gl.sceneobject'
@@ -8,13 +8,13 @@ local App = require 'glapp.orbit'()
 -- define Cdef of uniform blocks:
 
 local VtxMatricesType = ffi.typeof[[struct{
-	float modelMat[16];
-	float viewMat[16];
-	float projMat[16];
+	vec4x4f_t modelMat;
+	vec4x4f_t viewMat;
+	vec4x4f_t projMat;
 }]]
 
 local FragMatricesType = ffi.typeof[[struct{
-	float colorMat[16];
+	vec4x4f_t colorMat;
 }]]
 
 App.viewDist = 3
@@ -77,19 +77,15 @@ void main() {
 -- why is the colorMat uniform location -1 even when I am using it?	
 	print(tolua(table.mapi(self.obj.program.uniforms, |o| table(o, {setters=false}))))
 	
-	local m = matrix_ffi({4,4}, 'float'):zeros()
-
 	self.vtxMatricesCPU = VtxMatricesType()
 	self.fragMatricesCPU = FragMatricesType()
 
 	-- make our pointer objects point to it
 	-- hmm tempting to make a FFI type for mat4x4's...
-	self.modelMat = matrix_ffi({4,4}, 'float'):zeros()
-	self.colorMat = matrix_ffi({4,4}, 'float'):zeros()
-	self.view.projMat.ptr = self.vtxMatricesCPU.projMat
-	self.view.mvMat.ptr = self.vtxMatricesCPU.viewMat		-- view's mvMat will be the view-mat ...
-	self.modelMat.ptr = self.vtxMatricesCPU.modelMat
-	self.colorMat.ptr = self.fragMatricesCPU.colorMat
+	self.view.projMat = self.vtxMatricesCPU.projMat
+	self.view.mvMat = self.vtxMatricesCPU.viewMat		-- view's mvMat will be the view-mat ...
+	self.modelMat = self.vtxMatricesCPU.modelMat
+	self.colorMat = self.fragMatricesCPU.colorMat
 
 	self.view:setup(self.width / self.height)
 	self.modelMat:setIdent()

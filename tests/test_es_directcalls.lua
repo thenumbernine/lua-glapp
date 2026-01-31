@@ -1,13 +1,13 @@
 #!/usr/bin/env luajit
 -- ES test using raw gl calls
 local cmdline = require 'ext.cmdline'(...)
+local vec4x4f = require 'vec-ffi.vec4x4f'
 local sdl = require 'sdl.setup'(cmdline.sdl)
 local gl = require 'gl.setup'(cmdline.gl)
 
 local ffi = require 'ffi'
 local assert = require 'ext.assert'
 local getTime = require 'ext.timer'.getTime
-local matrix = require 'matrix.ffi'
 
 local Test = require 'glapp':subclass()
 Test.title = "Spinning Triangle"
@@ -35,7 +35,7 @@ function Test:initGL()
 	print('glsl es version', require 'gl.program'.getVersionPragma(true))
 
 	local aspectRatio = self.width / self.height
-	projMat = matrix({4,4}, 'float'):zeros()
+	projMat = vec4x4f()
 		--[[
 		:setFrustum(
 			-znear * aspectRatio * tanFovY,
@@ -56,8 +56,8 @@ function Test:initGL()
 			 zfar
 		)
 		--]]
-	mvMat = matrix({4,4}, 'float'):zeros():setIdent()
-	mvProjMat = matrix({4,4}, 'float'):zeros():setIdent()
+	mvMat = vec4x4f():setIdent()
+	mvProjMat = vec4x4f():setIdent()
 
 	local versionHeader = require 'gl.program'.getVersionPragma()..'\n'
 

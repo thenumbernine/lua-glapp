@@ -70,12 +70,12 @@ function View:init(args)
 	end
 
 	if not self.useGLMatrixMode then
-		local matrix = require 'matrix.ffi'
-		self.projMat = matrix({4,4}, float):zeros():setIdent()
-		self.mvMat = matrix({4,4}, float):zeros():setIdent()
+		local vec4x4f = require 'vec-ffi.vec4x4f'
+		self.projMat = vec4x4f():setIdent()
+		self.mvMat = vec4x4f():setIdent()
 
 		-- TODO do I even need this?  not for GL at least ...
-		self.mvProjMat = matrix({4,4}, float):zeros():setIdent()
+		self.mvProjMat = vec4x4f():setIdent()
 	end
 end
 

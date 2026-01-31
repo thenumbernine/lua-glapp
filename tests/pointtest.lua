@@ -9,9 +9,6 @@ local vec3f = require 'vec-ffi.vec3f'
 local glreport = require 'gl.report'
 local GLSceneObject = require 'gl.sceneobject'
 
-local matrix_ffi = require 'matrix.ffi'
-matrix_ffi.real = 'float'	-- default matrix_ffi type
-
 
 local Test = require 'glapp.orbit'()
 Test.title = "Spinning Points"
