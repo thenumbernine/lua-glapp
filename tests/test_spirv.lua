@@ -11,6 +11,7 @@ require 'gl.env'()
 -- [[
 local gl = require 'gl.setup'(cmdline.gl)
 local GLSceneObject = require 'gl.sceneobject'
+local GLUniformBuffer = require 'gl.uniformbuffer'
 --]]
 
 local useSPIRV = true
@@ -38,7 +39,19 @@ function App:initGL()
 precision highp float;
 layout(location=0) in vec2 vertex;
 layout(location=0) out vec2 posv;
+
+#if 0	// as uniform. location required for spirv
+
 layout(location=0) uniform mat4 mvProjMat;
+
+#else	// as a uniform-block, which is required for Vulkan (right?)
+
+layout(std140, binding=0) uniform VertexUniforms {
+	mat4 mvProjMat;
+};
+
+#endif
+
 void main() {
 	posv = vertex;
 	gl_Position = mvProjMat * vec4(vertex, 0., 1.);
@@ -82,14 +95,27 @@ void main() {
 		program = not useSPIRV and {
 			vertexCode = vertexCode,
 			fragmentCode = fragmentCode,
+
+			--[[
+			For using uniform-blocks instead of uniforms.
+			Fun Fact:
+			With glShaderSource with GLES3, you cannot specify binding= in the GLSL
+			But with glShaderBinary + SPIRV you *can only* specify the block binding in the GLSL
+				(since the compile phase seems to lose all names, so you have no other way to identify blocks beyond checking sizes or random guesses)
+			--]]
+			uniformBlocks = {
+				VertexUniforms = {
+					binding = 0,
+				},
+			},
 		} or {
 			binaryFormat = binaryFormat,
-			--[[ loading one binary shader-module at a time...
+			--[[ loading one binary shader-module at a time per glShaderBinary() call
 -- NOT WORKING AND NO ERROR
 			vertexBinary = assert(path'shader-vert.spv':read()),
 			fragmentBinary = assert(path'shader-frag.spv':read()),
 			--]]
-			-- [[ loading all binaries together
+			-- [[ loading all binaries in one single glShaderBinary() call
 -- NOT WORKING AND NO ERROR
 			multipleBinary = assert(path'shader.spv':read()),
 			-- can you infer this from the file?
@@ -110,6 +136,24 @@ void main() {
 			count = 4,
 		},
 	}
+
+	local uniformBlocks = self.sceneObj.program.uniformBlocks
+	print('uniform blocks:')
+	print(tolua(table.mapi(uniformBlocks, function(x) return x end)))
+
+	local vertexUniformBlock =
+		-- This will exist for the GLSL-source-compiled shader.
+		-- But it won't work with binary shader ... cuz no names in SPIR-V ?
+		uniformBlocks.VertexUniforms
+		-- would I need a .uniformBlockForBinding[] ?
+		or uniformBlocks[1]
+assert.eq(vertexUniformBlock.dataSize, ffi.sizeof'float' * 16)
+	self.vertexUniformBuf = GLUniformBuffer{
+		data = self.view.mvProjMat.ptr,
+		size = ffi.sizeof'float' * 16,
+		usage = gl.GL_DYNAMIC_DRAW,
+		binding = vertexUniformBlock.binding,
+	}:unbind()
 end
 
 function App:update()
@@ -117,7 +161,15 @@ function App:update()
 
 	gl.glClear(bit.bor(gl.GL_COLOR_BUFFER_BIT, gl.GL_DEPTH_BUFFER_BIT))
 
+--[[ using uniforms
 	self.sceneObj.uniforms.mvProjMat = self.view.mvProjMat.ptr
+--]]
+-- [[ using uniform-blocks:
+	self.vertexUniformBuf
+		:bind()
+		:updateData()
+		:unbind()
+--]]
 	self.sceneObj:draw()
 
 require'gl.report''here'

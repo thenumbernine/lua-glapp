@@ -79,12 +79,7 @@ void main() {
 	
 	local m = matrix_ffi({4,4}, 'float'):zeros()
 
-
-	self.obj.program:use()
-
-
 	self.vtxMatricesCPU = VtxMatricesType()
-
 	self.fragMatricesCPU = FragMatricesType()
 
 	-- make our pointer objects point to it
@@ -119,9 +114,6 @@ assert.eq(ffi.sizeof(FragMatricesType), self.obj.program.uniformBlocks.FragMatri
 		binding = self.obj.program.uniformBlocks.FragMatrices.binding,
 	}:unbind()
 assert.eq(ffi.sizeof(FragMatricesType), self.fragMatricesBuf.size)
-
-
-	self.obj.program:useNone()
 end
 
 App.update = |:|do
