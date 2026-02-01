@@ -227,7 +227,7 @@ function Test:update()
 
 	gl.glUseProgram(programID)
 
-	gl.glUniformMatrix4fv(mvProjMatUniformLoc, 1, gl.GL_FALSE, mvProjMat.ptr)
+	gl.glUniformMatrix4fv(mvProjMatUniformLoc, 1, gl.GL_TRUE, mvProjMat.ptr)
 
 	if vaoID then
 		gl.glBindVertexArray(vaoID)
