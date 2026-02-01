@@ -27,7 +27,7 @@ App.initGL = |:|do
 layout(location=0) in vec2 vertex;
 out vec2 vertexv;
 
-layout(std140) uniform VtxMatrices {
+layout(std140, row_major) uniform VtxMatrices {
 	mat4 modelMat;
 	mat4 viewMat;
 	mat4 projMat;
@@ -45,7 +45,7 @@ in vec2 vertexv;
 
 layout(location=0) out vec4 fragColor;
 
-layout(std140) uniform FragMatrices {
+layout(std140, row_major) uniform FragMatrices {
 	mat4 colorMat;
 };
 

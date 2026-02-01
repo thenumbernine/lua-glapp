@@ -54,7 +54,7 @@ layout(location=0) uniform mat4 mvProjMat;
 
 #else	// as a uniform-block, which is required for Vulkan (right?)
 
-layout(std140, binding=0) uniform VertexUniforms {
+layout(std140, binding=0, row_major) uniform VertexUniforms {
 	mat4 mvProjMat;
 };
 
