@@ -68,17 +68,11 @@ void main() {
 	// subdivide accordingly
 	// or use pixel length somehow
 
-#if 0// dot based on angle between each other
-	float dot01 = dot(vertexv[0], vertexv[1]);
-	float dot02 = dot(vertexv[0], vertexv[2]);
-	float dot12 = dot(vertexv[1], vertexv[2]);
-	float mindot = min(dot01, min(dot02, dot12));
-#else	//dot based on angle from view
-	float dot0 = 1. - normalize(viewMat * vec4(vertexv[0], 1.)).z;
-	float dot1 = 1. - normalize(viewMat * vec4(vertexv[1], 1.)).z;
-	float dot2 = 1. - normalize(viewMat * vec4(vertexv[2], 1.)).z;
-	float mindot = min(dot0, min(dot1, dot2));
-#endif
+	//dot based on angle from the perpendicular
+	float z0 = 1. - abs(viewMat * vec4(vertexv[0], 0.)).z;
+	float z1 = 1. - abs(viewMat * vec4(vertexv[1], 0.)).z;
+	float z2 = 1. - abs(viewMat * vec4(vertexv[2], 0.)).z;
+	float mindot = 1. - max(z0, max(z1, z2));
 
 	// TODO convert to arclength or something and determine subdivision amount
 	const float dotAngleThreshold = 1.;
