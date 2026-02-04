@@ -1,4 +1,10 @@
-#!/usr/bin/env rua
+#!/usr/bin/env luajit
+local ffi = require 'ffi'
+local cmdline = require 'ext.cmdline'(...)
+local table = require 'ext.table'
+local assert = require 'ext.assert'
+local tolua = require 'ext.tolua'
+local timer = require 'ext.timer'
 local vec4x4f = require 'vec-ffi.vec4x4f'
 local gl = require 'gl.setup'(cmdline.gl)
 local GLUniformBuffer = require 'gl.uniformbuffer'
@@ -18,7 +24,7 @@ local FragMatricesType = ffi.typeof[[struct{
 }]]
 
 App.viewDist = 3
-App.initGL = |:|do
+function App:initGL()
 	self.obj = GLSceneObject{
 		program = {
 			version = 'latest',
@@ -73,9 +79,9 @@ void main() {
 		}
 	}
 
-	print(tolua(table.mapi(self.obj.program.uniformBlocks, |o|o)))
+	print(tolua(table.mapi(self.obj.program.uniformBlocks, function(o) return o end)))
 -- why is the colorMat uniform location -1 even when I am using it?	
-	print(tolua(table.mapi(self.obj.program.uniforms, |o| table(o, {setters=false}))))
+	print(tolua(table.mapi(self.obj.program.uniforms, function(o) return table(o, {setters=false}) end)))
 	
 	self.vtxMatricesCPU = VtxMatricesType()
 	self.fragMatricesCPU = FragMatricesType()
@@ -112,7 +118,7 @@ assert.eq(ffi.sizeof(FragMatricesType), self.obj.program.uniformBlocks.FragMatri
 assert.eq(ffi.sizeof(FragMatricesType), self.fragMatricesBuf.size)
 end
 
-App.update = |:|do
+function App:update()
 	App.super.update(self)
 	gl.glClear(gl.GL_COLOR_BUFFER_BIT)
 
