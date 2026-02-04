@@ -21,6 +21,7 @@ files = {
 	"tests/src.png",
 	"tests/test_es.lua",
 	"tests/test_es_directcalls.lua",
+	"tests/test_geom.lua",
 	"tests/test_gl1.lua",
 	"tests/test_spirv.lua",
 	"tests/test_tex.lua",
