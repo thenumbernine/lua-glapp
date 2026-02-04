@@ -72,6 +72,7 @@ void main() {
 	float z0 = 1. - abs(viewMat * vec4(vertexv[0], 0.)).z;
 	float z1 = 1. - abs(viewMat * vec4(vertexv[1], 0.)).z;
 	float z2 = 1. - abs(viewMat * vec4(vertexv[2], 0.)).z;
+	// now I'm making one metric for the whole triangle, but really I should be doing this per-edge, but then I'd have to think up a more clever tesselation patch with varing edges, and that's a lot more tough than a simple patch that is evenly subdivided....
 	float mindot = 1. - max(z0, max(z1, z2));
 
 	// TODO convert to arclength or something and determine subdivision amount
