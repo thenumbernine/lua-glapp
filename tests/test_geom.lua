@@ -28,6 +28,7 @@ void main() {
 ]],
 			geometryCode = [[
 // I don't suppose tesselation can be specified by uniform ... probably not when tesselation shaders exist
+// TODO pick this based on whatever the max vertices queried are
 #define MAX_TESS 9
 
 layout(triangles) in;
