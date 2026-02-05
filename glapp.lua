@@ -99,6 +99,27 @@ function GLApp:initWindow()
 	sdl.SDL_GL_SetSwapInterval(0)
 	--)
 
+	-- you can set this by running your program with
+	-- `luajit -e "require'glapp'.gldebug=true" ...`
+	-- or `luajit -lglapp.debug ...`
+	if self.gldebug then
+		self.glDebugCallback = function(source, gltype, id, severity, length, message, userParam)
+			print('!!! glDebugCallback source='..tostring(source)
+				..' gltype='..tostring(gltype)
+				..' id='..tostring(id)
+				..' severity='..tostring(severity)
+				..' '..ffi.string(message, length)
+			)
+			print(debug.traceback())
+		end
+		self.glDebugClosure = ffi.cast('GLDEBUGPROC', self.glDebugCallback)
+
+		gl.glDebugMessageCallback(self.glDebugClosure, nil)
+		gl.glDebugMessageControl(gl.GL_DONT_CARE, gl.GL_DONT_CARE, gl.GL_DONT_CARE, 0, nil, gl.GL_TRUE)
+		gl.glEnable(gl.GL_DEBUG_OUTPUT)
+		gl.glEnable(gl.GL_DEBUG_OUTPUT_SYNCHRONOUS)
+	end
+
 	if self.initGL then self:initGL() end
 end
 
