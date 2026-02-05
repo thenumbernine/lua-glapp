@@ -21,8 +21,8 @@ function Test:initGL()
 	local ires = 10
 	local jres = 10
 	numPts = ires * jres
-	self.vertexCPUData = ffi.new('vec3f_t[?]', numPts)
-	self.colorCPUData = ffi.new('vec3f_t[?]', numPts)
+	self.vertexCPUData = ffi.new('vec3f[?]', numPts)
+	self.colorCPUData = ffi.new('vec3f[?]', numPts)
 
 	local umin, umax = -1, 1
 	local vmin, vmax = -1, 1
@@ -40,7 +40,7 @@ function Test:initGL()
 
 	self.sceneObj = GLSceneObject{
 		vertexes = {
-			size = numPts * ffi.sizeof'vec3f_t',
+			size = numPts * ffi.sizeof(vec3f),
 			data = self.vertexCPUData,
 			count = numPts,
 			dim = 3,
@@ -81,7 +81,7 @@ void main() {
 		attrs = {
 			color = {
 				buffer = {
-					size = numPts * ffi.sizeof'vec3f_t',
+					size = numPts * ffi.sizeof(vec3f),
 					data = self.colorCPUData,
 				},
 			},

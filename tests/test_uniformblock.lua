@@ -14,13 +14,13 @@ local App = require 'glapp.orbit'()
 -- define Cdef of uniform blocks:
 
 local VtxMatricesType = ffi.typeof[[struct{
-	vec4x4f_t modelMat;
-	vec4x4f_t viewMat;
-	vec4x4f_t projMat;
+	vec4x4f modelMat;
+	vec4x4f viewMat;
+	vec4x4f projMat;
 }]]
 
 local FragMatricesType = ffi.typeof[[struct{
-	vec4x4f_t colorMat;
+	vec4x4f colorMat;
 }]]
 
 App.viewDist = 3
