@@ -179,10 +179,11 @@ void main() {
 
 	local program = self.sceneObj.program
 	local uniformBlocks = program.uniformBlocks
+	local uniforms = program.uniforms
 	print'uniform blocks:'
 	print(tolua(table.mapi(uniformBlocks, function(x) return x end)))
 	print'uniforms:'
-	print(tolua(table.mapi(program.uniforms, function(o) return table(o, {setters=false}) end)))
+	print(tolua(table.mapi(uniforms, function(o) return table(o, {setters=false}) end)))
 
 	local vertexUniformBlock =
 		-- This will exist for the GLSL-source-compiled shader.
@@ -190,6 +191,7 @@ void main() {
 		uniformBlocks.VertexUniforms
 		-- would I need a .uniformBlockForBinding[] ?
 		or uniformBlocks[1]
+
 	if not vertexUniformBlock then
 		print('no vertexUniformBlock found -- no associated UniformBuffer will be created')
 	else
@@ -200,6 +202,14 @@ void main() {
 			usage = gl.GL_DYNAMIC_DRAW,
 			binding = vertexUniformBlock.binding,
 		}:unbind()
+	end
+
+	-- since spirv doesn't save names,
+	-- see if there's a lone, unnamed uniform
+	-- and if there is, give it a name
+	if not uniforms[1].name then
+		uniforms[1].name = 'mvProjMat'
+		uniforms.mvProjMat = uniforms[1]
 	end
 
 	-- if I load the SPIR-V shader ... and get my no-errors black-screen ... and then try to save the program ...
@@ -232,16 +242,7 @@ function App:update()
 			:updateData()
 			:unbind()
 	else
-		--[[ using uniforms with names ...
 		self.sceneObj.uniforms.mvProjMat = self.view.mvProjMat.ptr
-		--]]
-		-- [[ using uniforms with location only ...
-		-- TODO allow names on the Lua side only?
-		-- for the sake of SPIR-V programs?
-		assert.eq(self.sceneObj.program.uniforms[1].loc, 0)
-		self.sceneObj.program:use()
-		gl.glUniformMatrix4fv(0, 1, true, self.view.mvProjMat.ptr)
-		--]]
 	end
 	self.sceneObj:draw()
 
