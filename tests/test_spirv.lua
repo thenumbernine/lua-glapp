@@ -48,7 +48,7 @@ precision highp float;
 layout(location=0) in vec2 vertex;
 layout(location=0) out vec2 posv;
 
-#if 0	// as uniform. location required for spirv
+#if 1	// as uniform. location required for spirv
 
 layout(location=0) uniform mat4 mvProjMat;
 
@@ -179,8 +179,10 @@ void main() {
 
 	local program = self.sceneObj.program
 	local uniformBlocks = program.uniformBlocks
-	print('uniform blocks:')
+	print'uniform blocks:'
 	print(tolua(table.mapi(uniformBlocks, function(x) return x end)))
+	print'uniforms:'
+	print(tolua(table.mapi(program.uniforms, function(o) return table(o, {setters=false}) end)))
 
 	local vertexUniformBlock =
 		-- This will exist for the GLSL-source-compiled shader.
@@ -188,13 +190,17 @@ void main() {
 		uniformBlocks.VertexUniforms
 		-- would I need a .uniformBlockForBinding[] ?
 		or uniformBlocks[1]
-assert.eq(vertexUniformBlock.dataSize, ffi.sizeof'float' * 16)
-	self.vertexUniformBuf = GLUniformBuffer{
-		data = self.view.mvProjMat.ptr,
-		size = ffi.sizeof'float' * 16,
-		usage = gl.GL_DYNAMIC_DRAW,
-		binding = vertexUniformBlock.binding,
-	}:unbind()
+	if not vertexUniformBlock then
+		print('no vertexUniformBlock found -- no associated UniformBuffer will be created')
+	else
+		assert.eq(vertexUniformBlock.dataSize, ffi.sizeof'float' * 16)
+		self.vertexUniformBuf = GLUniformBuffer{
+			data = self.view.mvProjMat.ptr,
+			size = ffi.sizeof'float' * 16,
+			usage = gl.GL_DYNAMIC_DRAW,
+			binding = vertexUniformBlock.binding,
+		}:unbind()
+	end
 
 	-- if I load the SPIR-V shader ... and get my no-errors black-screen ... and then try to save the program ...
 	-- OpenGL segfaults.
@@ -216,17 +222,27 @@ end
 function App:update()
 	App.super.update(self)
 
+	gl.glClearColor(0,0,1,1)
 	gl.glClear(bit.bor(gl.GL_COLOR_BUFFER_BIT, gl.GL_DEPTH_BUFFER_BIT))
 
---[[ using uniforms
-	self.sceneObj.uniforms.mvProjMat = self.view.mvProjMat.ptr
---]]
--- [[ using uniform-blocks:
-	self.vertexUniformBuf
-		:bind()
-		:updateData()
-		:unbind()
---]]
+	if self.vertexUniformBuf then
+		-- using uniform-blocks:
+		self.vertexUniformBuf
+			:bind()
+			:updateData()
+			:unbind()
+	else
+		--[[ using uniforms with names ...
+		self.sceneObj.uniforms.mvProjMat = self.view.mvProjMat.ptr
+		--]]
+		-- [[ using uniforms with location only ...
+		-- TODO allow names on the Lua side only?
+		-- for the sake of SPIR-V programs?
+		assert.eq(self.sceneObj.program.uniforms[1].loc, 0)
+		self.sceneObj.program:use()
+		gl.glUniformMatrix4fv(0, 1, true, self.view.mvProjMat.ptr)
+		--]]
+	end
 	self.sceneObj:draw()
 
 require'gl.report''here'
