@@ -5,7 +5,6 @@ local gl = require 'gl.setup'(cmdline.gl)
 local ffi = require 'ffi'
 local template = require 'template'
 local GLApp = require 'glapp'
-local glreport = require 'gl.report'
 local GLTex2D = require 'gl.tex2d'
 local Image = require 'image'
 local vec3i = require 'vec-ffi.vec3i'
@@ -18,7 +17,6 @@ function App:initGL(...)
 	end
 
 	local GLGlobal = require 'gl.global'
-	glreport'here'
 
 	-- each global size dim must be <= this
 	print(GLGlobal:get'GL_MAX_COMPUTE_WORK_GROUP_COUNT')
@@ -34,7 +32,6 @@ function App:initGL(...)
 	-- also, this is >= 1024
 	local maxComputeWorkGroupInvocations = GLGlobal:get'GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS'
 	print('GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS = '..maxComputeWorkGroupInvocations)
-	glreport'here'
 
 	local w, h = 256, 256
 	local img = Image(w, h, 4, 'float', function(i,j)
@@ -51,7 +48,6 @@ function App:initGL(...)
 		magFilter = gl.GL_LINEAR,
 		generateMipmap = true,
 	}
-	glreport'here'
 
 	local img = Image(w, h, 4, 'float', function(i,j) return 0,0,0,1 end)
 	local dstTex = GLTex2D{
@@ -65,7 +61,6 @@ function App:initGL(...)
 		magFilter = gl.GL_LINEAR,
 		generateMipmap = true,
 	}
-	glreport'here'
 
 	local localSize = vec3i(32,32,1)
 	self.computeShader = require 'gl.program'{
@@ -96,7 +91,6 @@ void main() {
 		:bindImage(0, dstTex, gl.GL_RGBA32F, gl.GL_WRITE_ONLY)
 		:bindImage(1, srcTex, gl.GL_RGBA32F, gl.GL_READ_ONLY)
 
-	glreport'here'
 
 	gl.glDispatchCompute(
 		math.ceil(w / tonumber(localSize.x)),
@@ -109,7 +103,6 @@ void main() {
 	--srcTex:unbindImage(1)
 	--dstTex:unbindImage(0)
 	self.computeShader:useNone()
-	glreport'here'
 
 --[[
 	for _,uniform in ipairs(self.computeShader.uniforms) do
@@ -123,14 +116,12 @@ void main() {
 
 	srcTex:toCPU(img.buffer, 0)
 	srcTex:unbind()
-	glreport'here'
 	img:save'src-resaved.png'
 
 	-- this is reading dstTex correctly
 	img = img * 0
 	dstTex:toCPU(img.buffer, 0)
 	dstTex:unbind()
-	glreport'here'
 	img:save'dst.png'
 
 	print'done'

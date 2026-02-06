@@ -45,7 +45,6 @@ end
 
 local template = require 'template'
 local GLApp = require 'glapp'
-local glreport = require 'gl.report'
 local GLProgram = require 'gl.program'
 local GLTex2D = require 'gl.tex2d'
 local Image = require 'image'
@@ -73,7 +72,6 @@ function App:initGL(...)
 	-- also, this is >= 1024
 	local maxComputeWorkGroupInvocations = GLGlobal:get'GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS'
 	print('GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS = '..maxComputeWorkGroupInvocations)
-	glreport'here'
 
 	local w, h = 256, 256
 	local img = Image(w, h, 4, 'float', function(i,j)
@@ -90,7 +88,6 @@ function App:initGL(...)
 		magFilter = gl.GL_LINEAR,
 		generateMipmap = true,
 	}
-	glreport'here'
 
 	local img = Image(w, h, 4, 'float', function(i,j) return 0,0,0,1 end)
 	local dstTex = GLTex2D{
@@ -104,7 +101,6 @@ function App:initGL(...)
 		magFilter = gl.GL_LINEAR,
 		generateMipmap = true,
 	}
-	glreport'here'
 
 	local glslVersion = GLProgram.getVersionPragma()
 	local localSize = vec3i(32,32,1)
@@ -226,17 +222,14 @@ void <?=entryname?>(
 	-- manually setup id ...
 	-- TODO if we are doing the same thing with .vert and .frag shaders then we're gonna be making multiple shader-objects at once, so this wont port directly into a GLComputeShader alternate ctor
 	-- maybe it would belong better into the GLProgram ctor ...
-	glreport'here'
 	local computeShader = setmetatable({
 		id = gl.glCreateShader(GLProgram.ComputeShader.type),
 	}, GLProgram.ComputeShader)
-	glreport'here'
 	-- manually call gc collect resources ...
 	GLProgram.ComputeShader	-- ... the Shader subclass stored in gl.program
 		.super	-- ... gl.shader
 		.super	-- ... getbehavior gcwrapper
 		.init(computeShader)
-	glreport'here'
 	-- manually call glShaderBinary.  mind you we can initialize more than one shader object at a time here ...
 	local computeShaderIDs = ffi.new('GLuint[1]')
 	computeShaderIDs[0] = computeShader.id
@@ -244,16 +237,12 @@ void <?=entryname?>(
 	local binaryData = assert(spvfn:read())
 	local binaryLen = #binaryData
 	gl.glShaderBinary(1, computeShaderIDs, binaryFormat, binaryData, binaryLen)
-	glreport'here'
 
 	-- https://www.khronos.org/opengl/wiki/Example/SPIRV_Full_Compile_Linking
 	gl.glSpecializeShader(computeShader.id, entryname, 0, nil, nil)
-	glreport'here'
 
 	--computeShader:compile()	-- no need ...
-	--glreport'here'
 	computeShader:checkCompileStatus()	-- also no need?
-	glreport'here'
 
 	self.computeProgram = GLProgram{
 		shaders = {computeShader},
@@ -267,8 +256,6 @@ void <?=entryname?>(
 		:bindImage(0, dstTex, gl.GL_RGBA32F, gl.GL_WRITE_ONLY)
 		:bindImage(1, srcTex, gl.GL_RGBA32F, gl.GL_READ_ONLY)
 
-	glreport'here'
-
 	gl.glDispatchCompute(
 		math.ceil(w / tonumber(localSize.x)),
 		math.ceil(h / tonumber(localSize.y)),
@@ -280,7 +267,6 @@ void <?=entryname?>(
 	--srcTex:unbindImage(1)
 	--dstTex:unbindImage(0)
 	self.computeProgram:useNone()
-	glreport'here'
 
 --[[
 	for _,uniform in ipairs(self.computeProgram.uniforms) do
@@ -294,14 +280,12 @@ void <?=entryname?>(
 
 	srcTex:toCPU(img.buffer, 0)
 	srcTex:unbind()
-	glreport'here'
 	img:save'src-resaved.png'
 
 	-- this is reading dstTex correctly
 	img = img * 0
 	dstTex:toCPU(img.buffer, 0)
 	dstTex:unbind()
-	glreport'here'
 	img:save'dst.png'
 
 	print'done'

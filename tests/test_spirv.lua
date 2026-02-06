@@ -245,8 +245,6 @@ function App:update()
 		self.sceneObj.uniforms.mvProjMat = self.view.mvProjMat.ptr
 	end
 	self.sceneObj:draw()
-
-require'gl.report''here'
 end
 
 return App():run()

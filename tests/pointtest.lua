@@ -6,7 +6,6 @@ local getTime = require 'ext.timer'.getTime
 local op = require 'ext.op'
 local ffi = require 'ffi'
 local vec3f = require 'vec-ffi.vec3f'
-local glreport = require 'gl.report'
 local GLSceneObject = require 'gl.sceneobject'
 
 
@@ -116,8 +115,6 @@ function Test:update()
 		gl.glDisable(gl.GL_PROGRAM_POINT_SIZE)
 	end
 	gl.glDisable(gl.GL_DEPTH_TEST)
-
-	glreport'here'
 end
 
 return Test():run()

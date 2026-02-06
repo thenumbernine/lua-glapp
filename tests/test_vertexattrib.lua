@@ -3,7 +3,6 @@ require 'ext'
 local ffi = require 'ffi'
 local glver = cmdline.gl	-- "gl=OpenGLES3" to test GLES3
 local gl = require 'gl.setup' (glver)
-local glreport = require 'gl.report'
 local GLVertexArray = require 'gl.vertexarray'
 local GLAttribute = require 'gl.attribute'
 --[[

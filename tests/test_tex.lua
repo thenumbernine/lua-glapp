@@ -5,7 +5,6 @@ local ffi = require 'ffi'
 local string = require 'ext.string'
 local sdl, SDLApp = require 'sdl.setup' (cmdline.sdl)
 local gl = require 'gl.setup' (cmdline.gl)
-local glreport = require 'gl.report'
 local getTime = require 'ext.timer'.getTime
 local Image = require 'image'
 local GLTex2D = require 'gl.tex2d'
