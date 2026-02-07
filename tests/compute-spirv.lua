@@ -152,7 +152,6 @@ void <?=entryname?>() {
 	-- do the compiling here ...
 	-- check out cl/tests/cpptest.lua for an example
 
-	local bcfn = path'compute-spirv.bc'
 	local spvfn = path'compute-spirv.spv'
 
 	-- [=[ using glslangValidator (which means you have to write everything in GLSL-Compute)
@@ -163,6 +162,7 @@ void <?=entryname?>() {
 	}:concat' ')
 	--]=]
 	--[=[ using clang, compiling c++ to BC to IR
+	local bcfn = path'compute-spirv.bc'
 	-- TODO same but for CL, not CL-C++
 	-- can I use cl-cpp instead of glsl-compute?
 	-- there is clvk which compiles clcpp to spv
