@@ -5,44 +5,6 @@ local path = require 'ext.path'
 local table = require 'ext.table'
 local os = require 'ext.os'
 
--- gles3 doesn't define compute so ...
--- TODO go by this?
---   https://community.arm.com/arm-community-blogs/b/graphics-gaming-and-vr-blog/posts/get-started-with-compute-shaders
-for l in ([[
-enum { GL_COMPUTE_SHADER = 37305 };
-enum { GL_MAX_COMPUTE_UNIFORM_BLOCKS = 37307 };
-enum { GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS = 37308 };
-enum { GL_MAX_COMPUTE_IMAGE_UNIFORMS = 37309 };
-enum { GL_MAX_COMPUTE_SHARED_MEMORY_SIZE = 33378 };
-enum { GL_MAX_COMPUTE_UNIFORM_COMPONENTS = 33379 };
-enum { GL_MAX_COMPUTE_ATOMIC_COUNTER_BUFFERS = 33380 };
-enum { GL_MAX_COMPUTE_ATOMIC_COUNTERS = 33381 };
-enum { GL_MAX_COMBINED_COMPUTE_UNIFORM_COMPONENTS = 33382 };
-enum { GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS = 37099 };
-enum { GL_MAX_COMPUTE_WORK_GROUP_COUNT = 37310 };
-enum { GL_MAX_COMPUTE_WORK_GROUP_SIZE = 37311 };
-enum { GL_COMPUTE_WORK_GROUP_SIZE = 33383 };
-enum { GL_UNIFORM_BLOCK_REFERENCED_BY_COMPUTE_SHADER = 37100 };
-enum { GL_ATOMIC_COUNTER_BUFFER_REFERENCED_BY_COMPUTE_SHADER = 37101 };
-enum { GL_COMPUTE_SHADER_BIT = 32 };
-enum { GL_COMPUTE_TEXTURE = 33440 };
-enum { GL_COMPUTE_SUBROUTINE = 37613 };
-enum { GL_COMPUTE_SUBROUTINE_UNIFORM = 37619 };
-enum { GL_REFERENCED_BY_COMPUTE_SHADER = 37643 };
-enum { GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS = 37083 };
-enum { GL_COMPUTE_SHADER_INVOCATIONS = 33525 };
-typedef void ( * PFNGLDISPATCHCOMPUTEPROC) (GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z);
-typedef void ( * PFNGLDISPATCHCOMPUTEINDIRECTPROC) (GLintptr indirect);
-enum { GL_IMAGE_2D = 36941 };
-enum { GL_WRITE_ONLY = 35001 };
-]]):gmatch'[^\n]+' do
-	xpcall(function()
-		ffi.cdef(l)
-	end, function(err)
-		print(err)
-	end)
-end
-
 local template = require 'template'
 local GLApp = require 'glapp'
 local GLProgram = require 'gl.program'
