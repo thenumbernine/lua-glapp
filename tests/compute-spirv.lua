@@ -219,24 +219,25 @@ void <?=entryname?>(
 	--]=]
 
 
+--[=====[
 	-- manually setup id ...
 	-- TODO if we are doing the same thing with .vert and .frag shaders then we're gonna be making multiple shader-objects at once, so this wont port directly into a GLComputeShader alternate ctor
 	-- maybe it would belong better into the GLProgram ctor ...
 	local computeShader = setmetatable({
 		id = gl.glCreateShader(GLProgram.ComputeShader.type),
 	}, GLProgram.ComputeShader)
-	-- manually call gc collect resources ...
-	GLProgram.ComputeShader	-- ... the Shader subclass stored in gl.program
-		.super	-- ... gl.shader
-		.super	-- ... getbehavior gcwrapper
-		.init(computeShader)
 	-- manually call glShaderBinary.  mind you we can initialize more than one shader object at a time here ...
-	local computeShaderIDs = ffi.new('GLuint[1]')
-	computeShaderIDs[0] = computeShader.id
+	local computeShaderIDs = ffi.new('GLuint[1]', computeShader.id)
 	local binaryFormat = gl.GL_SHADER_BINARY_FORMAT_SPIR_V
 	local binaryData = assert(spvfn:read())
 	local binaryLen = #binaryData
-	gl.glShaderBinary(1, computeShaderIDs, binaryFormat, binaryData, binaryLen)
+	gl.glShaderBinary(
+		1,
+		computeShaderIDs,
+		binaryFormat,
+		binaryData,
+		binaryLen
+	)
 
 	-- https://www.khronos.org/opengl/wiki/Example/SPIRV_Full_Compile_Linking
 	gl.glSpecializeShader(computeShader.id, entryname, 0, nil, nil)
@@ -247,6 +248,14 @@ void <?=entryname?>(
 	self.computeProgram = GLProgram{
 		shaders = {computeShader},
 	}
+--]=====]
+-- [=====[ ok I finally made it all part of the gl.program class...
+	self.computeProgram = GLProgram{
+		binaryFormat = gl.GL_SHADER_BINARY_FORMAT_SPIR_V,
+		binaryEntryPoint = entryname,
+		computeBinary = assert(spvfn:read()),
+	}
+--]=====]
 
 	--]==]
 
