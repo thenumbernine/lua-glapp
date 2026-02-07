@@ -1,26 +1,20 @@
 #!/usr/bin/env luajit
 --[[
-test of GL_ARB_gl_spirv
+test of GL_ARB_gl_spirv with vert+frag shaders
+
+CLI:
+	method=source			-- from multiple glShaderSource's per shader module
+	method=programBinary	-- from one single glProgramBinary for the entire program
+	method=spirvPerShader	-- from multiple glShaderBinary's per shader module
+	method=spirvMultiple	-- from one single glShaderBinary for the entire program
+
+	useUniformBlocks		-- use uniform-blocks instead of uniforms (off by default)
 --]]
 require 'ext'
 local template = require 'template'
 local ffi = require 'ffi'
-
---[[ does something in this cause segfaults?
 require 'gl.env'()
---]]
--- [[
-local gl = require 'gl.setup'(cmdline.gl)
-local GLSceneObject = require 'gl.sceneobject'
-local GLUniformBuffer = require 'gl.uniformbuffer'
---]]
 
---[[
-local shaderMethod = 'source'			-- from multiple glShaderSource's
-local shaderMethod = 'binary'			-- from glProgramBinary
-local shaderMethod = 'spirvPerShader'	-- from a glShaderBinary per shader module
-local shaderMethod = 'spirvMultiple'	-- from one single glShaderBinary for the entire program
---]]
 -- so far the only thing that works is glShaderSource()
 local shaderMethod = cmdline.method or cmdline[1] or 'source'
 
@@ -113,7 +107,7 @@ void main() {
 		assert(os.exec('spirv-link '..shaderVertSPV:escape()..' '..shaderFragSPV:escape()..' -o '..shaderLinkedSPV:escape()))
 	end
 
-	-- used for shaderMethod == binary
+	-- used for shaderMethod == programBinary
 	local progBinPath = path'test_spirv_programBinaryOut.bin'
 
 	self.sceneObj = GLSceneObject{
@@ -138,7 +132,7 @@ void main() {
 					},
 				}
 			end,
-			binary = function()
+			programBinary = function()
 				local progBin = assert(progBinPath:read())
 				return {
 					-- by previously saved program:getBinary()
@@ -202,6 +196,7 @@ void main() {
 		print('no vertexUniformBlock found -- no associated UniformBuffer will be created')
 	else
 		assert.eq(vertexUniformBlock.dataSize, ffi.sizeof'float' * 16)
+print('creating a uniform buffer to map the mvProjMat to the shader uniform block...')
 		self.vertexUniformBuf = GLUniformBuffer{
 			data = self.view.mvProjMat.ptr,
 			size = ffi.sizeof'float' * 16,
@@ -216,7 +211,7 @@ void main() {
 	if not uniforms[1].name then
 print('reassigning uniform mvProjMat (SPIRV forgets names)')
 		uniforms[1].name = 'mvProjMat'
-		uniforms.mvProjMat = uniforms[1]
+		uniforms[uniforms[1].name] = uniforms[1]
 	end
 
 	-- if I load the SPIR-V shader ... and get my no-errors black-screen ... and then try to save the program ...
@@ -227,7 +222,8 @@ print('reassigning uniform mvProjMat (SPIRV forgets names)')
 	) then
 		-- [[ for glShaderSource() pathway, lets get the program-binary back and see what it is
 		local programBinary, programBinaryFormat = program:getBinary()
-		print('binary format:', programBinaryFormat)	-- on Linux this turns out to be GL_PROGRAM_BINARY_FORMAT_MESA = 34655
+		print('program binary format:', programBinaryFormat)	-- on Linux this turns out to be GL_PROGRAM_BINARY_FORMAT_MESA = 34655
+print('writing program binary to '..progBinPath)
 		progBinPath:write(
 			ffi.string(ffi.new('uint32_t[1]', programBinaryFormat), 4)
 			..programBinary
