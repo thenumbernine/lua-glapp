@@ -72,8 +72,8 @@ layout(local_size_x=<?=localSize.x
 	?>, local_size_z=<?=localSize.z
 	?>) in;
 
-layout(rgba32f, binding=0) uniform writeonly image2D dstTex;
-layout(rgba32f, binding=1) uniform readonly image2D srcTex;
+layout(<?=dstFormat?>, binding=0) uniform writeonly image2D dstTex;
+layout(<?=srcFormat?>, binding=1) uniform readonly image2D srcTex;
 
 void main() {
 	ivec2 itc = ivec2(gl_GlobalInvocationID.xy);
@@ -84,12 +84,14 @@ void main() {
 }
 ]], 	{
 			localSize = localSize,
+			dstFormat = dstTex:getFormatInfo().glslFormatName,
+			srcFormat = srcTex:getFormatInfo().glslFormatName,
 		})
 	}
 		-- TODO how do I get the uniform's read/write access, or its format?
 		-- or do I have to input that twice, both in the shader code as its glsl-format and in the glBindImageTexture call as a gl enum?
-		:bindImage(0, dstTex, gl.GL_RGBA32F, gl.GL_WRITE_ONLY)
-		:bindImage(1, srcTex, gl.GL_RGBA32F, gl.GL_READ_ONLY)
+		:bindImage(0, dstTex, gl.GL_WRITE_ONLY)
+		:bindImage(1, srcTex, gl.GL_READ_ONLY)
 
 
 	gl.glDispatchCompute(
