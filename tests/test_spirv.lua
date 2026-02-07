@@ -3,6 +3,7 @@
 test of GL_ARB_gl_spirv
 --]]
 require 'ext'
+local template = require 'template'
 local ffi = require 'ffi'
 
 --[[ does something in this cause segfaults?
@@ -23,6 +24,9 @@ local shaderMethod = 'spirvMultiple'	-- from one single glShaderBinary for the e
 -- so far the only thing that works is glShaderSource()
 local shaderMethod = cmdline.method or cmdline[1] or 'source'
 
+local useUniformBlocks = cmdline.useUniformBlocks or false
+print('useUniformBlocks', useUniformBlocks)
+
 
 local App = require 'imgui.appwithorbit'()
 
@@ -42,29 +46,31 @@ function App:initGL()
 	local binaryFormat = GL_SHADER_BINARY_FORMAT_SPIR_V
 	assert(binaryFormats:find(GL_SHADER_BINARY_FORMAT_SPIR_V), "failed to find GL_SHADER_BINARY_FORMAT_SPIR_V supported binary format")
 
-	local vertexCode = [[
+	local vertexCode = template([[
 #version 450
 precision highp float;
 layout(location=0) in vec2 vertex;
 layout(location=0) out vec2 posv;
 
-#if 1	// as uniform. location required for spirv
+<? if not useUniformBlocks then ?>	// as uniform. location required for spirv
 
 layout(location=0) uniform mat4 mvProjMat;
 
-#else	// as a uniform-block, which is required for Vulkan (right?)
+<? else -- useUniformBlocks ?>	// as a uniform-block, which is required for Vulkan (right?)
 
 layout(std140, binding=0, row_major) uniform VertexUniforms {
 	mat4 mvProjMat;
 };
 
-#endif
+<? end -- useUniformBlocks ?>
 
 void main() {
 	posv = vertex;
 	gl_Position = mvProjMat * vec4(vertex, 0., 1.);
 }
-]]
+]],	{
+		useUniformBlocks = useUniformBlocks,
+	})
 
 	local fragmentCode = [[
 #version 450
@@ -102,8 +108,8 @@ void main() {
 	local function glslangValidatorCompile()
 		shaderVertSrc:write(vertexCode)
 		shaderFragSrc:write(fragmentCode)
-		assert(os.exec('glslangValidator -S vert --glsl-version 450 --target-env opengl '..shaderVertSrc:escape()..' -o '..shaderVertSPV:escape()))
-		assert(os.exec('glslangValidator -S frag --glsl-version 450 --target-env opengl '..shaderFragSrc:escape()..' -o '..shaderFragSPV:escape()))
+		assert(os.exec('glslangValidator -S vert -G --glsl-version 450 --target-env opengl '..shaderVertSrc:escape()..' -o '..shaderVertSPV:escape()))
+		assert(os.exec('glslangValidator -S frag -G --glsl-version 450 --target-env opengl '..shaderFragSrc:escape()..' -o '..shaderFragSPV:escape()))
 		assert(os.exec('spirv-link '..shaderVertSPV:escape()..' '..shaderFragSPV:escape()..' -o '..shaderLinkedSPV:escape()))
 	end
 
@@ -208,6 +214,7 @@ void main() {
 	-- see if there's a lone, unnamed uniform
 	-- and if there is, give it a name
 	if not uniforms[1].name then
+print('reassigning uniform mvProjMat (SPIRV forgets names)')
 		uniforms[1].name = 'mvProjMat'
 		uniforms.mvProjMat = uniforms[1]
 	end
