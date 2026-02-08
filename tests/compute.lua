@@ -116,13 +116,18 @@ void main() {
 	{arraySize=1, loc=1, name="srcTex", setters={glsltype="image2D"}, type=gl.GL_IMAGE_2D}
 --]]
 
-	srcTex:toCPU(img.buffer, 0)
-	srcTex:unbind()
+	srcTex
+		:bind()
+		:getImage(img.buffer)
+		:unbind()
 	img:save'src-resaved.png'
 
 	-- this is reading dstTex correctly
 	img = img * 0
-	dstTex:toCPU(img.buffer, 0)
+	dstTex
+		:bind()
+		:getImage(img.buffer)
+		:unbind()
 	dstTex:unbind()
 	img:save'dst.png'
 
