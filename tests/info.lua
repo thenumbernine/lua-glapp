@@ -16,8 +16,7 @@ function App:initGL()
 	local glGlobal = require 'gl.global'
 
 	xpcall(function()
-		local ffireq = require 'ffi.req'
-		local egl = assert(op.land(pcall(ffireq, 'EGL')), 'EGL not found')
+		local egl = assert(op.land(pcall(require, 'gl.ffi.EGL')), 'EGL not found')
 
 		-- how do I find GLES version?  cuz GL doen't show it ...
 		-- GLES/OpenGLES1.h has GL_VERSION, but GL_VERSION returns the same as it does for non-ES ...
