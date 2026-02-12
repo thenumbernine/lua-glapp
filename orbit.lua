@@ -101,20 +101,22 @@ return function(cl)
 
 	function cl:update(...)
 		-- process multi-finger events:
-		do
-			local i = 1
-			local prevn = #self.activeFingersInOrder
+		self.doingMultiTouchGesture = nil
+		if self.gotFingerEvent then
+			local numTouches = 0
+			local prevNumTouches = #self.activeFingersInOrder
 			-- is there a promise that activeFingers IDs are sequential?
 			for fingerID, finger in pairs(self.activeFingers) do
-				self.activeFingersInOrder[i] = finger
-				i=i+1
+				numTouches=numTouches+1
+				self.activeFingersInOrder[numTouches] = finger
 			end
-			for j=i,prevn do
+			for j=numTouches+1,prevNumTouches do
 				self.activeFingersInOrder[j] = nil
 			end
+--DEBUG:print('we currently have', numTouches, 'touches, previously', prevNumTouches)
 
 			local f1, f2, pos1, pos2
-			if #self.activeFingersInOrder >= 2 then
+			if numTouches >= 2 then
 				f1, f2 = table.unpack(self.activeFingersInOrder)
 				pos1, pos2 = f1.pos, f2.pos
 				self.multiTouchDistSq = (pos2.x - pos1.x)^2 + (pos2.y - pos1.y)^2
@@ -126,13 +128,19 @@ return function(cl)
 			and self.lastMultiTouchDistSq
 			and self.multiTouchDistSq ~= self.lastMultiTouchDistSq
 			then
-				local zoomChange = math.sqrt(self.multiTouchDistSq) - math.sqrt(self.lastMultiTouchDistSq)
+				local toDist = math.sqrt(self.multiTouchDistSq)
+				local fromDist = math.sqrt(self.lastMultiTouchDistSq)
+				local zoomChange = toDist - fromDist
+--DEBUG:print('got zoom change', zoomChange, 'from-dist', fromDist, 'to-pts', pos1, pos2, 'to-dist', toDist)
 				-- process a zoom ...
 				-- TODO instead of calling orbit:mouseDownEvent, since it only handles rotate vs pan vs zoom, how about name its functions that?
 				-- zoom
-				self:mouseDownEvent(0, zoomChange, true, nil, nil, pos1.x, pos1.y)
+				self:mouseDownEvent(0, 100 * zoomChange, true, nil, nil, pos1.x, pos1.y)
+				-- tell our mouse event handler to ignore events coming from touches
+				self.doingMultiTouchGesture = true
 			end
 			self.lastMultiTouchDistSq = self.multiTouchDistSq
+			self.gotFingerEvent = nil
 		end
 
 		if self.mouse then	-- event() is called before init()
@@ -158,7 +166,16 @@ return function(cl)
 		if e.type == mouseMotionEventType
 		or e.type == mouseWheelEventType
 		then
-			if canHandleMouse then
+			if canHandleMouse
+			-- if it's a mouse event
+			-- and it came from a touch event
+			-- but we're doing a multi-touch gesture
+			-- then skip processing the mouse event
+			and not (
+				self.doingMultiTouchGesture
+				and e.motion.which == sdl.SDL_TOUCH_MOUSEID
+			)
+			then
 				local dx, dy, x, y
 				if e.type == mouseMotionEventType then
 					x = e.motion.x
@@ -178,8 +195,9 @@ return function(cl)
 				end
 			end
 		elseif e.type == fingerDownEventType then
-			self.activeFingers[e.tfinger.fingerID] = {
-				id = e.tfinger.fingerID,
+			local fingerID = tonumber(e.tfinger.fingerID)
+			self.activeFingers[fingerID] = {
+				id = fingerID,
 				pos = vec4f(
 					e.tfinger.x,
 					e.tfinger.y,
@@ -187,17 +205,23 @@ return function(cl)
 					e.tfinger.dy
 				),
 			}
+			self.gotFingerEvent = true
+--DEBUG:print('setting finger', fingerID, 'to', self.activeFingers[fingerID].pos)
 		elseif e.type == fingerUpEventType then
-			self.activeFingers[e.tfinger.fingerID] = nil
+			local fingerID = tonumber(e.tfinger.fingerID)
+--DEBUG:print('clearing finger', fingerID)
+			self.activeFingers[fingerID] = nil
+			self.gotFingerEvent = true
 		elseif e.type == fingerMotionEventType then
+			local fingerID = tonumber(e.tfinger.fingerID)
 			-- looks like sdl3 doesnt have multigesture like sdl2 did
 			-- and sdl3 sends each finger event separately unlike javascript does
 			-- and sdl3 , for query multiple touches with SDL_GetTouchFingers it seems to allocate a structure that needs to be freed ... which I don't want ot do every frame ...
-			local finger = self.activeFingers[e.tfinger.fingerID]
+			local finger = self.activeFingers[fingerID]
 			if not finger then
 				-- motion before down ...
-				self.activeFingers[e.tfinger.fingerID] = {
-					id = e.tfinger.fingerID,
+				self.activeFingers[fingerID] = {
+					id = fingerID,
 					pos = vec4f(
 						e.tfinger.x,
 						e.tfinger.y,
@@ -205,9 +229,11 @@ return function(cl)
 						e.tfinger.dy
 					),
 				}
+--DEBUG:print('motion setting finger', fingerID, 'to', self.activeFingers[fingerID].pos)
 			else
 				finger.pos.x, finger.pos.y, finger.pos.z, finger.pos.w
 				= e.tfinger.x, e.tfinger.y, e.tfinger.dx, e.tfinger.dy
+--DEBUG:print('updating finger', fingerID, 'to', finger.pos)
 			end
 			-- what about finger events that dont get a down event?
 			-- should I track time on fingers and clear them periodically?
@@ -215,6 +241,7 @@ return function(cl)
 			-- TODO how often to process events?
 			-- if I do every event, and SDL sends n separate events for n touches, then I'll have n x processing than I need
 			-- so I guess I should process multitouch in :update()
+			self.gotFingerEvent = true
 		elseif e.type == keyUpEventType
 		or e.type == keyDownEventType
 		then
