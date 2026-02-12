@@ -1,9 +1,11 @@
 -- This class adds orbit trackball behavior to a GLApp (or GLApp subclass).
 -- It also calls View.apply on the class if it has not yet already been applied to the class
 local class = require 'ext.class'
+local table = require 'ext.table'
 local sdl = require 'sdl'
 local SDLApp = require 'sdl.app'
 local vec3d = require 'vec-ffi.vec3d'
+local vec4f = require 'vec-ffi.vec4f'
 local quatd = require 'vec-ffi.quatd'
 local Mouse = require 'glapp.mouse'
 
@@ -13,6 +15,9 @@ local keyDownEventType
 local mouseMotionEventType
 local mouseWheelEventType
 local handleKeyUpDown
+local fingerUpEventType
+local fingerDownEventType
+local fingerMotionEventType
 if SDLApp.sdlMajorVersion == 2 then
 	keyUpEventType = sdl.SDL_KEYUP
 	keyDownEventType = sdl.SDL_KEYDOWN
@@ -39,6 +44,9 @@ elseif SDLApp.sdlMajorVersion == 3 then
 	keyDownEventType = sdl.SDL_EVENT_KEY_DOWN
 	mouseMotionEventType = sdl.SDL_EVENT_MOUSE_MOTION
 	mouseWheelEventType = sdl.SDL_EVENT_MOUSE_WHEEL
+	fingerUpEventType = sdl.SDL_EVENT_FINGER_UP
+	fingerDownEventType = sdl.SDL_EVENT_FINGER_DOWN
+	fingerMotionEventType = sdl.SDL_EVENT_FINGER_MOTION
 	function handleKeyUpDown(self, eventPtr)
 		local down = eventPtr[0].type == keyDownEventType
 		if eventPtr[0].key.key == sdl.SDLK_LSHIFT then
@@ -86,17 +94,55 @@ return function(cl)
 		self.rightGuiDown = false
 		self.leftAltDown = false
 		self.rightAltDown = false
+
+		self.activeFingers = {}
+		self.activeFingersInOrder = table()
 	end
 
 	function cl:update(...)
+		-- process multi-finger events:
+		do
+			local i = 1
+			local prevn = #self.activeFingersInOrder
+			-- is there a promise that activeFingers IDs are sequential?
+			for fingerID, finger in pairs(self.activeFingers) do
+				self.activeFingersInOrder[i] = finger
+				i=i+1
+			end
+			for j=i,prevn do
+				self.activeFingersInOrder[j] = nil
+			end
+
+			local f1, f2, pos1, pos2
+			if #self.activeFingersInOrder >= 2 then
+				f1, f2 = table.unpack(self.activeFingersInOrder)
+				pos1, pos2 = f1.pos, f2.pos
+				self.multiTouchDistSq = (pos2.x - pos1.x)^2 + (pos2.y - pos1.y)^2
+			else
+				self.multiTouchDistSq = nil
+			end
+
+			if self.multiTouchDistSq
+			and self.lastMultiTouchDistSq
+			and self.multiTouchDistSq ~= self.lastMultiTouchDistSq
+			then
+				local zoomChange = math.sqrt(self.multiTouchDistSq) - math.sqrt(self.lastMultiTouchDistSq)
+				-- process a zoom ...
+				-- TODO instead of calling orbit:mouseDownEvent, since it only handles rotate vs pan vs zoom, how about name its functions that?
+				-- zoom
+				self:mouseDownEvent(0, zoomChange, true, nil, nil, pos1.x, pos1.y)
+			end
+			self.lastMultiTouchDistSq = self.multiTouchDistSq
+		end
+
 		if self.mouse then	-- event() is called before init()
 			self.mouse:update()
 		end
 		return cl.super.update(self, ...)
 	end
 
-	function cl:event(eventPtr)
-		cl.super.event(self, eventPtr)
+	function cl:event(e)
+		cl.super.event(self, e)
 
 		local canHandleMouse = true
 		--local canHandleKeyboard = true
@@ -109,32 +155,70 @@ return function(cl)
 		local shiftDown = self.leftShiftDown or self.rightShiftDown
 		local guiDown = self.leftGuiDown or self.rightGuiDown
 		local altDown = self.leftAltDown or self.rightAltDown
-		if eventPtr[0].type == mouseMotionEventType
-		or eventPtr[0].type == mouseWheelEventType
+		if e.type == mouseMotionEventType
+		or e.type == mouseWheelEventType
 		then
 			if canHandleMouse then
 				local dx, dy, x, y
-				if eventPtr[0].type == mouseMotionEventType then
-					x = eventPtr[0].motion.x
-					y = eventPtr[0].motion.y
-					dx = eventPtr[0].motion.xrel
-					dy = eventPtr[0].motion.yrel
+				if e.type == mouseMotionEventType then
+					x = e.motion.x
+					y = e.motion.y
+					dx = e.motion.xrel
+					dy = e.motion.yrel
 				else
-					x = eventPtr[0].wheel.x
-					y = eventPtr[0].wheel.y
-					dx = 10 * eventPtr[0].wheel.x
-					dy = 10 * eventPtr[0].wheel.y
+					x = e.wheel.x
+					y = e.wheel.y
+					dx = 10 * e.wheel.x
+					dy = 10 * e.wheel.y
 				end
 				if (self.mouse and self.mouse.leftDown and not guiDown)
-				or eventPtr[0].type == mouseWheelEventType
+				or e.type == mouseWheelEventType
 				then
 					self:mouseDownEvent(dx, dy, shiftDown, guiDown, altDown, x, y)
 				end
 			end
-		elseif eventPtr[0].type == keyUpEventType
-		or eventPtr[0].type == keyDownEventType
+		elseif e.type == fingerDownEventType then
+			self.activeFingers[e.touch.fingerID] = {
+				id = e.touch.fingerID,
+				pos = vec4f(
+					e.touch.x,
+					e.touch.y,
+					e.touch.dx,
+					e.touch.dy
+				),
+			}
+		elseif e.type == fingerUpEventType then
+			self.activeFingers[e.touch.fingerID] = nil
+		elseif e.type == fingerMotionEventType then
+			-- looks like sdl3 doesnt have multigesture like sdl2 did
+			-- and sdl3 sends each finger event separately unlike javascript does
+			-- and sdl3 , for query multiple touches with SDL_GetTouchFingers it seems to allocate a structure that needs to be freed ... which I don't want ot do every frame ...
+			local finger = self.activeFingers[e.touch.fingerID]
+			if not finger then
+				-- motion before down ...
+				self.activeFingers[e.touch.fingerID] = {
+					id = e.touch.fingerID,
+					pos = vec4f(
+						e.touch.x,
+						e.touch.y,
+						e.touch.dx,
+						e.touch.dy
+					),
+				}
+			else
+				finger.pos.x, finger.pos.y, finger.pos.z, finger.pos.w
+				= e.touch.x, e.touch.y, e.touch.dx, e.touch.dy
+			end
+			-- what about finger events that dont get a down event?
+			-- should I track time on fingers and clear them periodically?
+
+			-- TODO how often to process events?
+			-- if I do every event, and SDL sends n separate events for n touches, then I'll have n x processing than I need
+			-- so I guess I should process multitouch in :update()
+		elseif e.type == keyUpEventType
+		or e.type == keyDownEventType
 		then
-			handleKeyUpDown(self, eventPtr)
+			handleKeyUpDown(self, e)
 		end
 	end
 
