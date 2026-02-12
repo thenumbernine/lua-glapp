@@ -178,36 +178,36 @@ return function(cl)
 				end
 			end
 		elseif e.type == fingerDownEventType then
-			self.activeFingers[e.touch.fingerID] = {
-				id = e.touch.fingerID,
+			self.activeFingers[e.tfinger.fingerID] = {
+				id = e.tfinger.fingerID,
 				pos = vec4f(
-					e.touch.x,
-					e.touch.y,
-					e.touch.dx,
-					e.touch.dy
+					e.tfinger.x,
+					e.tfinger.y,
+					e.tfinger.dx,
+					e.tfinger.dy
 				),
 			}
 		elseif e.type == fingerUpEventType then
-			self.activeFingers[e.touch.fingerID] = nil
+			self.activeFingers[e.tfinger.fingerID] = nil
 		elseif e.type == fingerMotionEventType then
 			-- looks like sdl3 doesnt have multigesture like sdl2 did
 			-- and sdl3 sends each finger event separately unlike javascript does
 			-- and sdl3 , for query multiple touches with SDL_GetTouchFingers it seems to allocate a structure that needs to be freed ... which I don't want ot do every frame ...
-			local finger = self.activeFingers[e.touch.fingerID]
+			local finger = self.activeFingers[e.tfinger.fingerID]
 			if not finger then
 				-- motion before down ...
-				self.activeFingers[e.touch.fingerID] = {
-					id = e.touch.fingerID,
+				self.activeFingers[e.tfinger.fingerID] = {
+					id = e.tfinger.fingerID,
 					pos = vec4f(
-						e.touch.x,
-						e.touch.y,
-						e.touch.dx,
-						e.touch.dy
+						e.tfinger.x,
+						e.tfinger.y,
+						e.tfinger.dx,
+						e.tfinger.dy
 					),
 				}
 			else
 				finger.pos.x, finger.pos.y, finger.pos.z, finger.pos.w
-				= e.touch.x, e.touch.y, e.touch.dx, e.touch.dy
+				= e.tfinger.x, e.tfinger.y, e.tfinger.dx, e.tfinger.dy
 			end
 			-- what about finger events that dont get a down event?
 			-- should I track time on fingers and clear them periodically?
