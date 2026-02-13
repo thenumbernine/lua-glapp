@@ -173,7 +173,7 @@ return function(cl)
 				local fdx = dx / magn
 				local fdy = dy / magn
 				magn = magn * 1000 * math.tan(math.rad(.5 * self.view.fovY))
-				local rotation = quatd():fromAngleAxis(-fdy, -fdx, 0, magn)
+				local rotation = quatd():fromAngleAxis(fdy, -fdx, 0, magn)
 				self.view.angle = (self.view.angle * rotation):normalize()
 				self.view.pos = self.view.angle:zAxis() * (self.view.pos - self.view.orbit):length() + self.view.orbit
 			end
