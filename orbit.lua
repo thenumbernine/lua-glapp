@@ -64,7 +64,7 @@ return function(cl)
 
 	-- make sure we have self.view == a View object
 	if not cl.viewApplied then
-		cl = class(require 'glapp.view'.apply(cl))
+		cl = class(require 'app3d.view'.apply(cl))
 	end
 	-- and same with .mouse
 	if not cl.mouseApplied then

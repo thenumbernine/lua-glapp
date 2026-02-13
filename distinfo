@@ -2,12 +2,12 @@
 -- generated with dist/build-distinfo.rua --
 --------------------------------------------
 
-name = "glapp"
+name = "app3d"
 files = {
 	"LICENSE",
 	"README.md",
+	"app3d-dev-1.rockspec",
 	"distinfo",
-	"glapp-dev-1.rockspec",
 	"orbit.lua",
 	"view.lua",
 }
