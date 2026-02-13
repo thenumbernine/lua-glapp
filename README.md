@@ -10,7 +10,7 @@ This now holds the generic 3D application classes, like view and orbit, which ca
 - orbit.lua = function to apply orbit behavior
 
 
-
+<!-- is broken since my lua-ffi-fb emscripten implementation doesn't support anonymous typeof structs
 ### See it in Browser
 -	[[launch]](https://thenumbernine.github.io/glapp/?dir=glapp/tests&file=test_es.lua)
 	[[source]](https://thenumbernine.github.io/lua/glapp/tests/test_es.lua)
@@ -18,3 +18,4 @@ This now holds the generic 3D application classes, like view and orbit, which ca
 -	[[launch]](https://thenumbernine.github.io/glapp/?dir=glapp/tests&file=test_tex.lua)
 	[[source]](https://thenumbernine.github.io/lua/glapp/tests/test_tex.lua)
 	texture demo
+-->
