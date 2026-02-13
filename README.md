@@ -4,7 +4,7 @@
 
 This used to be my OpenGL application class, but I moved that to my OpenGL library: [lua-gl](https://github.com/thenumbernine/lua-gl).
 
-This now holds the generic 3D application classes, like view and orbit, which can be used by GL, VK, WGPU, etc.
+This now holds the generic 3D application classes, like view and orbit, which can be used by [lua-gl](https://github.com/thenumbernine/lua-gl), [lua-vk](https://github.com/thenumbernine/lua-vk), [lua-wgpu](https://github.com/thenumbernine/lua-wgpu), etc.
 
 - view.lua = View object, applied to the class via View.apply
 - orbit.lua = function to apply orbit behavior
