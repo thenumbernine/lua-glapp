@@ -58,7 +58,7 @@ ImGuiApp = result and ImGuiApp
 
 return function(cl)
 	-- if no class is specified then assume the class is GLApp by default
-	cl = cl or require 'glapp'
+	cl = cl or require 'gl.app'
 
 	cl = class(cl)
 
