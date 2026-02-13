@@ -1,10 +1,8 @@
 -- This class adds orbit trackball behavior to a GLApp (or GLApp subclass).
 -- It also calls View.apply on the class if it has not yet already been applied to the class
 local class = require 'ext.class'
-local table = require 'ext.table'
 local sdl = require 'sdl'
 local SDLApp = require 'sdl.app'
-local Mouse = require 'sdl.mouse'
 local vec3d = require 'vec-ffi.vec3d'
 local vec4f = require 'vec-ffi.vec4f'
 local quatd = require 'vec-ffi.quatd'
@@ -68,11 +66,10 @@ return function(cl)
 	if not cl.viewApplied then
 		cl = class(require 'glapp.view'.apply(cl))
 	end
+	-- and same with .mouse
 	if not cl.mouseApplied then
 		cl = class(require 'sdl.mouse'.apply(cl))
 	end
-
-	-- and TODO same thing for Mouse.apply?
 
 	function cl:init(...)
 		cl.super.init(self, ...)
