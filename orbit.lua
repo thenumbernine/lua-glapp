@@ -147,17 +147,17 @@ return function(cl)
 				-- ortho = rotate view
 				-- will this be this frames delta or last frames delta, eh?
 				local aspectRatio = self.width / self.height
-				local rx = aspectRatio * (self.mouse.pos.x - .5) * 2
-				local ry = (self.mouse.pos.y - .5) * 2
-				local rx2 = aspectRatio * (self.mouse.lastPos.x - .5) * 2
-				local ry2 = (self.mouse.lastPos.y - .5) * 2
+				local rx = aspectRatio * (self.mouse.lastPos.x - .5) * 2
+				local ry = (self.mouse.lastPos.y - .5) * 2
+				local rx2 = aspectRatio * (self.mouse.pos.x - .5) * 2
+				local ry2 = (self.mouse.pos.y - .5) * 2
 				local angle = math.asin((rx2 * ry - ry2 * rx) / math.sqrt((rx^2 + ry^2) * (rx2^2 + ry2^2)))
 				local rotation = quatd():fromAngleAxis(0, 0, 1, math.deg(angle))
 				self.view.angle = (self.view.angle * rotation):normalize()
 			else
 				-- frustum = move orbit center
 				local dist = (self.view.pos - self.view.orbit):length()
-				self.view.orbit = self.view.orbit + self.view.angle:rotate(vec3d(-dx, dy, 0) * dist)
+				self.view.orbit = self.view.orbit + self.view.angle:rotate(vec3d(-dx, -dy, 0) * dist)
 				self.view.pos = self.view.angle:zAxis() * dist + self.view.orbit
 			end
 		else
@@ -165,7 +165,7 @@ return function(cl)
 				-- ortho = drag
 				local aspectRatio = self.width / self.height
 				local fdx = -2 * dx * self.view.orthoSize * aspectRatio
-				local fdy = 2 * dy * self.view.orthoSize
+				local fdy = -2 * dy * self.view.orthoSize
 				self.view.pos = self.view.pos + self.view.angle:rotate(vec3d(fdx, fdy, 0))
 			else
 				-- frustum = rotate around orbit
