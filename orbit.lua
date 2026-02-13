@@ -68,13 +68,14 @@ return function(cl)
 	if not cl.viewApplied then
 		cl = class(require 'glapp.view'.apply(cl))
 	end
+	if not cl.mouseApplied then
+		cl = class(require 'sdl.mouse'.apply(cl))
+	end
 
 	-- and TODO same thing for Mouse.apply?
 
 	function cl:init(...)
 		cl.super.init(self, ...)
-
-		self.mouse = self.mouse or Mouse{app=self}
 
 		self.leftShiftDown = false
 		self.rightShiftDown = false
@@ -84,12 +85,8 @@ return function(cl)
 		self.rightAltDown = false
 	end
 
-	-- hmm as a behavior this is tough
-	-- because mouse:update shuold always go last ...
-	-- even after the child class :update ...
 	function cl:update(...)
 		local mouse = self.mouse
-		mouse:update()
 		cl.super.update(self, ...)
 
 		if mouse.fingerPinchDelta ~= 0 then
