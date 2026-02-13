@@ -13,10 +13,8 @@ files = {
 }
 deps = {
 	"ext",
-	"ffi",
 	"gl",
-	"image",
+	"imgui",
 	"sdl",
-	"template",
 	"vec-ffi",
 }
