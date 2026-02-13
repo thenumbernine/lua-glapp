@@ -98,7 +98,7 @@ return function(cl)
 		if mouse.wheelDelta.x ~= 0
 		or mouse.wheelDelta.y ~= 0
 		then
-			self:mouseDownEvent(mouse.wheelDelta.x, mouse.wheelDelta.y, shiftDown, guiDown, altDown, mouse.pos.x, mouse.pos.y)
+			self:mouseDownEvent(-.01 * mouse.wheelDelta.x, -.01 * mouse.wheelDelta.y, shiftDown, guiDown, altDown, mouse.pos.x, mouse.pos.y)
 		end
 
 		if (
