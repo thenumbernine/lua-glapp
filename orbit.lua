@@ -4,10 +4,10 @@ local class = require 'ext.class'
 local table = require 'ext.table'
 local sdl = require 'sdl'
 local SDLApp = require 'sdl.app'
+local Mouse = require 'sdl.mouse'
 local vec3d = require 'vec-ffi.vec3d'
 local vec4f = require 'vec-ffi.vec4f'
 local quatd = require 'vec-ffi.quatd'
-local Mouse = require 'glapp.mouse'
 
 -- a case for a preprocessing ext.load shim layer ...
 local keyUpEventType
@@ -112,7 +112,7 @@ return function(cl)
 			or mouse.deltaPos.y ~= 0
 		)
 		and mouse.leftDown
-		--and not guiDown
+		and not guiDown
 		then
 			self:mouseDownEvent(mouse.deltaPos.x, mouse.deltaPos.y, shiftDown, guiDown, altDown, mouse.pos.x, mouse.pos.y)
 		end
@@ -134,9 +134,6 @@ return function(cl)
 			mouse:event(e)
 		end
 
-		local shiftDown = self.leftShiftDown or self.rightShiftDown
-		local guiDown = self.leftGuiDown or self.rightGuiDown
-		local altDown = self.leftAltDown or self.rightAltDown
 		if e.type == keyUpEventType
 		or e.type == keyDownEventType
 		then
@@ -148,10 +145,10 @@ return function(cl)
 		if shiftDown then
 			if self.view.ortho then
 				-- ortho = shrink / grow view size
-				self.view.orthoSize = self.view.orthoSize * math.exp(dy * -.03)
+				self.view.orthoSize = self.view.orthoSize * math.exp(-10 * dy)
 			else
 				-- frustum = zoom dist in and out
-				self.view.pos = (self.view.pos - self.view.orbit) * math.exp(dy * -.03) + self.view.orbit
+				self.view.pos = (self.view.pos - self.view.orbit) * math.exp(-10 * dy) + self.view.orbit
 			end
 		elseif altDown then
 			if self.view.ortho then
@@ -160,8 +157,8 @@ return function(cl)
 				local aspectRatio = self.width / self.height
 				local rx = aspectRatio * (self.mouse.pos.x - .5) * 2
 				local ry = (self.mouse.pos.y - .5) * 2
-				local rx2 = aspectRatio * (x - .5) * 2
-				local ry2 = ((1 - y) - .5) * 2
+				local rx2 = aspectRatio * (self.mouse.lastPos.x - .5) * 2
+				local ry2 = (self.mouse.lastPos.y - .5) * 2
 				local angle = math.asin((rx2 * ry - ry2 * rx) / math.sqrt((rx^2 + ry^2) * (rx2^2 + ry2^2)))
 				local rotation = quatd():fromAngleAxis(0, 0, 1, math.deg(angle))
 				self.view.angle = (self.view.angle * rotation):normalize()
@@ -181,9 +178,9 @@ return function(cl)
 			else
 				-- frustum = rotate around orbit
 				local magn = math.sqrt(dx * dx + dy * dy)
-				magn = magn * math.tan(math.rad(.5 * self.view.fovY))
 				local fdx = dx / magn
 				local fdy = dy / magn
+				magn = magn * 1000 * math.tan(math.rad(.5 * self.view.fovY))
 				local rotation = quatd():fromAngleAxis(-fdy, -fdx, 0, magn)
 				self.view.angle = (self.view.angle * rotation):normalize()
 				self.view.pos = self.view.angle:zAxis() * (self.view.pos - self.view.orbit):length() + self.view.orbit

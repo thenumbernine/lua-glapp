@@ -10,7 +10,6 @@ files = {
 	"debug.lua",
 	"glapp-dev-1.rockspec",
 	"glapp.lua",
-	"mouse.lua",
 	"orbit.lua",
 	"tests/compute-spirv.lua",
 	"tests/compute.lua",
