@@ -114,7 +114,6 @@ return function(cl)
 
 	function cl:event(e)
 		local mouse = self.mouse
-		cl.super.event(self, e)
 
 		local canHandleMouse = true
 		--local canHandleKeyboard = true
@@ -124,9 +123,8 @@ return function(cl)
 			--canHandleKeyboard = not ig.igGetIO()[0].WantCaptureKeyboard
 		end
 
-		if canHandleMouse then
-			mouse:event(e)
-		end
+		mouse.cantHandleEvent = not canHandleMouse
+		cl.super.event(self, e)
 
 		if e.type == keyUpEventType
 		or e.type == keyDownEventType
