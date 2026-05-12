@@ -3,6 +3,9 @@
 --------------------------------------------
 
 name = "app3d"
+
+git = "https://github.com/thenumbernine/lua-app3d"
+
 files = {
 	"LICENSE",
 	"README.md",
